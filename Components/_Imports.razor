@@ -8,3 +8,14 @@
 @using Microsoft.JSInterop
 @using MyBlazorApp
 @using MyBlazorApp.Components
+@using Microsoft.AspNetCore.Identity
+@using System.ComponentModel.DataAnnotations
+@using MyBlazorApp.Components.Layout
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory ClientFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using MyBlazorApp.Data
+@using MyBlazorApp.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore

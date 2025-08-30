@@ -29,7 +29,7 @@ namespace MyBlazorApp.Models
 
         public bool? IsActive { get; set; }
 
-        public int? Departmentid { get; set; }
+        public int? DepartmentId { get; set; }
 
         public string? DepartmentName { get; set; }
 
