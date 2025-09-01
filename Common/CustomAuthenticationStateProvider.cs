@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 
-namespace MyBlazorApp.Data
+namespace MyBlazorApp.Common
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {

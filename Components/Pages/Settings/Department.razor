@@ -2,6 +2,9 @@
 @layout MainLayout
 @attribute [Authorize]
 @inject EMSContext Db
+@inject IJSRuntime JS
+@inject ModalServices ModalService
+@inject Blazored.Toast.Services.IToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Department</PageTitle>
@@ -12,9 +15,9 @@
 	</div>
 	<div class="row">
 		<div class="col-md-6" style="text-align:right">
-			<a href="#" class="btn btn-success mb-3">
+            <button href="#" class="btn btn-success mb-3" @onclick="OpenAddModal">
 				<i class="fa-solid fa-plus"></i> Add Department
-			</a>
+			</button>
 		</div>
 	</div>
 </div>
@@ -52,10 +55,65 @@
 		</table>
 	</div>
 </div>
-
-
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="departmentModalLabel">Add Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control mb-2" placeholder="Department Name" @bind="newDepartment.DepartmentName" />
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" @bind="newDepartment.IsActive" />
+                    <label class="form-check-label">Is Active</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" @onclick="SaveDepartment">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @code {
-	private List<Mst_Department> departmentlist = new List<Mst_Department>();
+    private List<Mst_Department> departmentlist = new List<Mst_Department>();
+    private Mst_Department newDepartment = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        departmentlist = await Db.Mst_Department.Where(d => d.DeletedBy == null).ToListAsync();
+    }
+
+    #region commented code
+    // private async Task SaveDepartment()
+    // {
+    //     Db.Mst_Department.Add(newDepartment);
+    //     await Db.SaveChangesAsync();
+
+    //     departmentlist = await Db.Mst_Department.ToListAsync(); // refresh list
+    //     newDepartment = new Mst_Department(); // reset form
+
+    //     // Close the modal
+    //     await JS.InvokeVoidAsync("closeModal", "addDepartmentModal");
+    // }
+    #endregion
+
+    private async Task OpenAddModal()
+    {
+        await ModalService.ShowAsync("departmentModal");
+    }
+
+    private async Task SaveDepartment()
+    {
+        
+        ToastService.ShowSuccess("Department saved successfully!");
+
+        await ModalService.HideAsync("departmentModal");
+        newDepartment = new(); // reset form
+    }
 }

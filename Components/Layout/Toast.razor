@@ -1,0 +1,42 @@
+﻿@inject ToastService ToastService
+@rendermode InteractiveServer 
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="toast-container">
+        <div class="toast-message @ToastType">@Message</div>
+    </div>
+}
+
+@code {
+    private string? Message;
+    private string ToastType = "success";
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += HandleToast;
+    }
+
+    private void HandleToast(string message, string type)
+    {
+        Message = message;
+        ToastType = type;
+
+        // ✅ Ensure UI thread
+        InvokeAsync(StateHasChanged);
+
+        // ✅ Clear toast after delay
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(3000);
+            Message = null;
+            await InvokeAsync(StateHasChanged);
+        });
+    }
+
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= HandleToast;
+    }
+}

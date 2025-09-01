@@ -10,5 +10,7 @@ namespace MyBlazorApp.Data
 
         public virtual DbSet<Mst_Employee> Mst_Employees { get; set; }
 
+        public virtual DbSet<Mst_Department> Mst_Department { get; set; }
+
     }
 }

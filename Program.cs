@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Blazored.Toast;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MyBlazorApp.Common;
 using MyBlazorApp.Components;
 using MyBlazorApp.Data;
 using MyBlazorApp.Models;
@@ -72,6 +74,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<ModalServices>();
+
+builder.Services.AddSingleton<ToastService>();
+
+builder.Services.AddBlazoredToast();
 
 var app = builder.Build();
 

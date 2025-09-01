@@ -5,6 +5,7 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -13,9 +14,32 @@
     <Authorized>
         <h1>Hello, @context.User.Identity?.Name!</h1>
         <p>Welcome to your new app.</p>
+
+        <button class="btn btn-success" @onclick="ShowSuccess">Show Success</button>
+        <button class="btn btn-warning" @onclick="ShowWarning">Show Warning</button>
+        <button class="btn btn-danger" @onclick="ShowError">Show Danger</button>
+
     </Authorized>
     <NotAuthorized>
         <p>You are not authorized. Please log in.</p>
     </NotAuthorized>
 </AuthorizeView>
 
+@code {
+    void ShowSuccess()
+    {
+        ToastService.ShowToast("Operation completed successfully!", "success");
+    }
+
+    void ShowWarning()
+    {
+        ToastService.ShowToast("This action might have consequences.", "warning");
+    }
+
+    void ShowError()
+    {
+        ToastService.ShowToast("Something went wrong!", "error");
+    }
+
+
+}
