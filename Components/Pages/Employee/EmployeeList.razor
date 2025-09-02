@@ -40,12 +40,12 @@ else
             @foreach (var employee in employeelist)
             {
                 <tr>
-                    <td>@employee.EmpId</td>
-                    <td>@employee.Emp_FirstName</td>
-                    <td>@employee.Emp_LastName</td>
+                    <td>@employee.Emp_id</td>
+                    <td>@employee.Emp_firstname</td>
+                    <td>@employee.Emp_surname</td>
                     <td>@employee.Username</td>
-                    <td>@employee.Email_Address</td>
-                    <td>@employee.DepartmentName</td>
+                    <td>@employee.Email_address</td>
+                    <td>@employee.Department_type</td>
                     <td>
                         <input type="checkbox" @bind="employee.IsActive" disabled />
                     </td>
@@ -60,7 +60,7 @@ else
 }
 
 @code {
-    private Mst_Employee[]? employeelist;
+    private Mst_employees[]? employeelist;
 
     protected override async Task OnInitializedAsync()
     {

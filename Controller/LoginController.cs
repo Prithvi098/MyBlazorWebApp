@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyBlazorApp.Common;
 using MyBlazorApp.Data;
 using System.Security.Claims;
 
@@ -13,12 +14,20 @@ namespace MyBlazorApp.Controller
     public class LoginController : ControllerBase
     {
         private readonly EMSContext _context;
-        public LoginController(EMSContext context) => _context = context;
+        
+
+        public LoginController(EMSContext context)
+        {
+            
+            _context = context;
+        }
+
 
         [AllowAnonymous]
         [HttpPost("userlogin")]
         public async Task<IActionResult> UserLogin([FromForm] string username, [FromForm] string password)
         {
+            //var encryptpass = _helper.Encrypt(password);
             var emp = _context.Mst_Employees.FirstOrDefault(e => e.DeletedBy == null && e.IsActive == true && e.Username == username && e.Password == password);
 
             if (emp == null)
@@ -29,7 +38,7 @@ namespace MyBlazorApp.Controller
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
-                new Claim("EmpId", emp.EmpId.ToString())
+                new Claim("EmpId", emp.Emp_id.ToString())
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
