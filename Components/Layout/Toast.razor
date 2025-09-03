@@ -1,42 +1,70 @@
-﻿@inject ToastService ToastService
+﻿@using static MyBlazorApp.Common.ToastService
+@inject ToastService ToastService
 @rendermode InteractiveServer 
 
-@if (!string.IsNullOrEmpty(Message))
-{
-    <div class="toast-container">
-        <div class="toast-message @ToastType">@Message</div>
-    </div>
-}
+<div class="toast-wrapper">
+    @foreach (var toast in Toasts)
+    {
+        <div class="toast active">
+            <div class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
+                <div class="message">
+                    <span class="text text-1">@toast.Title</span>
+                    <span class="text text-2">@toast.Message</span>
+                </div>
+            </div>
+            <i class="fa-solid fa-xmark close" @onclick="() => CloseToast(toast.Id)"></i>
+            <div class="progress @(toast.IsActive ? "active" : "")"></div>
+        </div>
+    }
+</div>
+
+
+
 
 @code {
-    private string? Message;
-    private string ToastType = "success";
+
+    private List<ToastEntry> Toasts = new();
+
 
     protected override void OnInitialized()
     {
-        ToastService.OnShow += HandleToast;
+        ToastService.OnShow += AddToast;
     }
 
-    private void HandleToast(string message, string type)
+    private void AddToast(ToastEntry entry)
     {
-        Message = message;
-        ToastType = type;
-
-        // ✅ Ensure UI thread
+        Toasts.Add(entry);
         InvokeAsync(StateHasChanged);
 
-        // ✅ Clear toast after delay
         _ = Task.Run(async () =>
         {
-            await Task.Delay(3000);
-            Message = null;
-            await InvokeAsync(StateHasChanged);
+            await Task.Delay(20000).ContinueWith(_ => CloseToast(entry.Id));
+
         });
     }
+
+    private void CloseToast(Guid id)
+    {
+        var toast = Toasts.FirstOrDefault(t => t.Id == id);
+        if (toast != null)
+        {
+            toast.IsActive = false;
+            InvokeAsync(StateHasChanged);
+
+            _ = Task.Delay(500).ContinueWith(_ =>
+            {
+                Toasts.Remove(toast);
+                InvokeAsync(StateHasChanged);
+            });
+        }
+    }
+
 
 
     public void Dispose()
     {
-        ToastService.OnShow -= HandleToast;
+        ToastService.OnShow -= AddToast;
     }
+
 }

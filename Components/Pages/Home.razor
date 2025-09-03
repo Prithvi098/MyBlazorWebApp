@@ -28,17 +28,17 @@
 @code {
     void ShowSuccess()
     {
-        ToastService.ShowToast("Operation completed successfully!", "success");
+        ToastService.ShowToast("Operation completed successfully!", "success", "Success");
     }
 
     void ShowWarning()
     {
-        ToastService.ShowToast("This action might have consequences.", "warning");
+        ToastService.ShowToast("This action might have consequences.", "warning", "Warning");
     }
 
     void ShowError()
     {
-        ToastService.ShowToast("Something went wrong!", "error");
+        ToastService.ShowToast("Something went wrong!", "error", "Error");
     }
 
 
