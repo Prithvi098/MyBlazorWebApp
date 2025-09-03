@@ -1,7 +1,8 @@
 ﻿@page "/employeelist"
 @attribute [Authorize]
 @layout MainLayout
-@inject EMSContext Db
+@inject IDbContextFactory<EMSContext> DbFactory
+@inject ToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Employee List</PageTitle>
@@ -51,7 +52,7 @@ else
                     </td>
                     <td>
                         <a class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i></a>
-                        <a class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></a>
+                        <a class="btn btn-sm btn-danger" @onclick="() => DeleteEmployee(employee.Emp_id)"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             }
@@ -62,11 +63,32 @@ else
 @code {
     private Mst_employees[]? employeelist;
 
+    private async Task LoadEmployees()
+    {
+        using var db = DbFactory.CreateDbContext();
+        employeelist = await db.Mst_Employees
+                               .Where(e => e.DeletedBy == null)
+                               .ToArrayAsync();
+    }
+
+
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
-        employeelist = await Db.Mst_Employees
-                               .Where(e => e.DeletedBy == null)
-                               .ToArrayAsync();
+        await LoadEmployees();
+    }
+
+    async Task DeleteEmployee(int Id)
+    {
+        using var db = DbFactory.CreateDbContext();
+        var emp = db.Mst_Employees.Where(e => e.Emp_id == Id).FirstOrDefault();
+        emp.DeletedBy = 1;
+        emp.DeletedOn = DateTime.Now;
+        db.SaveChangesAsync();
+        ToastService.ShowToast("Employee Deleted Successfully.", "success", "Success");
+
+        await LoadEmployees();
+        StateHasChanged();
+
     }
 }

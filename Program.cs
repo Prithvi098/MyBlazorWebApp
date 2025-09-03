@@ -17,8 +17,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<EMSContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("EMSContext")));
+/*builder.Services.AddDbContext<EMSContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("EMSContext")));*/
 
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
@@ -82,6 +82,12 @@ builder.Services.AddSingleton<ToastService>();
 builder.Services.AddScoped<Helper>();
 
 builder.Services.AddBlazoredToast();
+
+builder.Services.AddDbContextFactory<EMSContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("EMSContext"));
+});
+
 
 var app = builder.Build();
 

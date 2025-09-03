@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">MyBlazorApp</a>
+        <a class="navbar-brand" href="/home">EMS</a>
     </div>
 </div>
 
@@ -30,10 +30,15 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Employee List
             </NavLink>
         </div>
-        <!-- Admin expandable -->
         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="department">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Department
+            </NavLink>
+        </div>
+        <!-- Admin expandable -->
+        @* <div class="nav-item px-3">  
             <a class="nav-link d-flex justify-content-between align-items-center"
-               data-bs-toggle="collapse" href="#adminMenu" role="button"
+               data-bs-toggle="collapse" role="button"
                aria-expanded="false" aria-controls="adminMenu">
                 <span class="bi bi-gear-fill-nav-menu" aria-hidden="true"></span> Admin
                 <i class="bi bi-chevron-down small"></i>
@@ -43,13 +48,13 @@
                     <NavLink class="nav-link" href="department">
                         <span class="bi bi-diagram-3-fill-nav-menu" aria-hidden="true"></span> Department
                     </NavLink>
-                    @* <NavLink class="nav-link" href="roles">
+                    <NavLink class="nav-link" href="roles">
                         <span class="bi bi-person-badge-fill-nav-menu" aria-hidden="true"></span> Roles
-                    </NavLink> *@
+                    </NavLink>
 
                 </nav>
             </div>
-        </div>
+        </div> *@
     </nav>
 </div>
 
