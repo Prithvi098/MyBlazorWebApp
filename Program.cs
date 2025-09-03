@@ -83,6 +83,7 @@ builder.Services.AddScoped<Helper>();
 
 builder.Services.AddBlazoredToast();
 
+//Must add Dbcontext factory for db transactions
 builder.Services.AddDbContextFactory<EMSContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("EMSContext"));
