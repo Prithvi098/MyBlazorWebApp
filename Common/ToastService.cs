@@ -10,7 +10,7 @@
             {
                 Title = title,
                 Message = message,
-                Type = type
+                Type = type,
             };
 
             OnShow?.Invoke(entry); // type = "success", "warning", "error"

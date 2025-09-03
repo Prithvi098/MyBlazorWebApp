@@ -79,6 +79,8 @@ builder.Services.AddScoped<ModalServices>();
 
 builder.Services.AddSingleton<ToastService>();
 
+builder.Services.AddScoped<Helper>();
+
 builder.Services.AddBlazoredToast();
 
 var app = builder.Build();

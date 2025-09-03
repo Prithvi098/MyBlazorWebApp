@@ -14,11 +14,11 @@ namespace MyBlazorApp.Controller
     public class LoginController : ControllerBase
     {
         private readonly EMSContext _context;
-        
+        private readonly Helper _helper;
 
-        public LoginController(EMSContext context)
+        public LoginController(EMSContext context, Helper helper)
         {
-            
+            _helper = helper;
             _context = context;
         }
 
@@ -27,8 +27,8 @@ namespace MyBlazorApp.Controller
         [HttpPost("userlogin")]
         public async Task<IActionResult> UserLogin([FromForm] string username, [FromForm] string password)
         {
-            //var encryptpass = _helper.Encrypt(password);
-            var emp = _context.Mst_Employees.FirstOrDefault(e => e.DeletedBy == null && e.IsActive == true && e.Username == username && e.Password == password);
+            var encryptpass = _helper.Encrypt(password);
+            var emp = _context.Mst_Employees.FirstOrDefault(e => e.DeletedBy == null && e.IsActive == true && e.Username == username && e.Password == encryptpass);
 
             if (emp == null)
             {

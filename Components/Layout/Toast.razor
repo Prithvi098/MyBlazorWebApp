@@ -5,7 +5,7 @@
 <div class="toast-wrapper">
     @foreach (var toast in Toasts)
     {
-        <div class="toast active">
+        <div class="toast show @(toast.IsActive ? "active" : "")">
             <div class="toast-content">
                 <i class="fas fa-solid fa-check check"></i>
                 <div class="message">
@@ -39,7 +39,7 @@
 
         _ = Task.Run(async () =>
         {
-            await Task.Delay(20000).ContinueWith(_ => CloseToast(entry.Id));
+            await Task.Delay(5000).ContinueWith(_ => CloseToast(entry.Id));
 
         });
     }
