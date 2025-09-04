@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
+@* @inject EMSContext db *@
 @inject ToastService ToastService
 @rendermode InteractiveServer
 
@@ -81,10 +82,14 @@ else
     async Task DeleteEmployee(int Id)
     {
         using var db = DbFactory.CreateDbContext();
-        var emp = db.Mst_Employees.Where(e => e.Emp_id == Id).FirstOrDefault();
+        var emp = await db.Mst_Employees.Where(e => e.Emp_id == Id).FirstOrDefaultAsync();
+
+        if(emp == null)
+            ToastService.ShowToast("No Data Found.", "error", "Error");
+
         emp.DeletedBy = 1;
         emp.DeletedOn = DateTime.Now;
-        db.SaveChangesAsync();
+        await db.SaveChangesAsync();
         ToastService.ShowToast("Employee Deleted Successfully.", "success", "Success");
 
         await LoadEmployees();
