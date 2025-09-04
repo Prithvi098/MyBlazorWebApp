@@ -1,13 +1,24 @@
 ﻿@page "/employeecreate"
+@page "/employeecreate/{EmpId:int}"
 @attribute [Authorize]
 @layout MainLayout
 @inject ToastService ToastService
 @inject IDbContextFactory<EMSContext> DbFactory
+@inject NavigationManager Navigation
+@inject Helper _helper
 @rendermode InteractiveServer
 
 
-<h3>Add New Employee</h3>
-<EditForm Model="@employee">
+<div class="row">
+    <div class="col-md-6">
+        <h3 class="float-left"> @(employee.Emp_id == 0 ? "Add Employee" : "Edit Employee")</h3>
+    </div>
+    <div class="col-md-6" style="text-align:right">
+        <a href="/employeelist" class="btn btn-success mb-3"> Back</a>
+    </div>
+</div>
+
+<EditForm Model="@employee" OnValidSubmit="SaveEmployee">
     <DataAnnotationsValidator />
     <div class="row">
         <div class="col-md-4">
@@ -32,23 +43,35 @@
             </div>
         </div>
     </div>
-    <div>
-
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Email</label>
+                <InputText @bind-Value="employee.Email_address" class="form-control" />
+                <ValidationMessage For="@(() => employee.Email_address)" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Username</label>
+                <InputText @bind-Value="employee.Username" class="form-control" />
+                <ValidationMessage For="@(() => employee.Username)" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="plainPassword" Type="text" class="form-control" />
+                <ValidationMessage For="@(() => employee.Password)" />
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label>Email</label>
-        <InputText @bind-Value="employee.Email_address" class="form-control" />
-        <ValidationMessage For="@(() => employee.Email_address)" />
-        
+    <div class="row">
+        <div class="col-md-1">
+            <button type="submit" class="btn-login">Login</button>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label>Password</label>
-        <InputText @bind-Value="employee.Password" Type="password" class="form-control" />
-        <ValidationMessage For="@(() => employee.Password)" />
-    </div>
-
-    <button type="submit" class="btn-login">Login</button>
+    
 </EditForm>
 <div class="row">
 	<div class="col-md-4">
@@ -57,5 +80,47 @@
 </div>
 
 @code {
-	private Mst_employees? employee;
+
+    [Parameter] public int? EmpId { get; set; }
+    private Mst_employees employee = new Mst_employees();
+    private string plainPassword = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        using var db = DbFactory.CreateDbContext();
+        if (EmpId != null)
+        {
+            employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
+            plainPassword = _helper.Decrypt(employee.Password);
+        }
+    }
+
+    private async Task SaveEmployee()
+    {
+        using var db = DbFactory.CreateDbContext();
+        if (employee.Emp_id == 0)
+        {
+            employee.Password = _helper.Encrypt(plainPassword);
+            db.Mst_Employees.Add(employee);
+            await db.SaveChangesAsync();
+            ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
+            db.Dispose();
+            Navigation.NavigateTo("/employeelist", true);
+        }
+        else
+        {
+            var existingEmployee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == employee.Emp_id).FirstOrDefaultAsync();
+            existingEmployee.Emp_firstname = employee.Emp_firstname;
+            existingEmployee.Emp_middlename = employee.Emp_middlename;
+            existingEmployee.Emp_surname = employee.Emp_surname;
+            existingEmployee.Email_address = employee.Email_address;
+            existingEmployee.Username = employee.Username;
+            existingEmployee.Password = _helper.Encrypt(plainPassword);
+            await db.SaveChangesAsync();
+            ToastService.ShowToast("Employee Updated Successfully.", "success", "Success");
+            db.Dispose();
+            Navigation.NavigateTo("/employeelist", true);
+        }
+    }
+
 }
