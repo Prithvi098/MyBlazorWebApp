@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MyBlazorApp.Models
 {
     [Table("Mst_Department")]
-    public class Mst_Department
+    public class    Mst_Department
     {
         [Key]
         public int Id { get; set; }
