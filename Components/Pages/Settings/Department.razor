@@ -45,8 +45,8 @@
                             <input type="checkbox" @bind="department.IsActive" disabled />
                         </td>
                         <td>
-                            <a class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i></a>
-                            <a class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></a>
+                            <a class="btn btn-sm btn-primary" @onclick="() => EditDepartment(department.Id)"><i class="fa-solid fa-pen"></i></a>
+                            <a class="btn btn-sm btn-danger" @onclick="() => AskDelete(department.Id)"><i class="fa-solid fa-trash"></i></a>
                         </td>
                     </tr>
                 }
@@ -61,7 +61,12 @@
             <EditForm Model="newDepartment" OnValidSubmit="SaveDepartment">
                 @* <DataAnnotationsValidator /> *@
                 <FluentValidationValidator />
-
+                @if (!string.IsNullOrEmpty(ModalMessage))
+                {
+                    <div class="alert @ModalCssClass" role="alert">
+                        @ModalMessage
+                    </div>
+                }
                 <div class="modal-header">
                     <h5 class="modal-title" id="departmentModalLabel">Add Department</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -76,8 +81,8 @@
 
                     <!-- Is Active -->
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" @bind="newDepartment.IsActive" />
-                        <label class="form-check-label">Is Active</label>
+                        <input class="form-check-input" type="checkbox" @bind="newDepartment.IsActive" id="IsActive"/>
+                        <label class="form-check-label" for="IsActive">Is Active</label>
                     </div>
                 </div>
 
@@ -89,12 +94,48 @@
         </div>
     </div>
 </div>
+<ConfirmationModal Show="@ShowConfirmDialog"
+               Title="Delete Department"
+               Message="Are you sure you want to delete this department?"
+               ConfirmationChanged="OnDeleteConfirmation" />
 
 
 @code {
     private List<Mst_Department> departmentlist = new List<Mst_Department>();
     private Mst_Department newDepartment = new() { IsActive = false };
-    private EditContext editContext;
+    private EditContext? editContext;
+    private string? ModalMessage { get; set; }
+    private string ModalCssClass { get; set; } = "alert-info";
+    private bool ShowConfirmDialog { get; set; }
+    private int DeleteDeptId { get; set; }
+
+    private async Task ShowModalMessage(string message, string type)
+    {
+        ModalMessage = message;
+        ModalCssClass = type switch
+        {
+            "success" => "alert alert-success",
+            "warning" => "alert alert-warning",
+            "error" => "alert alert-danger",
+            _ => "alert alert-info"
+        };
+
+        StateHasChanged();
+
+        // wait 2 seconds
+        await Task.Delay(3000);
+
+        if (type == "success")
+        {
+            // Close modal
+            await ModalService.HideAsync("departmentModal");
+            ResetForm();
+        }
+
+        // clear message after fade out
+        ModalMessage = string.Empty;
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,19 +150,20 @@
         departmentlist = await Db.Mst_Department.Where(d => d.DeletedBy == null).ToListAsync();
     }
 
-    #region commented code
-    // private async Task SaveDepartment()
-    // {
-    //     Db.Mst_Department.Add(newDepartment);
-    //     await Db.SaveChangesAsync();
+    private void AskDelete(int id)
+    {
+        DeleteDeptId = id;
+        ShowConfirmDialog = true;
+    }
 
-    //     departmentlist = await Db.Mst_Department.ToListAsync(); // refresh list
-    //     newDepartment = new Mst_Department(); // reset form
-
-    //     // Close the modal
-    //     await JS.InvokeVoidAsync("closeModal", "addDepartmentModal");
-    // }
-    #endregion
+    private async Task OnDeleteConfirmation(bool confirmed)
+    {
+        ShowConfirmDialog = false;
+        if (confirmed)
+        {
+            await DeleteDepartment(DeleteDeptId);
+        }
+    }
 
     private async Task OpenAddModal()
     {
@@ -135,28 +177,84 @@
         editContext = new EditContext(newDepartment);
     }
 
+    private async Task EditDepartment(int Id)
+    {
+        using var Db = DbFactory.CreateDbContext();
+        var department = Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == 0).FirstOrDefault();
+        if (department == null || department.Id == 0)
+        {
+            ToastService.ShowToast("No Department found!", "warning", "Warning");
+            await LoadDepartment();
+        }
+        else
+        {
+            newDepartment = department;
+            await ModalService.ShowAsync("departmentModal");
+        }
+    }
+
     private async Task SaveDepartment()
     {
         using var Db = DbFactory.CreateDbContext();
-        if (newDepartment.DepartmentName == "" || newDepartment.DepartmentName == null) { ToastService.ShowToast("Department saved successfully!", "success", "Success"); return; }
-        var entity = new Mst_Department
+        var checkdept = Db.Mst_Department.Where(d => d.DeletedBy == null && d.DepartmentName == newDepartment.DepartmentName && d.Id != newDepartment.Id).FirstOrDefault();
+        if (newDepartment.Id == 0)
         {
-            DepartmentName = newDepartment.DepartmentName,
-            IsActive = newDepartment.IsActive
-        };
+            if (checkdept != null)
+            {
+                await ShowModalMessage("Department already exists!", "error");
+                return;
+            }
 
-        Db.Mst_Department.Add(entity);
-        await Db.SaveChangesAsync();
+            var entity = new Mst_Department
+            {
+                DepartmentName = newDepartment.DepartmentName,
+                IsActive = newDepartment.IsActive,
+                CreatedBy = 1,
+                CreatedOn = DateTime.Now
+            };
 
-        await LoadDepartment();
+            Db.Mst_Department.Add(entity);
+            await Db.SaveChangesAsync();
+            await LoadDepartment();
+            await ShowModalMessage("Department saved successfully!", "success");
+        }
+        else
+        {
+            if (checkdept != null)
+            {
+                await ShowModalMessage("Department already exists!", "warning");
+                return;
+            }
+            var existDept = Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == newDepartment.Id).FirstOrDefault();
+            existDept.DepartmentName = newDepartment.DepartmentName;
+            existDept.IsActive = newDepartment.IsActive;
+            existDept.UpdatedBy = 1;
+            existDept.UpdatedOn = DateTime.Now;
+        }
 
-        ToastService.ShowToast("Department saved successfully!", "success", "Success");
 
-        await ModalService.HideAsync("departmentModal");
+        //await LoadDepartment();
+
+        //ToastService.ShowToast("Department saved successfully!", "success", "Success");
+
+        //await ModalService.HideAsync("departmentModal");
 
         // reset form + validation
-        newDepartment = new();
+        //ResetForm();
 
+    }
+
+    private async Task DeleteDepartment(int Id)
+    {
+        using var Db = DbFactory.CreateDbContext();
+        var department = await Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == 0).FirstOrDefaultAsync();
+        if (department == null) { ToastService.ShowToast("No Department found!", "warning", "Warning"); await LoadDepartment(); return; }
+
+        department.DeletedBy = 1;
+        department.DeletedOn = DateTime.Now;
+        await Db.SaveChangesAsync();
+        ToastService.ShowToast("Department Deleted successfully!", "success", "Success");
+        await LoadDepartment();
     }
 
 }

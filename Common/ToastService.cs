@@ -11,6 +11,7 @@
                 Title = title,
                 Message = message,
                 Type = type,
+                IsActive = true
             };
 
             OnShow?.Invoke(entry); // type = "success", "warning", "error"

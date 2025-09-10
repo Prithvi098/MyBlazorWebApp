@@ -1,5 +1,6 @@
 ﻿@using static MyBlazorApp.Common.ToastService
 @inject ToastService ToastService
+@implements IDisposable
 @rendermode InteractiveServer 
 
 <div class="toast-wrapper">
@@ -59,8 +60,6 @@
             });
         }
     }
-
-
 
     public void Dispose()
     {
