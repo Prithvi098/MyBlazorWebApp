@@ -1,7 +1,6 @@
 ﻿@page "/counter"
 @attribute [Authorize]
 @layout MainLayout
-@inject Blazored.Toast.Services.IToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Counter</PageTitle>
@@ -18,6 +17,5 @@
     private void IncrementCount()
     {
         currentCount++;
-        ToastService.ShowSuccess("Count Increased");
     }
 }

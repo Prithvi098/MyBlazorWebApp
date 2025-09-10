@@ -5,7 +5,7 @@
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject IJSRuntime JS
 @inject ModalServices ModalService
-@inject Blazored.Toast.Services.IToastService ToastService
+@inject ToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Department</PageTitle>
@@ -59,8 +59,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <EditForm Model="newDepartment" OnValidSubmit="SaveDepartment">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+                @* <DataAnnotationsValidator /> *@
+                <FluentValidationValidator />
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="departmentModalLabel">Add Department</h5>
@@ -94,10 +94,17 @@
 @code {
     private List<Mst_Department> departmentlist = new List<Mst_Department>();
     private Mst_Department newDepartment = new() { IsActive = false };
+    private EditContext editContext;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
+        await LoadDepartment();
+
+    }
+
+    private async Task LoadDepartment()
+    {
         using var Db = DbFactory.CreateDbContext();
         departmentlist = await Db.Mst_Department.Where(d => d.DeletedBy == null).ToListAsync();
     }
@@ -118,15 +125,38 @@
 
     private async Task OpenAddModal()
     {
+        ResetForm();
         await ModalService.ShowAsync("departmentModal");
+    }
+
+    private void ResetForm()
+    {
+        newDepartment = new Mst_Department();
+        editContext = new EditContext(newDepartment);
     }
 
     private async Task SaveDepartment()
     {
-        
-        ToastService.ShowSuccess("Department saved successfully!");
+        using var Db = DbFactory.CreateDbContext();
+        if (newDepartment.DepartmentName == "" || newDepartment.DepartmentName == null) { ToastService.ShowToast("Department saved successfully!", "success", "Success"); return; }
+        var entity = new Mst_Department
+        {
+            DepartmentName = newDepartment.DepartmentName,
+            IsActive = newDepartment.IsActive
+        };
+
+        Db.Mst_Department.Add(entity);
+        await Db.SaveChangesAsync();
+
+        await LoadDepartment();
+
+        ToastService.ShowToast("Department saved successfully!", "success", "Success");
 
         await ModalService.HideAsync("departmentModal");
-        newDepartment = new(); // reset form
+
+        // reset form + validation
+        newDepartment = new();
+
     }
+
 }

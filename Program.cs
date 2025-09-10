@@ -1,4 +1,4 @@
-﻿using Blazored.Toast;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +12,7 @@ using System.Net;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -81,7 +82,6 @@ builder.Services.AddSingleton<ToastService>();
 
 builder.Services.AddScoped<Helper>();
 
-builder.Services.AddBlazoredToast();
 
 //Must add Dbcontext factory for db transactions
 builder.Services.AddDbContextFactory<EMSContext>(options =>
