@@ -7,7 +7,6 @@ namespace MyBlazorApp.Common
 {
     public class Validators
     {
-        private readonly IDbContextFactory<EMSContext> _dbFactory;
         public class DepartmentValidator : AbstractValidator<Mst_Department>
         {
             public DepartmentValidator()
@@ -27,6 +26,7 @@ namespace MyBlazorApp.Common
                 _dbFactory = dbFactory;
 
                 RuleFor(x => x.Email_address)
+                    .Cascade(CascadeMode.Stop)
                     .NotEmpty().WithMessage("Email is required")
                     .Matches(@"^[^@\s]+@[^@\s]+\.[^@\s]+$").WithMessage("Invalid Email");
 
@@ -39,18 +39,19 @@ namespace MyBlazorApp.Common
                     .MinimumLength(3).WithMessage("Last Name must be at least 3 characters");
 
                 RuleFor(e => e.Username)
+                    //.Cascade(CascadeMode.Stop)
                     .NotEmpty().WithMessage("Username is required.")
                     .MustAsync(BeUniqueUsername).WithMessage("This username already exists.");
+                    //.When(e => !string.IsNullOrWhiteSpace(e.Username));
             }
 
-            private async Task<bool> BeUniqueUsername(Mst_employees employee, string username, CancellationToken cancellationToken)
+            private async Task<bool> BeUniqueUsername(Mst_employees? employee, string username, CancellationToken cancellationToken)
             {
                 using var db = _dbFactory.CreateDbContext();
+                //var exists = await db.Mst_Employees.AnyAsync(e => e.Username == username && e.DeletedBy == null && e.Emp_id != employee.Emp_id, cancellationToken);
+                var exists = employee.Username == null && employee.Username == null ? false : await db.Mst_Employees.AnyAsync(e => e.Username == username && e.DeletedBy == null && e.Emp_id != employee.Emp_id, cancellationToken);
 
-                return !await db.Mst_Employees
-                    .AnyAsync(e => e.Username == username
-                                   && e.DeletedBy == null
-                                   && e.Emp_id != employee.Emp_id, cancellationToken);
+                return !exists;
             }
         }
     }

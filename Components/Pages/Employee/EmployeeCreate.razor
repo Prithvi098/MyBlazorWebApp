@@ -81,6 +81,12 @@
                 <ValidationMessage For="@(() => employee.Department_type)" />
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" @bind="employee.IsActive" id="IsActive" />
+                <label class="form-check-label" for="IsActive">Is Active</label>
+            </div>
+        </div>
         
     </div>
     <div class="row">
@@ -106,7 +112,7 @@
         if (EmpId != null)
         {
             employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
-            plainPassword = _helper.Decrypt(employee.Password);
+            plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
         }
         editContext = new EditContext(employee);
         departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.IsActive == true).ToList();
@@ -118,12 +124,13 @@
         using var db = DbFactory.CreateDbContext();
         if (employee.Emp_id == 0)
         {
-            //employee.Password = _helper.Encrypt(plainPassword);
-            //db.Mst_Employees.Add(employee);
-            //await db.SaveChangesAsync();
-            //ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
-            //db.Dispose();
-            Navigation.NavigateTo("/employeelist", true);
+
+            employee.Password = _helper.Encrypt(plainPassword);
+            db.Mst_Employees.Add(employee);
+            await db.SaveChangesAsync();
+            ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
+            db.Dispose();
+            Navigation.NavigateTo("/employeelist");
         }
         else
         {
@@ -138,7 +145,7 @@
             await db.SaveChangesAsync();
             ToastService.ShowToast("Employee Updated Successfully.", "success", "Success");
             db.Dispose();
-            Navigation.NavigateTo("/employeelist", true);
+            Navigation.NavigateTo("/employeelist");
         }
     }
 

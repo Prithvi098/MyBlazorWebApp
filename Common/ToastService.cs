@@ -11,7 +11,8 @@
                 Title = title,
                 Message = message,
                 Type = type,
-                IsActive = true
+                IsActive = true,
+                DurationMs = 5000
             };
 
             OnShow?.Invoke(entry); // type = "success", "warning", "error"
@@ -24,6 +25,7 @@
             public string Message { get; set; } = "Your changes have been saved";
             public string Type { get; set; } = "success"; // success, warning, error
             public bool IsActive { get; set; } = true;
+            public int DurationMs { get; set; } = 5000;
 
 
         }

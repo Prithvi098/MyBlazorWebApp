@@ -1,12 +1,13 @@
 ﻿@using static MyBlazorApp.Common.ToastService
 @inject ToastService ToastService
 @implements IDisposable
+@inject IJSRuntime JS
 @rendermode InteractiveServer 
 
 <div class="toast-wrapper">
     @foreach (var toast in Toasts)
     {
-        <div class="toast show @(toast.IsActive ? "active" : "")">
+        <div id="toast-@toast.Id" class="toast show @(toast.IsActive ? "active" : "")">
             <div class="toast-content">
                 <i class="fas fa-solid fa-check check"></i>
                 <div class="message">
@@ -15,7 +16,11 @@
                 </div>
             </div>
             <i class="fa-solid fa-xmark close" @onclick="() => CloseToast(toast.Id)"></i>
-            <div class="progress @(toast.IsActive ? "active" : "")"></div>
+
+            <!-- Progress bar with unique animation name -->
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
         </div>
     }
 </div>
@@ -31,6 +36,21 @@
     protected override void OnInitialized()
     {
         ToastService.OnShow += AddToast;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            foreach (var toast in Toasts)
+            {
+                // Get duration in ms
+                var duration = toast.DurationMs;
+
+                // Pass both selector and duration to JS
+                await JS.InvokeVoidAsync("startToastProgress", $"#toast-{toast.Id} .toast-progress", duration);
+            }
+        }
     }
 
     private void AddToast(ToastEntry entry)

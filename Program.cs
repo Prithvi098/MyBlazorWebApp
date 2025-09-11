@@ -13,7 +13,8 @@ using System.Net;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddValidatorsFromAssemblyContaining<Validators.EmployeeValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<Validators>();
+builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 

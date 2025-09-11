@@ -59,17 +59,23 @@ else
                     </td>
                     <td>
                         <a class="btn btn-sm btn-primary" @onclick="() => EditEmployee(employee.Empid)"><i class="fa-solid fa-pen"></i></a>
-                        <a class="btn btn-sm btn-danger" @onclick="() => DeleteEmployee(employee.Empid)"><i class="fa-solid fa-trash"></i></a>
+                        <a class="btn btn-sm btn-danger" @onclick="() => AskDelete(employee.Empid)"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 }
+<ConfirmationModal Show="@ShowConfirmDialog"
+                   Title="Delete Employee"
+                   Message="Are you sure you want to delete this employee?"
+                   ConfirmationChanged="OnDeleteConfirmation" />
 
 @code {
     private List<EmployeeListModel> employeelist = new List<EmployeeListModel>();
     private bool IsActive { get; set; } = true;
+    private bool ShowConfirmDialog { get; set; }
+    private int DeleteEmpId { get; set; }
 
     private async Task LoadEmployees()
     {
@@ -91,6 +97,20 @@ else
         }).ToListAsync();
     }
 
+    private void AskDelete(int id)
+    {
+        DeleteEmpId = id;
+        ShowConfirmDialog = true;
+    }
+
+    private async Task OnDeleteConfirmation(bool confirmed)
+    {
+        ShowConfirmDialog = false;
+        if (confirmed)
+        {
+            await DeleteEmployee(DeleteEmpId);
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
