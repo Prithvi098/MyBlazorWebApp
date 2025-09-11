@@ -180,7 +180,7 @@
     private async Task EditDepartment(int Id)
     {
         using var Db = DbFactory.CreateDbContext();
-        var department = Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == 0).FirstOrDefault();
+        var department = Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == Id).FirstOrDefault();
         if (department == null || department.Id == 0)
         {
             ToastService.ShowToast("No Department found!", "warning", "Warning");
@@ -232,22 +232,12 @@
             existDept.UpdatedOn = DateTime.Now;
         }
 
-
-        //await LoadDepartment();
-
-        //ToastService.ShowToast("Department saved successfully!", "success", "Success");
-
-        //await ModalService.HideAsync("departmentModal");
-
-        // reset form + validation
-        //ResetForm();
-
     }
 
     private async Task DeleteDepartment(int Id)
     {
         using var Db = DbFactory.CreateDbContext();
-        var department = await Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == 0).FirstOrDefaultAsync();
+        var department = await Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == Id).FirstOrDefaultAsync();
         if (department == null) { ToastService.ShowToast("No Department found!", "warning", "Warning"); await LoadDepartment(); return; }
 
         department.DeletedBy = 1;

@@ -8,9 +8,14 @@
 @rendermode InteractiveServer
 
 <PageTitle>Employee List</PageTitle>
+<div class="row mb-3">
+    <h3 class="float-left">Employee List</h3>
+</div>
 <div class="row">
     <div class="col-md-6">
-        <h3 class="float-left">Employee List</h3>
+        <a class="btn btn-outline-primary mb-3" @onclick="() => GetInActiveEmployeeList()">
+            @(IsActive ? "InActive Employee List" : "Active Employee List")
+        </a>
     </div>
     <div class="col-md-6" style="text-align:right">
         <a href="/employeecreate" class="btn btn-success mb-3">
@@ -43,18 +48,18 @@ else
             @foreach (var employee in employeelist)
             {
                 <tr>
-                    <td>@employee.Emp_id</td>
-                    <td>@employee.Emp_firstname</td>
-                    <td>@employee.Emp_surname</td>
+                    <td>@employee.Empid</td>
+                    <td>@employee.EmpFirstName</td>
+                    <td>@employee.EmpLastName</td>
                     <td>@employee.Username</td>
-                    <td>@employee.Email_address</td>
-                    <td>@employee.Department_type</td>
+                    <td>@employee.Email</td>
+                    <td>@employee.DepartmentName</td>
                     <td>
                         <input type="checkbox" @bind="employee.IsActive" disabled />
                     </td>
                     <td>
-                        <a class="btn btn-sm btn-primary" @onclick="() => EditEmployee(employee.Emp_id)"><i class="fa-solid fa-pen"></i></a>
-                        <a class="btn btn-sm btn-danger" @onclick="() => DeleteEmployee(employee.Emp_id)"><i class="fa-solid fa-trash"></i></a>
+                        <a class="btn btn-sm btn-primary" @onclick="() => EditEmployee(employee.Empid)"><i class="fa-solid fa-pen"></i></a>
+                        <a class="btn btn-sm btn-danger" @onclick="() => DeleteEmployee(employee.Empid)"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             }
@@ -63,20 +68,39 @@ else
 }
 
 @code {
-    private Mst_employees[]? employeelist;
+    private List<EmployeeListModel> employeelist = new List<EmployeeListModel>();
+    private bool IsActive { get; set; } = true;
 
     private async Task LoadEmployees()
     {
         using var db = DbFactory.CreateDbContext();
-        employeelist = await db.Mst_Employees
-                               .Where(e => e.DeletedBy == null)
-                               .ToArrayAsync();
+        employeelist = await (
+        from e in db.Mst_Employees
+        join d in db.Mst_Department.Where(x => x.DeletedBy == null) on e.Department_type equals d.Id into deptJoin
+        from d in deptJoin.DefaultIfEmpty() // LEFT JOIN
+        where e.DeletedBy == null && e.IsActive == IsActive 
+        select new EmployeeListModel
+        {
+            Empid = e.Emp_id,
+            EmpFirstName = e.Emp_firstname,
+            EmpLastName = e.Emp_surname,
+            Username = e.Username,
+            Email = e.Email_address,
+            DepartmentName = d != null ? d.DepartmentName : string.Empty, // blank if no department
+            IsActive = e.IsActive ?? false
+        }).ToListAsync();
     }
 
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
+        await LoadEmployees();
+    }
+
+    private async Task GetInActiveEmployeeList()
+    {
+        IsActive = !IsActive;
         await LoadEmployees();
     }
 
@@ -101,5 +125,16 @@ else
         await LoadEmployees();
         StateHasChanged();
 
+    }
+
+    private class EmployeeListModel
+    {
+        public int Empid { get; set; }
+        public string? EmpFirstName { get; set; }
+        public string? EmpLastName { get; set; }
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        public string? DepartmentName { get; set; }
+        public bool IsActive { get; set; }
     }
 }

@@ -20,6 +20,7 @@
 
 <EditForm Model="@employee" OnValidSubmit="SaveEmployee">
     <FluentValidationValidator />
+    
     <div class="row">
         <div class="col-md-4">
             <div class="form-group">
@@ -67,44 +68,61 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Department</label>
+                <InputSelect @bind-Value="employee.Department_type" class="form-control">
+                    <option value="">-- Select Department --</option>
+                    @foreach (var dept in departments)
+                    {
+                        <option value="@dept.Id">@dept.DepartmentName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => employee.Department_type)" />
+            </div>
+        </div>
+        
+    </div>
+    <div class="row">
         <div class="col-md-1">
-            <button type="submit" class="btn-login">Login</button>
+            <button type="submit" class="btn-login">Save</button>
         </div>
     </div>
     
 </EditForm>
-<div class="row">
-	<div class="col-md-4">
-		
-	</div>
-</div>
 
 @code {
 
     [Parameter] public int? EmpId { get; set; }
     private Mst_employees employee = new Mst_employees();
     private string plainPassword = string.Empty;
+    private List<Mst_Department> departments = new();
+    private EditContext editContext;
 
     protected override void OnInitialized()
     {
         using var db = DbFactory.CreateDbContext();
+        
         if (EmpId != null)
         {
             employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
             plainPassword = _helper.Decrypt(employee.Password);
         }
+        editContext = new EditContext(employee);
+        departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.IsActive == true).ToList();
     }
 
     private async Task SaveEmployee()
-    {
+    {   
+
         using var db = DbFactory.CreateDbContext();
         if (employee.Emp_id == 0)
         {
-            employee.Password = _helper.Encrypt(plainPassword);
-            db.Mst_Employees.Add(employee);
-            await db.SaveChangesAsync();
-            ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
-            db.Dispose();
+            //employee.Password = _helper.Encrypt(plainPassword);
+            //db.Mst_Employees.Add(employee);
+            //await db.SaveChangesAsync();
+            //ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
+            //db.Dispose();
             Navigation.NavigateTo("/employeelist", true);
         }
         else
@@ -115,6 +133,7 @@
             existingEmployee.Emp_surname = employee.Emp_surname;
             existingEmployee.Email_address = employee.Email_address;
             existingEmployee.Username = employee.Username;
+            existingEmployee.Department_type = employee.Department_type;
             existingEmployee.Password = _helper.Encrypt(plainPassword);
             await db.SaveChangesAsync();
             ToastService.ShowToast("Employee Updated Successfully.", "success", "Success");
