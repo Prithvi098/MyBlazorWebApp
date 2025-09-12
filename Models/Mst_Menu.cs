@@ -9,11 +9,21 @@ namespace MyBlazorApp.Models
         [Key]
         public int MID { get; set; }
 
+        public int? PMID { get; set; }
+
+        [StringLength(200)]
         public string? MenuName { get; set; }
 
+        [StringLength(200)]
         public string? MenuUrl { get; set; }
 
-        public int MenuSortOrder { get; set; }
+        [StringLength(200)]
+        public string? MenuDesc { get; set; }
+
+        [StringLength(500)]
+        public string? MainMenu { get; set; }
+
+        public int? SortOrder { get; set; }
 
         public int? CreatedBy { get; set; }
 
@@ -26,5 +36,7 @@ namespace MyBlazorApp.Models
         public int? DeletedBy { get; set; }
 
         public DateTime? DeletedOn { get; set; }
+
+        public bool? IsFrontMenu { get; set; }
     }
 }

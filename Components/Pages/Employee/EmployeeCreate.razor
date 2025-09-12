@@ -1,5 +1,5 @@
 ﻿@page "/employeecreate"
-@page "/employeecreate/{EmpId:int}"
+@page "/employeeedit/{EmpId:int}"
 @attribute [Authorize]
 @layout MainLayout
 @inject ToastService ToastService
@@ -91,7 +91,7 @@
     </div>
     <div class="row">
         <div class="col-md-1">
-            <button type="submit" class="btn-login">Save</button>
+            <button type="submit" class="btn-login">@(employee.Emp_id == 0 ? "Save" : "Update")</button>
         </div>
     </div>
     

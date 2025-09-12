@@ -26,6 +26,8 @@ builder.Services.AddControllers();
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
 builder.Services.AddHttpClient("API", (sp, client) =>

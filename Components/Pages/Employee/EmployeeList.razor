@@ -81,20 +81,20 @@ else
     {
         using var db = DbFactory.CreateDbContext();
         employeelist = await (
-        from e in db.Mst_Employees
-        join d in db.Mst_Department.Where(x => x.DeletedBy == null) on e.Department_type equals d.Id into deptJoin
-        from d in deptJoin.DefaultIfEmpty() // LEFT JOIN
-        where e.DeletedBy == null && e.IsActive == IsActive 
-        select new EmployeeListModel
-        {
-            Empid = e.Emp_id,
-            EmpFirstName = e.Emp_firstname,
-            EmpLastName = e.Emp_surname,
-            Username = e.Username,
-            Email = e.Email_address,
-            DepartmentName = d != null ? d.DepartmentName : string.Empty, // blank if no department
-            IsActive = e.IsActive ?? false
-        }).ToListAsync();
+                       from e in db.Mst_Employees
+                       join d in db.Mst_Department.Where(x => x.DeletedBy == null) on e.Department_type equals d.Id into deptJoin
+                       from d in deptJoin.DefaultIfEmpty() // LEFT JOIN
+                       where e.DeletedBy == null && e.IsActive == IsActive 
+                       select new EmployeeListModel
+                       {
+                           Empid = e.Emp_id,
+                           EmpFirstName = e.Emp_firstname,
+                           EmpLastName = e.Emp_surname,
+                           Username = e.Username,
+                           Email = e.Email_address,
+                           DepartmentName = d != null ? d.DepartmentName : string.Empty, // blank if no department
+                           IsActive = e.IsActive ?? false
+                       }).ToListAsync();
     }
 
     private void AskDelete(int id)
@@ -126,7 +126,7 @@ else
 
     private async Task EditEmployee(int EmpId)
     {
-        Navigation.NavigateTo($"/employeecreate/{EmpId}");
+        Navigation.NavigateTo($"/employeeedit/{EmpId}");
     }
 
     async Task DeleteEmployee(int Id)

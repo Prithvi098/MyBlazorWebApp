@@ -11,6 +11,12 @@ namespace MyBlazorApp.Data
         public virtual DbSet<Mst_employees> Mst_Employees { get; set; }
 
         public virtual DbSet<Mst_Department> Mst_Department { get; set; }
+        public virtual DbSet<ErrorLog> ErrorLogs { get; set; }
+        public virtual DbSet<Mst_Menu> Mst_Menu { get; set; }
+        public virtual DbSet<Mst_Right> Mst_Right { get; set; }
+        public virtual DbSet<Mst_UserRights> Mst_UserRight { get; set; }
+        public virtual DbSet<Mst_Role> Mst_Role { get; set; }
+        public virtual DbSet<Mst_RolePermission> Mst_RolePermission { get; set; }
 
     }
 }

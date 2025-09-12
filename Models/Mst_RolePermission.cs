@@ -1,22 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyBlazorApp.Models
 {
-    [Table("Mst_UserRights")]
-    public class Mst_UserRights
+    public class Mst_RolePermission
     {
         [Key]
-        public int URAID { get; set; }
+        public int PerID { get; set; }
 
-        public int? EmpID { get; set; }
+        public int RoleID { get; set; }
 
-        public int? UserID { get; set; }
-
-        public int? MenuID { get; set; }
-
-        [StringLength(50)]
-        public string? RID { get; set; }
+        [Required]
+        public string? MenuId { get; set; }
 
         public int? CreatedBy { get; set; }
 
