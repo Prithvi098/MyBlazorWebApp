@@ -39,7 +39,7 @@ namespace MyBlazorApp.Common
                     .MinimumLength(3).WithMessage("Last Name must be at least 3 characters");
 
                 RuleFor(e => e.Username)
-                    //.Cascade(CascadeMode.Stop)
+                    .Cascade(CascadeMode.Stop)
                     .NotEmpty().WithMessage("Username is required.")
                     .MustAsync(BeUniqueUsername).WithMessage("This username already exists.");
                     //.When(e => !string.IsNullOrWhiteSpace(e.Username));
@@ -52,6 +52,21 @@ namespace MyBlazorApp.Common
                 var exists = employee.Username == null && employee.Username == null ? false : await db.Mst_Employees.AnyAsync(e => e.Username == username && e.DeletedBy == null && e.Emp_id != employee.Emp_id, cancellationToken);
 
                 return !exists;
+            }
+        }
+
+        public class MenuValidator : AbstractValidator<Mst_Menu>
+        {
+            public MenuValidator()
+            {
+                RuleFor(e => e.MenuName)
+                    .NotEmpty().WithMessage("Menu Name is required");
+
+                RuleFor(e => e.MenuUrl)
+                    .NotEmpty().WithMessage("Menu url is required");
+
+                RuleFor(e => e.SortOrder)
+                    .NotEmpty().WithMessage("Sort order is required");
             }
         }
     }

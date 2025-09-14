@@ -74,6 +74,7 @@
 
                 <div class="modal-body">
                     <!-- Department Name -->
+                    <label>Department Name</label>
                     <InputText class="form-control mb-2"
                                placeholder="Department Name"
                                @bind-Value="newDepartment.DepartmentName" />
@@ -128,7 +129,7 @@
         if (type == "success")
         {
             // Close modal
-            await ModalService.HideAsync("departmentModal");
+            await ModalService.Department.HideAsync("departmentModal");
             ResetForm();
         }
 
@@ -168,7 +169,7 @@
     private async Task OpenAddModal()
     {
         ResetForm();
-        await ModalService.ShowAsync("departmentModal");
+        await ModalService.Department.ShowAsync("departmentModal");
     }
 
     private void ResetForm()
@@ -189,7 +190,7 @@
         else
         {
             newDepartment = department;
-            await ModalService.ShowAsync("departmentModal");
+            await ModalService.Department.ShowAsync("departmentModal");
         }
     }
 

@@ -8,14 +8,22 @@ namespace MyBlazorApp.Common
 
         public ModalServices(IJSRuntime js) => _js = js;
 
-        public async Task ShowAsync(string modalId)
-        {
-            await _js.InvokeVoidAsync("bootstrapModalHelper.show", modalId);
-        }
+        public DepartmentModal Department => new DepartmentModal(_js);
 
-        public async Task HideAsync(string modalId)
+        public class DepartmentModal
         {
-            await _js.InvokeVoidAsync("bootstrapModalHelper.hide", modalId);
+            private readonly IJSRuntime _js;
+            public DepartmentModal(IJSRuntime js) => _js = js;
+
+            public async Task ShowAsync(string modalId)
+            {
+                await _js.InvokeVoidAsync("bootstrapModalHelper.show", modalId);
+            }
+
+            public async Task HideAsync(string modalId)
+            {
+                await _js.InvokeVoidAsync("bootstrapModalHelper.hide", modalId);
+            }
         }
     }
 }

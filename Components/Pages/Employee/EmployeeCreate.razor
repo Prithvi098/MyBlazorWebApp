@@ -18,84 +18,93 @@
     </div>
 </div>
 
-<EditForm Model="@employee" OnValidSubmit="SaveEmployee">
-    <FluentValidationValidator />
-    
-    <div class="row">
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>First Name</label>
-                <InputText type="text" @bind-Value="employee.Emp_firstname" class="form-control" id="empfirstname" />
-                <ValidationMessage For="@(() => employee.Emp_firstname)" />
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="@employee" OnValidSubmit="AskDelete">
+            <FluentValidationValidator />
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <InputText type="text" @bind-Value="employee.Emp_firstname" class="form-control" id="empfirstname" />
+                        <ValidationMessage For="@(() => employee.Emp_firstname)" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Middle Name</label>
+                        <InputText type="text" @bind-Value="employee.Emp_middlename" class="form-control" id="empmiddlename" />
+                        <ValidationMessage For="@(() => employee.Emp_middlename)" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <InputText type="text" @bind-Value="employee.Emp_surname" class="form-control" id="emplastname" />
+                        <ValidationMessage For="@(() => employee.Emp_surname)" />
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Middle Name</label>
-                <InputText type="text" @bind-Value="employee.Emp_middlename" class="form-control" id="empmiddlename" />
-                <ValidationMessage For="@(() => employee.Emp_middlename)" />
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <InputText @bind-Value="employee.Email_address" class="form-control" />
+                        <ValidationMessage For="@(() => employee.Email_address)" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <InputText @bind-Value="employee.Username" class="form-control" />
+                        <ValidationMessage For="@(() => employee.Username)" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Password</label>
+                        <InputText @bind-Value="plainPassword" Type="text" class="form-control" />
+                        <ValidationMessage For="@(() => employee.Password)" />
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Last Name</label>
-                <InputText type="text" @bind-Value="employee.Emp_surname" class="form-control" id="emplastname" />
-                <ValidationMessage For="@(() => employee.Emp_surname)" />
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <InputSelect @bind-Value="employee.Department_type" class="form-control">
+                            <option value="">-- Select Department --</option>
+                            @foreach (var dept in departments)
+                            {
+                                <option value="@dept.Id">@dept.DepartmentName</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => employee.Department_type)" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" @bind="employee.IsActive" id="IsActive" />
+                        <label class="form-check-label" for="IsActive">Is Active</label>
+                    </div>
+                </div>
+
             </div>
-        </div>
+            <div class="row">
+                <div class="col-md-1">
+                    <button type="submit" class="btn-login">@(employee.Emp_id == 0 ? "Save" : "Update")</button>
+                </div>
+            </div>
+
+        </EditForm>
     </div>
-    <div class="row">
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Email</label>
-                <InputText @bind-Value="employee.Email_address" class="form-control" />
-                <ValidationMessage For="@(() => employee.Email_address)" />
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Username</label>
-                <InputText @bind-Value="employee.Username" class="form-control" />
-                <ValidationMessage For="@(() => employee.Username)" />
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Password</label>
-                <InputText @bind-Value="plainPassword" Type="text" class="form-control" />
-                <ValidationMessage For="@(() => employee.Password)" />
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>Department</label>
-                <InputSelect @bind-Value="employee.Department_type" class="form-control">
-                    <option value="">-- Select Department --</option>
-                    @foreach (var dept in departments)
-                    {
-                        <option value="@dept.Id">@dept.DepartmentName</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => employee.Department_type)" />
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-check mt-4">
-                <input class="form-check-input" type="checkbox" @bind="employee.IsActive" id="IsActive" />
-                <label class="form-check-label" for="IsActive">Is Active</label>
-            </div>
-        </div>
-        
-    </div>
-    <div class="row">
-        <div class="col-md-1">
-            <button type="submit" class="btn-login">@(employee.Emp_id == 0 ? "Save" : "Update")</button>
-        </div>
-    </div>
-    
-</EditForm>
+</div>
+<ConfirmationModal Show="@ShowConfirmDialog"
+                   Title="@(employee.Emp_id == 0 ? "Save Employee" : "Update Employee")"
+                   Message="@(employee.Emp_id == 0 ? "Are you sure you want to save this details ?" : 
+                            "Are you sure you want to update this details ?")"
+                   ConfirmationChanged="OnConfirmation" />
 
 @code {
 
@@ -103,7 +112,7 @@
     private Mst_employees employee = new Mst_employees();
     private string plainPassword = string.Empty;
     private List<Mst_Department> departments = new();
-    private EditContext editContext;
+    private bool ShowConfirmDialog { get; set; }
 
     protected override void OnInitialized()
     {
@@ -114,8 +123,21 @@
             employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
             plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
         }
-        editContext = new EditContext(employee);
         departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.IsActive == true).ToList();
+    }
+
+    private void AskDelete()
+    {
+        ShowConfirmDialog = true;
+    }
+
+    private async Task OnConfirmation(bool confirmed)
+    {
+        ShowConfirmDialog = false;
+        if (confirmed)
+        {
+            await SaveEmployee();
+        }
     }
 
     private async Task SaveEmployee()
