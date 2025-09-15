@@ -4,7 +4,6 @@
 @* @inject EMSContext Db *@
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject IJSRuntime JS
-@inject ModalServices ModalService
 @inject ToastService ToastService
 @rendermode InteractiveServer
 
@@ -59,7 +58,6 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <EditForm Model="newDepartment" OnValidSubmit="SaveDepartment">
-                @* <DataAnnotationsValidator /> *@
                 <FluentValidationValidator />
                 @if (!string.IsNullOrEmpty(ModalMessage))
                 {
@@ -74,16 +72,20 @@
 
                 <div class="modal-body">
                     <!-- Department Name -->
-                    <label>Department Name</label>
-                    <InputText class="form-control mb-2"
-                               placeholder="Department Name"
-                               @bind-Value="newDepartment.DepartmentName" />
-                    <ValidationMessage For="@(() => newDepartment.DepartmentName)" />
+                    <div class="form-group">
+                        <label>Department Name</label>
+                        <InputText class="form-control mb-2"
+                                   placeholder="Department Name"
+                                   @bind-Value="newDepartment.DepartmentName" />
+                        <ValidationMessage For="@(() => newDepartment.DepartmentName)" />
+                    </div>
 
                     <!-- Is Active -->
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" @bind="newDepartment.IsActive" id="IsActive"/>
-                        <label class="form-check-label" for="IsActive">Is Active</label>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="newDepartment.IsActive" id="IsActive" />
+                            <label class="form-check-label" for="IsActive">Is Active</label>
+                        </div>
                     </div>
                 </div>
 
@@ -129,7 +131,8 @@
         if (type == "success")
         {
             // Close modal
-            await ModalService.Department.HideAsync("departmentModal");
+            //await ModalService.HideAsync("departmentModal");
+            await JS.InvokeVoidAsync("bootstrapModalHelper.hide", "departmentModal");
             ResetForm();
         }
 
@@ -169,7 +172,8 @@
     private async Task OpenAddModal()
     {
         ResetForm();
-        await ModalService.Department.ShowAsync("departmentModal");
+        //await ModalService.ShowAsync("departmentModal");
+        await JS.InvokeVoidAsync("bootstrapModalHelper.show", "departmentModal");
     }
 
     private void ResetForm()
@@ -190,7 +194,8 @@
         else
         {
             newDepartment = department;
-            await ModalService.Department.ShowAsync("departmentModal");
+            //await ModalService.ShowAsync("departmentModal");
+            await JS.InvokeVoidAsync("bootstrapModalHelper.show", "departmentModal");
         }
     }
 

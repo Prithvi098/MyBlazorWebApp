@@ -80,7 +80,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<ModalServices>();
+/*builder.Services.AddScoped<ModalServices>();*/
 
 builder.Services.AddSingleton<ToastService>();
 
