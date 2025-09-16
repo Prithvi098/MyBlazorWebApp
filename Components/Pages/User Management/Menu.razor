@@ -75,7 +75,7 @@
 			<div class="card-body">
 
 				<QuickGrid TGridItem="Mst_Menu" Items="@MenuList.AsQueryable()" Class="table table-bordered border-3 border-black" Pagination="@pagination" PageSize="10">
-					<PropertyColumn Property="@(e => e.MID)" Title="EmpId" Sortable="true" />
+					<PropertyColumn Property="@(e => e.MID)" Title="MID" Sortable="true" />
 					<PropertyColumn Property="@(e => e.MenuName)" Title="Menu Name" Sortable="true" />
 					<PropertyColumn Property="@(e => e.MenuUrl)" Title="Menu Url" Sortable="true" />
 					<TemplateColumn Title="Action">
@@ -87,6 +87,66 @@
 						</a>
 					</TemplateColumn>
 				</QuickGrid>
+				@* <Paginator State="@pagination" /> *@
+				<div class="d-flex justify-content-between align-items-center mt-3">
+					<span class="text-muted">
+						Showing @(pagination.CurrentPageIndex* pagination.ItemsPerPage + 1) -
+						@(Math.Min((pagination.CurrentPageIndex + 1) * pagination.ItemsPerPage, MenuList.Count))
+						of @MenuList.Count items
+					</span>
+
+					<nav>
+						<ul class="pagination mb-0">
+							<!-- First -->
+							<li class="page-item @(pagination.CurrentPageIndex == 0 ? "disabled" : "")">
+								<button class="page-link" type="button"
+										disabled="@(pagination.CurrentPageIndex == 0)"
+										@onclick="@(async () => await GoToPageAsync(0))">
+									« First
+								</button>
+							</li>
+
+							<!-- Prev -->
+							<li class="page-item @(pagination.CurrentPageIndex == 0 ? "disabled" : "")">
+								<button class="page-link" type="button"
+										disabled="@(pagination.CurrentPageIndex == 0)"
+										@onclick="@(async () => await GoToPageAsync(pagination.CurrentPageIndex - 1))">
+									‹ Prev
+								</button>
+							</li>
+
+							<!-- Page numbers -->
+							@for (int i = 0; i <= (pagination.LastPageIndex ?? 0); i++)
+							{
+								<li class="page-item @(pagination.CurrentPageIndex == i ? "active" : "")">
+									<button class="page-link" type="button"
+											disabled="@(pagination.CurrentPageIndex == i)"
+											@onclick="@(async () => await GoToPageAsync(i))">
+										@(i + 1)   @* Show 1-based label but pass 0-based index *@
+									</button>
+								</li>
+							}
+
+							<!-- Next -->
+							<li class="page-item @((pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex) ? "disabled" : "")">
+								<button class="page-link" type="button"
+										disabled="@(pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex)"
+										@onclick="@(async () => await GoToPageAsync(pagination.CurrentPageIndex + 1))">
+									Next ›
+								</button>
+							</li>
+
+							<!-- Last -->
+							<li class="page-item @((pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex) ? "disabled" : "")">
+								<button class="page-link" type="button"
+										disabled="@(pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex)"
+										@onclick="@(async () => await GoToPageAsync(pagination.LastPageIndex ?? 0))">
+									Last »
+								</button>
+							</li>
+						</ul>
+					</nav>
+				</div>
 			</div>
 		</div>
 		
@@ -107,6 +167,16 @@
 	private bool IsSubmenu { get; set; } = false;
 
 	private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+	private async Task GoToPageAsync(int pageIndex)
+	{
+		var last = pagination.LastPageIndex ?? 0;
+
+		if (pageIndex < 0) pageIndex = 0;
+		if (pageIndex > last) pageIndex = last;
+
+		await pagination.SetCurrentPageIndexAsync(pageIndex);
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -129,6 +199,7 @@
 	{
 		using var Db = DbFactory.CreateDbContext();
 		MenuList = await Db.Mst_Menu.Where(m => m.DeletedBy == null).OrderBy(m => m.MID).ToListAsync();
+		StateHasChanged();
 	}
 
 	private void Clear()

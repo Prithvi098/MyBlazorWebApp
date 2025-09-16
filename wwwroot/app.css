@@ -213,3 +213,26 @@ h1:focus {
         right: 100%;
     }
 }
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    list-style: none;
+}
+
+    .pagination button {
+        border: 1px solid #dee2e6;
+        background-color: #fff;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .pagination button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination button[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
