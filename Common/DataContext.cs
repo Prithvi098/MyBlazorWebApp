@@ -42,7 +42,7 @@ namespace MyBlazorApp.Common
                 logger.ErrorDate = DateTime.Now;
                 eMSContext.ErrorLogs.Add(logger);
                 eMSContext.SaveChanges();
-                return dt;
+                throw;
             }
         }
 
@@ -73,7 +73,7 @@ namespace MyBlazorApp.Common
                 logger.ErrorDate = DateTime.Now;
                 eMSContext.ErrorLogs.Add(logger);
                 eMSContext.SaveChanges();
-                return ds;
+                throw;
             }
         }
 
@@ -107,7 +107,7 @@ namespace MyBlazorApp.Common
                 };
                 eMSContext.ErrorLogs.Add(logger);
                 eMSContext.SaveChanges();
-                return 0; // or rethrow the exception based on your error handling strategy
+                throw; // or rethrow the exception based on your error handling strategy
             }
         }
 
@@ -140,7 +140,7 @@ namespace MyBlazorApp.Common
                 };
                 eMSContext.ErrorLogs.Add(logger);
                 eMSContext.SaveChanges();
-                return 0; // or rethrow the exception based on your error handling strategy
+                throw; // or rethrow the exception based on your error handling strategy
             }
         }
     }

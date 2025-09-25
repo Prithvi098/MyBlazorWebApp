@@ -1,0 +1,232 @@
+﻿@using System.Data
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="~/Content/img/favicon 3.png">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+
+    <link href="~/Content/plugins/daterangepicker/daterangepicker.css" rel="stylesheet" />
+    <link href="~/Content/old/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link href="~/Content/plugins/datatables-bs4/css/dataTables.bootstrap4.css" rel="stylesheet" />
+    <link href="~/Content/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Loader.css" rel="stylesheet" />
+    <link href="~/Content/plugins/select2/css/select2.css" rel="stylesheet" />
+    <link href="~/Content/plugins/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/Content/plugins/jquery-ui/jquery-ui.css" rel="stylesheet" />
+    @*<link href="~/Content/dist/css/style.css" rel="stylesheet" />*@
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css" rel="stylesheet">
+    <link href="~/Content/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/Content/dist/css/adminlte.min.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/42.0.1/ckeditor5.css">
+    @*<link href="~/Content/CSS/responsive.css" rel="stylesheet" />*@
+
+
+
+
+    <script src="~/Content/plugins/moment/moment.min.js"></script>
+
+    @*<script src="~/Content/plugins/daterangepicker/daterangepicker.js"></script>*@
+    @*<script src="https://cdn.ckeditor.com/ckeditor5/42.0.2/ckeditor5.js"></script>*@
+
+    <script src="~/Content/plugins/jquery/jquery.min.js"></script>
+    <script src="~/Content/plugins/jquery-ui/jquery-ui.js"></script>
+    <script src="~/Content/plugins/inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/Content/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Content/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Content/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Content/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    <script src="~/Content/plugins/select2/js/select2.full.min.js"></script>
+    <script src="~/Content/plugins/select2/js/select2.min.js"></script>
+    <script src="~/Content/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+    @*<script src="~/Content/ckeditor/ckeditor.js"></script>*@
+    @*<script src="~/Scripts/jquery.marquee.js"></script>*@
+    @*<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>*@
+    @*<script type="text/javascript" src="~/Scripts/duplicate.js"></script>*@
+    @*@Styles.Render("~/Content/dashboardcss")
+        @Scripts.Render("~/Content/dashboardjs")*@
+
+
+
+    <script>
+        window.onload = () => {
+            if (window.location.protocol === 'file:') {
+                alert('This sample requires an HTTP server. Please serve this file with a web server.');
+            }
+        };
+    </script>
+
+</head>
+<body class="layout-top-nav layout-navbar-fixed dashboard-wrap" style="height: auto;">
+    <div class="wrapper">
+        <nav class="main-header navbar navbar-expand-md navbar-light border-0">
+            <div class="container-fluid">
+                <a href="/Home/Index" class="navbar-brand">
+                    <img src="~/Content/img/SmartwayMain.svg" alt="Main Logo" class="img-fluid"/>
+                </a>
+                <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+                    <ul class="navbar-nav">
+                        @{
+                            DataSet DtMenu = new DataSet();
+                            DtMenu = (DataSet)TempData["UserMenu"];
+                            TempData.Keep("UserMenu");
+                            if (DtMenu != null)
+                            {
+                                string strhtml = "";
+                                for (var mi = 0; mi < DtMenu.Tables[0].Rows.Count; mi++)
+                                {
+
+                                    if (!Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuName"]).ToLower().Contains("covid")
+                                                    && !Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuName"]).ToLower().Contains("sd stock"))
+                                    {
+                                        strhtml += "<ul class=\"navbar-nav\">";
+                                        strhtml += "<li class=\"nav-item dropdown\">";
+                                        if (Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) == "#")
+                                        {
+                                            strhtml += "<a href=\"" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\" class=\"nav-link dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+                                        }
+                                        else if (Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuName"]).Contains("!"))
+                                        {
+                                            strhtml += "<a href=\"" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\" class=\"nav-link d-none dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+                                        }
+                                        else if (Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) == "Client/Index")
+                                        {
+                                            strhtml += "<a class=\"nav-link\" href=\"../../" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+
+                                        }
+                                        else if (Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) == "Orders/OrderIndex")
+                                        {
+                                            strhtml += "<a class=\"nav-link\" href=\"../../" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+
+                                        }
+                                        else
+                                        {
+                                            strhtml += "<a class=\"nav-link\" href=\"../../" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "</a>";
+                                        }
+                                        strhtml += "<ul class=\"dropdown-menu border-0 shadow\" role=\"menu\">";
+                                        for (var mis = 0; mis < DtMenu.Tables[1].Rows.Count; mis++)
+                                        {
+                                            if (Convert.ToString(DtMenu.Tables[0].Rows[mi]["MID"]) == Convert.ToString(DtMenu.Tables[1].Rows[mis]["PMID"]))
+                                            {
+                                                string strsubclasscss = "";
+                                                DataRow[] drchksubmenu = DtMenu.Tables[1].Select("PMID = " + DtMenu.Tables[1].Rows[mis]["MID"]);
+                                                if (drchksubmenu.Length > 0)
+                                                {
+                                                    strsubclasscss = "dropdown-submenu dropdown-hover";
+                                                }
+                                                strhtml += "<li class=\"" + strsubclasscss + "\">";
+                                                if (Convert.ToString(DtMenu.Tables[1].Rows[mis]["MenuUrl"]) == "#")
+                                                {
+                                                    strhtml += "<a href=\"" + Convert.ToString(DtMenu.Tables[1].Rows[mis]["MenuUrl"]) + "\" class=\"dropdown-item dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\"><i class=\"fa fa-circle-o\"></i>" + DtMenu.Tables[1].Rows[mis]["MenuName"] + "</a>";
+                                                }
+                                                else if (Convert.ToString(DtMenu.Tables[1].Rows[mis]["MenuName"]).StartsWith("!"))
+                                                {
+                                                    strhtml += "<a href=\"" + Convert.ToString(DtMenu.Tables[1].Rows[mi]["MenuUrl"]) + "\" style=\" Display:none\" class=\"nav-link d-none dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">" + DtMenu.Tables[1].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+                                                }
+                                                else if (Convert.ToString(DtMenu.Tables[1].Rows[mis]["MenuUrl"]) == "Client/Index")
+                                                {
+                                                    strhtml += "<a class=\"nav-link\" href=\"../../" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+
+                                                }
+                                                else if (Convert.ToString(DtMenu.Tables[1].Rows[mis]["MenuUrl"]) == "Orders/OrderIndex")
+                                                {
+                                                    strhtml += "<a class=\"nav-link\" href=\"../../" + Convert.ToString(DtMenu.Tables[0].Rows[mi]["MenuUrl"]) + "\">" + DtMenu.Tables[0].Rows[mi]["MenuName"] + "<span class=\"caret\"></span></a>";
+
+                                                }
+                                                else
+                                                {
+                                                    strhtml += "<a class=\"dropdown-item\" href=\"../../" + Convert.ToString(DtMenu.Tables[1].Rows[mis]["MenuUrl"]) + "\">" + DtMenu.Tables[1].Rows[mis]["MenuName"] + "</a>";
+                                                }
+
+                                                bool flg = false;
+                                                string strsubmenu = "";
+                                                for (var misub = 0; misub < DtMenu.Tables[1].Rows.Count; misub++)
+                                                {
+                                                    if (Convert.ToString(DtMenu.Tables[1].Rows[mis]["MID"]) == Convert.ToString(DtMenu.Tables[1].Rows[misub]["PMID"]))
+                                                    {
+                                                        strsubmenu += "<li>";
+                                                        if (Convert.ToString(DtMenu.Tables[1].Rows[misub]["MenuName"]).StartsWith("!"))
+                                                        {
+                                                            strsubmenu += "<a class=\"dropdown-item d-none\" style=\" Display:none\" href=\"../../" + Convert.ToString(DtMenu.Tables[1].Rows[misub]["MenuUrl"]) + "\">" + DtMenu.Tables[1].Rows[misub]["MenuName"] + "</a>";
+                                                        }
+                                                        else
+                                                        {
+                                                            strsubmenu += "<a class=\"dropdown-item\" href=\"../../" + Convert.ToString(DtMenu.Tables[1].Rows[misub]["MenuUrl"]) + "\">" + DtMenu.Tables[1].Rows[misub]["MenuName"] + "</a>";
+                                                        }
+                                                        strsubmenu += "</li>";
+                                                        flg = true;
+                                                    }
+                                                }
+
+                                                if (flg)
+                                                {
+                                                    strhtml += "<ul class=\"dropdown-menu border-0 shadow\">";
+                                                    strhtml += strsubmenu;
+                                                    strhtml += "</ul>";
+                                                }
+                                                strhtml += "</li>";
+                                            }
+                                        }
+                                        strhtml += "</ul>";
+                                        strhtml += "</li>";
+                                        strhtml += "</ul>";
+                                    }
+                                }
+                                @Html.Raw(strhtml);
+                            }
+                        }
+                    </ul>
+
+                    <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+                        <li class="nav-item dropdown profile-info ">
+                            <a class="nav-link dropdown-toggle p-0" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                @Session["UserFullName"]
+                            </a>
+
+                            @*<a class="nav-link p-0" data-toggle="dropdown" href="#">
+                                    <img src="~/Content/img/user-1.jpg" alt="User Avtar" class="img-fluid ml-3 img-circle">
+                                </a>*@
+
+                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                                <a href="~/Account/LogOff" class="">Sign out</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <input type="hidden" id="hdnNews" />
+        <div class="content-wrapper" style="min-height: 1436px;margin-left: 0px;">
+            <section class="content">
+                @RenderBody()
+            </section>
+        </div>
+        <div id="loading" style="display:none;">
+            <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        </div>
+        <footer class="main-footer">
+            <strong>Copyright © @DateTime.Now.Year <a href="#!">Smartway B2B</a>.</strong>
+            All rights reserved.
+        </footer>
+    </div>
+</body>
+</html>
+@*<script>
+        $(function () {
+            $(document).tooltip();
+        });
+    </script>*@
+
+@*<script src="~/Content/dist/js/demo.js"></script>*@
