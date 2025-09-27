@@ -32,7 +32,7 @@
 					</div>
 					<div class="form-group">
 						<label>Menu Sort Order</label>
-						<InputText class="form-control" placeholder="Menu Sort Order" @bind-Value="MenuSortOrder"></InputText>
+						<InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText>
 					</div>
 					<div class="form-group">
 						<div class="form-check">
@@ -74,10 +74,15 @@
 			</div>
 			<div class="card-body">
 
-				<QuickGrid TGridItem="Mst_Menu" Items="@MenuList.AsQueryable()" Class="table table-bordered border-3 border-black" Pagination="@pagination" PageSize="10">
+				<QuickGrid TGridItem="Mst_Menu"
+						   ItemsProvider="LoadData"
+						   Pagination="pagination"
+						   Class="table table-bordered border-3 border-black" Virtualize="false">
+
 					<PropertyColumn Property="@(e => e.MID)" Title="MID" Sortable="true" />
 					<PropertyColumn Property="@(e => e.MenuName)" Title="Menu Name" Sortable="true" />
 					<PropertyColumn Property="@(e => e.MenuUrl)" Title="Menu Url" Sortable="true" />
+
 					<TemplateColumn Title="Action">
 						<a class="btn btn-sm btn-primary">
 							<i class="fa-solid fa-pen"></i>
@@ -87,7 +92,7 @@
 						</a>
 					</TemplateColumn>
 				</QuickGrid>
-				@* <Paginator State="@pagination" /> *@
+			    
 				<div class="d-flex justify-content-between align-items-center mt-3">
 					<span class="text-muted">
 						Showing @(pagination.CurrentPageIndex* pagination.ItemsPerPage + 1) -
@@ -116,13 +121,15 @@
 							</li>
 
 							<!-- Page numbers -->
-							@for (int i = 0; i <= (pagination.LastPageIndex ?? 0); i++)
+							@for (int i = 0; i < TotalPages; i++)
 							{
-								<li class="page-item @(pagination.CurrentPageIndex == i ? "active" : "")">
+								var pageIndex = i;
+
+								<li class="page-item @(pagination.CurrentPageIndex == pageIndex ? "active" : "")">
 									<button class="page-link" type="button"
-											disabled="@(pagination.CurrentPageIndex == i)"
-											@onclick="@(async () => await GoToPageAsync(i))">
-										@(i + 1)   @* Show 1-based label but pass 0-based index *@
+											disabled="@(pagination.CurrentPageIndex == pageIndex)"
+											@onclick="@(async () => await GoToPageAsync(pageIndex))">
+										@(pageIndex + 1)
 									</button>
 								</li>
 							}
@@ -168,6 +175,10 @@
 
 	private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
 
+
+	private int TotalPages =>
+		(int)Math.Ceiling((double)MenuList.Count / pagination.ItemsPerPage);
+
 	private async Task GoToPageAsync(int pageIndex)
 	{
 		var last = pagination.LastPageIndex ?? 0;
@@ -178,11 +189,42 @@
 		await pagination.SetCurrentPageIndexAsync(pageIndex);
 	}
 
+	private async ValueTask<GridItemsProviderResult<Mst_Menu>> LoadData(GridItemsProviderRequest<Mst_Menu> request)
+	{
+		// Get IQueryable from your source
+		if (MenuList == null || !MenuList.Any())
+			return GridItemsProviderResult.From(Array.Empty<Mst_Menu>(), 0);
+
+		var query = MenuList.AsQueryable();
+
+		var items = query
+			.Skip(request.StartIndex)
+			.Take(request.Count ?? pagination.ItemsPerPage)
+			.ToList();
+
+		return GridItemsProviderResult.From(items, MenuList.Count);
+
+	}
+
+	private void checksortorder(string stringnumber)
+	{
+		if (int.TryParse(stringnumber, out int number))
+		{
+			menu.SortOrder = number;
+		}
+		else
+		{
+			MenuSortOrder = "";
+		}
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
 		await Task.Delay(500);
 		await GetMainMenuList();
 		await LoadMenuList();
+
+		await pagination.SetCurrentPageIndexAsync(0);
 	}
 
 	private async Task GetMainMenuList()
