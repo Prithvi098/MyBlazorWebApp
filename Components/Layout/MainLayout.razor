@@ -1,8 +1,24 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
+<div class="wrapper">
+    <NavMenu />
+    <div class="content-wrapper" style="min-height:100vh; margin-left:0;">
+        <section class="content">
+            <Toast />
+            @Body
+        </section>
+    </div>
+    <div id="loading" style="display:none;">
+        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+    <footer class="main-footer">
+        <strong>Copyright © @DateTime.Now.Year <a href="#!"></a>.</strong>
+        All rights reserved.
+    </footer>
+</div>
+@* <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        
     </div>
 
     <main>
@@ -12,9 +28,9 @@
 
         <article class="content px-4">
 
-            <Toast />
+            
             @Body
         </article>
     </main>
-</div>
+</div> *@
 

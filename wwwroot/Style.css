@@ -277,59 +277,7 @@ table.dataTable > thead .sorting:before, table.dataTable > thead .sorting:after,
     display: inline-block;
     background-color: #d4edda;
 }
-    /* .card .card-body .custom-multi-chkbox .custom-checkbox {
-  padding: 0px;
-  display: flex;
-  flex-wrap: wrap;
-}
-.card .card-body .custom-multi-chkbox .custom-control-label {
-  width: 140px;
-  height: 50px;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid #dee2e6;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #FFFFFF;
-  transition: 0.15s ease;
-  cursor: pointer;
-  position: relative;
-}
-.card .card-body .custom-multi-chkbox .custom-control-label .checkbox-lbl {
-  color: #707070;
-  width: 100%;
-  padding-top: 0.5rem;
-  font-size: 14px;
-  text-align: center;
-  display: block;
-}
-.card .card-body .custom-multi-chkbox .custom-checkbox .custom-control-label::before,
-.card .card-body .custom-multi-chkbox .custom-control-label::after {
-  top: 5px;
-  left: 5px;
-}
-.card .card-body .custom-multi-chkbox .custom-control-label i {
-  color: #494949;
-  font-size: 25px;
-}
-.card .card-body .custom-multi-chkbox .custom-control-input:checked + .custom-control-label {
-  color: #fb957a;
-  border-color: #fb957a;
-}
-.card .card-body .custom-multi-chkbox .custom-control-input:checked + .custom-control-label i, 
-.card .card-body .custom-multi-chkbox .custom-control-input:checked + .custom-control-label .checkbox-lbl {
-  color: #fb957a;
-}
-.card .card-body .custom-multi-chkbox .custom-control-input:checked~.custom-control-label::before {
-  border-color: #fb957a;
-  background-color: #fb957a;
-}
-.card .card-body .custom-multi-chkbox .custom-control-input:checked~.custom-control-label::before,
-.custom-checkbox .custom-control-input:checked~.custom-control-label::after {
-  opacity: 1;
-} */
+
 
     .products-chkbox .custom-control-label {
     cursor: pointer;
@@ -453,6 +401,30 @@ input:checked + .slider .off {
     width: 200px;
     margin-bottom: 1rem;
 }
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    list-style: none;
+}
+
+    .pagination button {
+        border: 1px solid #dee2e6;
+        background-color: #fff;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .pagination button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination button[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
 /* ------x------- Global Classes -------x-------*/
 
 /* ---------------- Login ---------------*/
@@ -1070,3 +1042,112 @@ footer {
     padding-left: 2rem;
     list-style-type: square;
 }
+
+
+/* ---------------- Toast ---------------*/
+
+.toast-wrapper {
+    position: fixed;
+    top: 3rem;
+    right: 1rem;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.toast {
+    border-radius: 12px;
+    background: #fff;
+    padding: 20px 35px 20px 25px;
+    box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.1);
+    transform: translateX(calc(100% + 30px));
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.35);
+    position: relative;
+    min-width: 450px;
+}
+
+    .toast.active {
+        transform: translateX(0%);
+    }
+
+    .toast:not(.active) {
+        display: none;
+    }
+
+.toast-content {
+    display: flex;
+    align-items: center;
+}
+
+    .toast-content .check {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 35px;
+        min-width: 35px;
+        background-color: #4070f4;
+        color: #fff;
+        font-size: 20px;
+        border-radius: 50%;
+    }
+
+    .toast-content .message {
+        display: flex;
+        flex-direction: column;
+        margin: 0 20px;
+    }
+
+.message .text {
+    font-size: 16px;
+    font-weight: 400;
+    color: #666666;
+}
+
+    .message .text.text-1 {
+        font-weight: 600;
+        color: #333;
+    }
+
+.toast .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    padding: 5px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+    .toast .close:hover {
+        opacity: 1;
+    }
+
+.toast .progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+}
+
+    .toast .progress:before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #4070f4;
+    }
+
+.progress.active:before {
+    animation: progress 5s linear forwards;
+}
+
+@keyframes progress {
+    100% {
+        right: 100%;
+    }
+}
+
+/* ---------------- Toast ---------------*/
