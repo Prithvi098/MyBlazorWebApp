@@ -1,22 +1,27 @@
 ﻿@using static MyBlazorApp.Common.ToastService
 @inject ToastService ToastService
+@inject IJSRuntime JS
 @implements IDisposable
 @rendermode InteractiveServer
 
 <div class="toast-wrapper">
     @foreach (var toast in Toasts)
     {
-        <div class="toast show @(toast.IsActive ? "active" : "")">
-            <div class="toast-content">
-                <i class="fas fa-solid fa-check check"></i>
-                <div class="message">
-                    <span class="text text-1">@toast.Title</span>
-                    <span class="text text-2">@toast.Message</span>
+        if (toast.Id != null)
+        {
+            <div class="toast show @(toast.IsActive ? "active" : "fadeout")" id="@toast.Id">
+                <div class="toast-content">
+                    <i class="fas fa-solid fa-check check"></i>
+                    <div class="message">
+                        <span class="text text-1">@toast.Title</span>
+                        <span class="text text-2">@toast.Message</span>
+                    </div>
                 </div>
+                <i class="fa-solid fa-xmark close" @onclick="() => CloseToast(toast.Id)"></i>
+                <div class="progress active" style="animation-duration:@(toast.DurationMs + "ms")"></div>
             </div>
-            <i class="fa-solid fa-xmark close" @onclick="() => CloseToast(toast.Id)"></i>
-            <div class="progress @(toast.IsActive ? "active" : "")"></div>
-        </div>
+        }
+        
     }
 </div>
 
@@ -26,44 +31,58 @@
 @code {
 
     private List<ToastEntry> Toasts = new();
-
+    private CancellationTokenSource? _cts;
 
     protected override void OnInitialized()
     {
+        _cts = new CancellationTokenSource();
         ToastService.OnShow += AddToast;
     }
 
-    private void AddToast(ToastEntry entry)
+    private async void AddToast(ToastEntry entry)
     {
+        if (_cts?.IsCancellationRequested == true) return;
+
         Toasts.Add(entry);
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
 
-        _ = Task.Run(async () =>
+        try
         {
-            await Task.Delay(5000).ContinueWith(_ => CloseToast(entry.Id));
-
-        });
+            await Task.Delay(entry.DurationMs, _cts!.Token);
+            if (!_cts.IsCancellationRequested)
+            {
+                await CloseToast(entry.Id);
+            }
+        }
+        catch (TaskCanceledException) { }
     }
 
-    private void CloseToast(Guid id)
+    private async Task CloseToast(Guid id)
     {
+        if (_cts?.IsCancellationRequested == true) return;
+
         var toast = Toasts.FirstOrDefault(t => t.Id == id);
         if (toast != null)
         {
-            toast.IsActive = false;
-            InvokeAsync(StateHasChanged);
+            toast.IsActive = false; // trigger CSS fade-out
+            await InvokeAsync(StateHasChanged);
 
-            _ = Task.Delay(500).ContinueWith(_ =>
+            try
             {
-                Toasts.Remove(toast);
-                //InvokeAsync(StateHasChanged);
-            });
+                await Task.Delay(500, _cts!.Token); // wait for fade-out
+            }
+            catch (TaskCanceledException) { return; }
+
+            Toasts.Remove(toast); // Blazor removes DOM node
+            //await InvokeAsync(StateHasChanged);
         }
     }
 
     public void Dispose()
     {
         ToastService.OnShow -= AddToast;
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 
 }

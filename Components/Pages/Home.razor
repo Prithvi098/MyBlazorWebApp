@@ -9,21 +9,38 @@
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
+<section class="content">
+    <div class="content-header">
+        <div class="container-fluid p-0">
+            <div class="row">
+                <div class="col-6 col-lg-6">
+					<div class="main-title">
+                        <h2 class="m-0">Dashboard</h2>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-6">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid p-0">
+        <AuthorizeView>
+            <Authorized>
+                <h1>Hello, @context.User.Identity?.Name!</h1>
+                <p>Welcome to your new app.</p>
 
-<AuthorizeView>
-    <Authorized>
-        <h1>Hello, @context.User.Identity?.Name!</h1>
-        <p>Welcome to your new app.</p>
+                <button class="btn btn-sm btn-success" @onclick="ShowSuccess">Show Success</button>
+                <button class="btn btn-sm btn-warning" @onclick="ShowWarning">Show Warning</button>
+                <button class="btn btn-sm btn-danger" @onclick="ShowError">Show Danger</button>
 
-        <button class="btn btn-success" @onclick="ShowSuccess">Show Success</button>
-        <button class="btn btn-warning" @onclick="ShowWarning">Show Warning</button>
-        <button class="btn btn-danger" @onclick="ShowError">Show Danger</button>
+            </Authorized>
+            <NotAuthorized>
+                <p>You are not authorized. Please log in.</p>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</section>
 
-    </Authorized>
-    <NotAuthorized>
-        <p>You are not authorized. Please log in.</p>
-    </NotAuthorized>
-</AuthorizeView>
 
 @code {
     void ShowSuccess()

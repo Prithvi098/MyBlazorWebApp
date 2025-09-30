@@ -12,7 +12,7 @@
                 Message = message,
                 Type = type,
                 IsActive = true,
-                DurationMs = 5000
+                DurationMs = 5500
             };
 
             OnShow?.Invoke(entry); // type = "success", "warning", "error"
