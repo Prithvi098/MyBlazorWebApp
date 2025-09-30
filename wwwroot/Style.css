@@ -1153,3 +1153,27 @@ footer {
 }
 
 /* ---------------- Toast ---------------*/
+
+
+/* ---------------- Blazor/FluentValidation Validation Styling ---------------*/
+
+.validation-message,
+.text-danger {
+    color: #dc3545 !important; /* Bootstrap's red */
+    font-size: 0.95em;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+input.input-validation-error,
+input.input-validation-error.form-control,
+.form-control.input-validation-error,
+input:invalid.form-control,
+input.form-control:invalid {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,.10);
+}
+
+/* ---------------- Blazor/FluentValidation Validation Styling ---------------*/

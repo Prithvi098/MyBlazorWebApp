@@ -7,158 +7,175 @@
 
 <PageTitle>Menu</PageTitle>
 
-<div class="row">
-	<div class="col-md-4">
-		<div class="card">
-			<div class="card-header">
-				<h3>Create Menu</h3>
-			</div>
-			<div class="card-body">
-				<EditForm Model="menu">
-					<FluentValidationValidator />
-					<div class="form-group">
-						<label>Menu Name</label>
-						<InputText class="form-control" placeholder="Menu Name" @bind-Value="menu.MenuName"></InputText>
-						<ValidationMessage For="@(() => menu.MenuName)" />
+<section class="content">
+	<div class="content-header">
+		<div class="container-fluid p-0">
+			<div class="row">
+				<div class="col-6 col-lg-6">
+					<div class="main-title">
 					</div>
-					<div class="form-group">
-						<label>Menu URL</label>
-						<InputText class="form-control" placeholder="Menu Url" @bind-Value="menu.MenuUrl"></InputText>
-						<ValidationMessage For="@(() => menu.MenuUrl)" />
-					</div>
-					<div class="form-group">
-						<label>Menu Description</label>
-						<InputText class="form-control" placeholder="Menu Description" @bind-Value="menu.MenuDesc"></InputText>
-					</div>
-					<div class="form-group">
-						<label>Menu Sort Order</label>
-						<InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText>
-					</div>
-					<div class="form-group">
-						<div class="form-check">
-							<input class="form-check-input" type="checkbox" @bind="IsSubmenu" id="IsSubmenu" />
-							<label class="form-check-label" for="IsSubmenu">Is Sub Menu</label>
-						</div>
-					</div>
-					@if (IsSubmenu)
-					{
-						<div class="form-group">
-							<label>Department</label>
-							<InputSelect @bind-Value="menu.PMID" class="form-control">
-								<option value="">-- Select Menu --</option>
-								@foreach (var menu in MainMenuList)
-								{
-									<option value="@menu.MID">@menu.MenuName</option>
-								}
-							</InputSelect>
-							@* <ValidationMessage For="@(() => employee.Department_type)" /> *@
-						</div>
-					}
-					<div class="row">
-						<div class="col-md-2">
-							<button type="submit" class="btn btn-primary">Save</button>
-						</div>
-						<div class="col-md-2">
-							<button type="button" class="btn btn-secondary" @onclick="@(() => Clear())">Clear</button>
-						</div>
-					</div>
-					
-				</EditForm>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-8">
-		<div class="card">
-			<div class="card-header">
-				<h3>Menu List</h3>
-			</div>
-			<div class="card-body">
-
-				<QuickGrid TGridItem="Mst_Menu"
-						   ItemsProvider="LoadData"
-						   Pagination="pagination"
-						   Class="table table-bordered border-3 border-black" Virtualize="false">
-
-					<PropertyColumn Property="@(e => e.MID)" Title="MID" Sortable="true" />
-					<PropertyColumn Property="@(e => e.MenuName)" Title="Menu Name" Sortable="true" />
-					<PropertyColumn Property="@(e => e.MenuUrl)" Title="Menu Url" Sortable="true" />
-
-					<TemplateColumn Title="Action">
-						<a class="btn btn-sm btn-primary">
-							<i class="fa-solid fa-pen"></i>
-						</a>
-						<a class="btn btn-sm btn-danger" @onclick="() => AskDelete(context.MID)">
-							<i class="fa-solid fa-trash"></i>
-						</a>
-					</TemplateColumn>
-				</QuickGrid>
-			    
-				<div class="d-flex justify-content-between align-items-center mt-3">
-					<span class="text-muted">
-						Showing @(pagination.CurrentPageIndex* pagination.ItemsPerPage + 1) -
-						@(Math.Min((pagination.CurrentPageIndex + 1) * pagination.ItemsPerPage, MenuList.Count))
-						of @MenuList.Count items
-					</span>
-
-					<nav>
-						<ul class="pagination mb-0">
-							<!-- First -->
-							<li class="page-item @(pagination.CurrentPageIndex == 0 ? "disabled" : "")">
-								<button class="page-link" type="button"
-										disabled="@(pagination.CurrentPageIndex == 0)"
-										@onclick="@(async () => await GoToPageAsync(0))">
-									« First
-								</button>
-							</li>
-
-							<!-- Prev -->
-							<li class="page-item @(pagination.CurrentPageIndex == 0 ? "disabled" : "")">
-								<button class="page-link" type="button"
-										disabled="@(pagination.CurrentPageIndex == 0)"
-										@onclick="@(async () => await GoToPageAsync(pagination.CurrentPageIndex - 1))">
-									‹ Prev
-								</button>
-							</li>
-
-							<!-- Page numbers -->
-							@for (int i = 0; i < TotalPages; i++)
-							{
-								var pageIndex = i;
-
-								<li class="page-item @(pagination.CurrentPageIndex == pageIndex ? "active" : "")">
-									<button class="page-link" type="button"
-											disabled="@(pagination.CurrentPageIndex == pageIndex)"
-											@onclick="@(async () => await GoToPageAsync(pageIndex))">
-										@(pageIndex + 1)
-									</button>
-								</li>
-							}
-
-							<!-- Next -->
-							<li class="page-item @((pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex) ? "disabled" : "")">
-								<button class="page-link" type="button"
-										disabled="@(pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex)"
-										@onclick="@(async () => await GoToPageAsync(pagination.CurrentPageIndex + 1))">
-									Next ›
-								</button>
-							</li>
-
-							<!-- Last -->
-							<li class="page-item @((pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex) ? "disabled" : "")">
-								<button class="page-link" type="button"
-										disabled="@(pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex)"
-										@onclick="@(async () => await GoToPageAsync(pagination.LastPageIndex ?? 0))">
-									Last »
-								</button>
-							</li>
-						</ul>
-					</nav>
+				</div>
+				<div class="col-6 col-lg-6">
 				</div>
 			</div>
 		</div>
-		
 	</div>
-</div>
+	<div class="container-fluid p-0">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-header">
+						<h3>Create Menu</h3>
+					</div>
+					<div class="card-body">
+						<EditForm Model="menu">
+							<FluentValidationValidator />
+							<div class="form-group">
+								<label>Menu Name</label>
+								<InputText class="form-control" placeholder="Menu Name" @bind-Value="menu.MenuName"></InputText>
+								<ValidationMessage For="@(() => menu.MenuName)" />
+							</div>
+							<div class="form-group">
+								<label>Menu URL</label>
+								<InputText class="form-control" placeholder="Menu Url" @bind-Value="menu.MenuUrl"></InputText>
+								<ValidationMessage For="@(() => menu.MenuUrl)" />
+							</div>
+							<div class="form-group">
+								<label>Menu Description</label>
+								<InputText class="form-control" placeholder="Menu Description" @bind-Value="menu.MenuDesc"></InputText>
+							</div>
+							<div class="form-group">
+								<label>Menu Sort Order</label>
+								<InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText>
+							</div>
+							<div class="form-group">
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox" @bind="IsSubmenu" id="IsSubmenu" />
+									<label class="form-check-label" for="IsSubmenu">Is Sub Menu</label>
+								</div>
+							</div>
+							@if (IsSubmenu)
+							{
+								<div class="form-group">
+									<label>Department</label>
+									<InputSelect @bind-Value="menu.PMID" class="form-control">
+										<option value="">-- Select Menu --</option>
+										@foreach (var menu in MainMenuList)
+										{
+											<option value="@menu.MID">@menu.MenuName</option>
+										}
+									</InputSelect>
+									@* <ValidationMessage For="@(() => employee.Department_type)" /> *@
+								</div>
+							}
+							<div class="row">
+								<div class="col-md-2">
+									<button type="submit" class="btn btn-primary">Save</button>
+								</div>
+								<div class="col-md-2">
+									<button type="button" class="btn btn-secondary" @onclick="@(() => Clear())">Clear</button>
+								</div>
+							</div>
+
+						</EditForm>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-8">
+				<div class="card">
+					<div class="card-header">
+						<h3>Menu List</h3>
+					</div>
+					<div class="card-body table-responsive">
+
+						<QuickGrid TGridItem="Mst_Menu"
+								   ItemsProvider="LoadData"
+								   Pagination="pagination"
+								   Class="table table-bordered border-3 border-black" Virtualize="false">
+
+							<PropertyColumn Property="@(e => e.MID)" Title="MID" Sortable="true" />
+							<PropertyColumn Property="@(e => e.MenuName)" Title="Menu Name" Sortable="true" />
+							<PropertyColumn Property="@(e => e.MenuUrl)" Title="Menu Url" Sortable="true" />
+
+							<TemplateColumn Title="Action">
+								<a class="btn btn-sm btn-primary">
+									<i class="fa-solid fa-pen"></i>
+								</a>
+								<a class="btn btn-sm btn-danger" @onclick="() => AskDelete(context.MID)">
+									<i class="fa-solid fa-trash"></i>
+								</a>
+							</TemplateColumn>
+						</QuickGrid>
+
+						<div class="d-flex justify-content-between align-items-center mt-3">
+							<span class="text-muted">
+								Showing @(pagination.CurrentPageIndex* pagination.ItemsPerPage + 1) -
+								@(Math.Min((pagination.CurrentPageIndex + 1) * pagination.ItemsPerPage, MenuList.Count))
+								of @MenuList.Count items
+							</span>
+
+							<nav>
+								<ul class="pagination mb-0">
+									<!-- First -->
+									<li class="page-item @(pagination.CurrentPageIndex == 0 ? "disabled" : "")">
+										<button class="page-link" type="button"
+												disabled="@(pagination.CurrentPageIndex == 0)"
+												@onclick="@(async () => await GoToPageAsync(0))">
+											« First
+										</button>
+									</li>
+
+									<!-- Prev -->
+									<li class="page-item @(pagination.CurrentPageIndex == 0 ? "disabled" : "")">
+										<button class="page-link" type="button"
+												disabled="@(pagination.CurrentPageIndex == 0)"
+												@onclick="@(async () => await GoToPageAsync(pagination.CurrentPageIndex - 1))">
+											‹ Prev
+										</button>
+									</li>
+
+									<!-- Page numbers -->
+									@for (int i = 0; i < TotalPages; i++)
+									{
+										var pageIndex = i;
+
+										<li class="page-item @(pagination.CurrentPageIndex == pageIndex ? "active" : "")">
+											<button class="page-link" type="button"
+													disabled="@(pagination.CurrentPageIndex == pageIndex)"
+													@onclick="@(async () => await GoToPageAsync(pageIndex))">
+												@(pageIndex + 1)
+											</button>
+										</li>
+									}
+
+									<!-- Next -->
+									<li class="page-item @((pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex) ? "disabled" : "")">
+										<button class="page-link" type="button"
+												disabled="@(pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex)"
+												@onclick="@(async () => await GoToPageAsync(pagination.CurrentPageIndex + 1))">
+											Next ›
+										</button>
+									</li>
+
+									<!-- Last -->
+									<li class="page-item @((pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex) ? "disabled" : "")">
+										<button class="page-link" type="button"
+												disabled="@(pagination.LastPageIndex.HasValue && pagination.CurrentPageIndex >= pagination.LastPageIndex)"
+												@onclick="@(async () => await GoToPageAsync(pagination.LastPageIndex ?? 0))">
+											Last »
+										</button>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</section>
+
 <ConfirmationModal Show="@ShowConfirmDialog"
                Title="Delete Department"
                Message="Are you sure you want to delete this department?" 
