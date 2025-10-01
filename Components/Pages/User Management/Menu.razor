@@ -46,7 +46,8 @@
 							</div>
 							<div class="form-group">
 								<label>Menu Sort Order</label>
-								<InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText>
+								@* <InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText> *@
+								<InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder"></InputText>
 							</div>
 							<div class="form-group">
 								<div class="form-check">
@@ -88,7 +89,7 @@
 					</div>
 					<div class="card-body table-responsive">
 
-						<QuickGrid TGridItem="Mst_Menu"
+						<QuickGrid TGridItem="Mst_Menu_New"
 								   ItemsProvider="LoadData"
 								   Pagination="pagination"
 								   Class="table table-bordered border-3 border-black" Virtualize="false">
@@ -182,9 +183,9 @@
 			   ConfirmationChanged="OnDeleteConfirmation"/>
 
 @code {
-	private List<Mst_Menu> MenuList = new List<Mst_Menu>();
-	private List<Mst_Menu> MainMenuList = new List<Mst_Menu>();
-	private Mst_Menu menu = new();
+	private List<Mst_Menu_New> MenuList = new List<Mst_Menu_New>();
+	private List<Mst_Menu_New> MainMenuList = new List<Mst_Menu_New>();
+	private Mst_Menu_New menu = new();
 	private string? MenuSortOrder;
 	private int DeleteMid { get; set; }
 	private bool ShowConfirmDialog { get; set; }
@@ -206,11 +207,11 @@
 		await pagination.SetCurrentPageIndexAsync(pageIndex);
 	}
 
-	private async ValueTask<GridItemsProviderResult<Mst_Menu>> LoadData(GridItemsProviderRequest<Mst_Menu> request)
+	private async ValueTask<GridItemsProviderResult<Mst_Menu_New>> LoadData(GridItemsProviderRequest<Mst_Menu_New> request)
 	{
 		// Get IQueryable from your source
 		if (MenuList == null || !MenuList.Any())
-			return GridItemsProviderResult.From(Array.Empty<Mst_Menu>(), 0);
+			return GridItemsProviderResult.From(Array.Empty<Mst_Menu_New>(), 0);
 
 		var query = MenuList.AsQueryable();
 
@@ -223,17 +224,17 @@
 
 	}
 
-	private void checksortorder(string stringnumber)
-	{
-		if (int.TryParse(stringnumber, out int number))
-		{
-			menu.SortOrder = number;
-		}
-		else
-		{
-			MenuSortOrder = "";
-		}
-	}
+	//private void checksortorder(string stringnumber)
+	//{
+	//	if (int.TryParse(stringnumber, out int number))
+	//	{
+	//		menu.SortOrder = number;
+	//	}
+	//	else
+	//	{
+	//		MenuSortOrder = "";
+	//	}
+	//}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -247,7 +248,7 @@
 	private async Task GetMainMenuList()
 	{
 		using var Db = DbFactory.CreateDbContext();
-		var menulist = await Db.Mst_Menu.Where(m => m.DeletedBy == null && (m.PMID == null || m.PMID == 0)).ToListAsync();
+		var menulist = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && (m.PMID == null || m.PMID == 0)).ToListAsync();
 		if (menulist.Count > 0)
 		{
 			MainMenuList = menulist;
@@ -257,7 +258,7 @@
 	private async Task LoadMenuList()
 	{
 		using var Db = DbFactory.CreateDbContext();
-		MenuList = await Db.Mst_Menu.Where(m => m.DeletedBy == null).OrderBy(m => m.MID).ToListAsync();
+		MenuList = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null).OrderBy(m => m.MID).ToListAsync();
 		StateHasChanged();
 	}
 
@@ -286,7 +287,7 @@
 	private async Task DeleteMenu(int MId)
 	{
 		using var Db = DbFactory.CreateDbContext();
-		var existmenu = await Db.Mst_Menu.Where(m => m.DeletedBy == null && m.MID == MId).FirstOrDefaultAsync();
+		var existmenu = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && m.MID == MId).FirstOrDefaultAsync();
 		if (existmenu == null){ ToastService.ShowToast("No Menu found!", "warning", "Warning"); await LoadMenuList(); await GetMainMenuList(); return; }
 
 		existmenu.DeletedBy = 1;
@@ -295,5 +296,14 @@
 		ToastService.ShowToast("Menu Deleted successfully!", "success", "Success");
 		await LoadMenuList(); 
 		await GetMainMenuList();
+	}
+
+	private async Task GetMenuDetail(int Mid)
+	{
+        using var Db = DbFactory.CreateDbContext();
+        var menudetail = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && m.MID == Mid).FirstOrDefaultAsync();
+		if (menudetail == null) { ToastService.ShowToast("No Menu found!", "warning", "Warning"); await LoadMenuList(); await GetMainMenuList(); return; }
+
+        menu = menudetail;
 	}
 }
