@@ -28,7 +28,7 @@
 						<h3>Create Menu</h3>
 					</div>
 					<div class="card-body">
-						<EditForm Model="menu">
+						<EditForm Model="menu" OnValidSubmit="SaveMenu">
 							<FluentValidationValidator />
 							<div class="form-group">
 								<label>Menu Name</label>
@@ -43,11 +43,13 @@
 							<div class="form-group">
 								<label>Menu Description</label>
 								<InputText class="form-control" placeholder="Menu Description" @bind-Value="menu.MenuDesc"></InputText>
+								<ValidationMessage For="@(() => menu.MenuDesc)" />
 							</div>
 							<div class="form-group">
 								<label>Menu Sort Order</label>
 								@* <InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText> *@
-								<InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder"></InputText>
+								<InputNumber @bind-Value="menu.SortOrder" class="form-control" placeholder="Menu Sort Order" />
+								<ValidationMessage For="@(() => menu.SortOrder)" />
 							</div>
 							<div class="form-group">
 								<div class="form-check">
@@ -58,7 +60,7 @@
 							@if (IsSubmenu)
 							{
 								<div class="form-group">
-									<label>Department</label>
+									<label>Select Parent Menu</label>
 									<InputSelect @bind-Value="menu.PMID" class="form-control">
 										<option value="">-- Select Menu --</option>
 										@foreach (var menu in MainMenuList)
@@ -70,12 +72,12 @@
 								</div>
 							}
 							<div class="row">
-								<div class="col-md-2">
+								 <div class="col-md-12">
 									<button type="submit" class="btn btn-primary">Save</button>
-								</div>
-								<div class="col-md-2">
 									<button type="button" class="btn btn-secondary" @onclick="@(() => Clear())">Clear</button>
 								</div>
+								@*<div class="col-md-2">
+								</div> *@
 							</div>
 
 						</EditForm>
@@ -99,7 +101,7 @@
 							<PropertyColumn Property="@(e => e.MenuUrl)" Title="Menu Url" Sortable="true" />
 
 							<TemplateColumn Title="Action">
-								<a class="btn btn-sm btn-primary">
+								<a class="btn btn-sm btn-primary" @onclick="() => GetMenuDetail(context.MID)">
 									<i class="fa-solid fa-pen"></i>
 								</a>
 								<a class="btn btn-sm btn-danger" @onclick="() => AskDelete(context.MID)">
@@ -224,18 +226,6 @@
 
 	}
 
-	//private void checksortorder(string stringnumber)
-	//{
-	//	if (int.TryParse(stringnumber, out int number))
-	//	{
-	//		menu.SortOrder = number;
-	//	}
-	//	else
-	//	{
-	//		MenuSortOrder = "";
-	//	}
-	//}
-
 	protected override async Task OnInitializedAsync()
 	{
 		await Task.Delay(500);
@@ -300,10 +290,53 @@
 
 	private async Task GetMenuDetail(int Mid)
 	{
-        using var Db = DbFactory.CreateDbContext();
-        var menudetail = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && m.MID == Mid).FirstOrDefaultAsync();
-		if (menudetail == null) { ToastService.ShowToast("No Menu found!", "warning", "Warning"); await LoadMenuList(); await GetMainMenuList(); return; }
+		using var Db = DbFactory.CreateDbContext();
+		var menudetail = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && m.MID == Mid).FirstOrDefaultAsync();
+		if (menudetail == null) { ToastService.ShowToast("No Menu found!", "warning", "Warning"); await LoadMenuList(); await GetMainMenuList();  return; }
+		IsSubmenu = menudetail.PMID != null ? true : false;
+		menu = menudetail;
+	}
 
-        menu = menudetail;
+	private async Task SaveMenu()
+	{
+		using var Db = DbFactory.CreateDbContext();
+		if (menu.MID == 0)
+		{
+			Mst_Menu_New mst_Menu_New = new Mst_Menu_New
+			{
+				MenuName = menu.MenuName,
+				MenuUrl = menu.MenuUrl,
+				MenuDesc = menu.MenuDesc,
+				MainMenu = menu.MenuName?.Replace(" ", "").ToLower(),
+				SortOrder = menu.SortOrder,
+				PMID = IsSubmenu ? menu.PMID : null,
+				CreatedBy = 1,
+				CreatedOn = DateTime.Now
+            };
+			Db.Mst_Menu_New.Add(mst_Menu_New);
+			await Db.SaveChangesAsync();
+			ToastService.ShowToast("Menu Saved Successfully", "success", "Success");
+			await LoadMenuList();
+			await GetMainMenuList();
+			Clear();
+		}
+		else
+		{
+			var existmenu = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && m.MID == menu.MID).FirstOrDefaultAsync();
+			if (existmenu == null) { ToastService.ShowToast("No Menu found!", "warning", "Warning"); await LoadMenuList(); await GetMainMenuList(); return; }
+			existmenu.MenuName = menu.MenuName;
+			existmenu.MenuUrl = menu.MenuUrl;
+			existmenu.MenuDesc = menu.MenuDesc;
+			existmenu.MainMenu = menu.MenuName?.Replace(" ", "").ToLower();
+			existmenu.SortOrder = menu.SortOrder;
+			existmenu.PMID = IsSubmenu ? menu.PMID : null;
+			existmenu.UpdatedBy = 1;
+			existmenu.UpdatedOn = DateTime.Now;
+			await Db.SaveChangesAsync();
+			ToastService.ShowToast("Menu Updated Successfully", "success", "Success");
+            await LoadMenuList();
+			await GetMainMenuList();
+			Clear();
+		}
 	}
 }

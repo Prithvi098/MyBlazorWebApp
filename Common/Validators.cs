@@ -55,7 +55,7 @@ namespace MyBlazorApp.Common
             }
         }
 
-        public class MenuValidator : AbstractValidator<Mst_Menu>
+        public class MenuValidator : AbstractValidator<Mst_Menu_New>
         {
             public MenuValidator()
             {
@@ -65,8 +65,13 @@ namespace MyBlazorApp.Common
                 RuleFor(e => e.MenuUrl)
                     .NotEmpty().WithMessage("Menu url is required");
 
-                RuleFor(e => e.SortOrder)
-                    .NotEmpty().WithMessage("Sort order is required");
+                RuleFor(e => e.MenuDesc)
+                    .NotEmpty().WithMessage("Menu Description is required");
+
+                RuleFor(m => m.SortOrder)
+                    .Cascade(CascadeMode.Stop)
+                    .NotNull().WithMessage("Sort Order is required.")
+                    .GreaterThan(0).WithMessage("Sort Order must be greater than 0.");
             }
         }
     }
