@@ -1,4 +1,7 @@
-﻿<nav class="main-header navbar navbar-expand-md navbar-light border-0">
+﻿@inject MenuService MenuService
+@rendermode InteractiveServer
+
+<nav class="main-header navbar navbar-expand-md navbar-light border-0">
     <div class="container-fluid">
         <a href="/home" class="navbar-brand">
             <span style="font-size:medium;font-weight:900">EMS</span>
@@ -39,3 +42,76 @@
         </div>
     </div>
 </nav>
+
+@* <nav class="main-header navbar navbar-expand-md navbar-light border-0">
+    <div class="container-fluid">
+        <a href="/Home/Index" class="navbar-brand">
+            <img src="images/logo.svg" alt="Main Logo" class="img-fluid" />
+        </a>
+
+        <button class="navbar-toggler order-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+            <ul class="navbar-nav">
+                @foreach (var main in Menus)
+                {
+                    <li class="nav-item dropdown">
+                        <a href="@main.MenuUrl" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            @main.MenuName
+                        </a>
+
+                        @if (main.SubMenus?.Any() == true)
+                        {
+                            <ul class="dropdown-menu border-0 shadow">
+                                @foreach (var sub in main.SubMenus)
+                                {
+                                    if (sub.SubMenus?.Any() == true)
+                                    {
+                                        <li class="dropdown-submenu dropdown-hover">
+                                            <a href="@sub.MenuUrl" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">@sub.MenuName</a>
+                                            <ul class="dropdown-menu border-0 shadow">
+                                                @foreach (var child in sub.SubMenus)
+                                                {
+                                                    <li><a href="@child.MenuUrl" class="dropdown-item">@child.MenuName</a></li>
+                                                }
+                                            </ul>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li><a href="@sub.MenuUrl" class="dropdown-item">@sub.MenuName</a></li>
+                                    }
+                                }
+                            </ul>
+                        }
+                    </li>
+                }
+            </ul>
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        @UserFullName
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/Account/Logout">Sign out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav> *@
+
+@code {
+    private List<MenuModel> Menus = new();
+    private string UserFullName = "User";
+
+    protected override void OnInitialized()
+    {
+        int userId = 1; // Replace with actual session/user
+        Menus = MenuService.GetUserMenus(userId, 0);
+        UserFullName = "John Doe"; // Example
+    }
+}
