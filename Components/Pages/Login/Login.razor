@@ -1,6 +1,9 @@
 ﻿@page "/"
+@using static MyBlazorApp.Models.LoginModel
 @layout LoginLayout
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject HttpClient Http
 @rendermode InteractiveServer
 
 <h3 class="login-title">Welcome Back</h3>
@@ -34,6 +37,39 @@
     {
         // Pass the login model directly to JS
         await JS.InvokeVoidAsync("submitLoginForm", loginModel);
+
+        /*try
+        {
+            var formData = new MultipartFormDataContent
+            {
+                { new StringContent(loginModel.Username), "username" },
+                { new StringContent(loginModel.Password), "password" }
+            };
+
+            var response = await Http.PostAsync("/api/login/userlogin", formData);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                errorMessage = "Invalid username or password";
+                return;
+            }
+
+            var json = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+            if (json != null)
+            {
+                // ✅ Store JWT in localStorage
+                await JS.InvokeVoidAsync("localStorage.setItem", "auth_token", json.token);
+
+                // Redirect to home
+                Navigation.NavigateTo("/home", forceLoad: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Something went wrong: " + ex.Message;
+        }*/
     }
 
     protected override void OnInitialized()

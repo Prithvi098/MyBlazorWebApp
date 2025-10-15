@@ -1,19 +1,22 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MyBlazorApp.Common;
 using MyBlazorApp.Components;
 using MyBlazorApp.Data;
 using MyBlazorApp.Models;
 using System.Net;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddValidatorsFromAssemblyContaining<Validators>();
+builder.Services.AddValidatorsFromAssemblyContaining<MyBlazorApp.Common.Validators>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -78,11 +81,38 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
     });
 
+// JWT Configuration
+/*var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});*/
+
 builder.Services.AddAuthorization();
 
 /*builder.Services.AddScoped<ModalServices>();*/
 
 builder.Services.AddSingleton<ToastService>();
+builder.Services.AddScoped<MenuService>();
+builder.Services.AddScoped<DataContext>();
 
 builder.Services.AddScoped<Helper>();
 

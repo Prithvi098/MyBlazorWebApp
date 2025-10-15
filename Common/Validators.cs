@@ -74,5 +74,15 @@ namespace MyBlazorApp.Common
                     .GreaterThan(0).WithMessage("Sort Order must be greater than 0.");
             }
         }
+
+        public class RoleValidator : AbstractValidator<Mst_Role>
+        {
+            public RoleValidator()
+            {
+                RuleFor(e => e.RoleName)
+                    .NotEmpty().WithMessage("Role Name is required");
+
+            }
+        }
     }
 }

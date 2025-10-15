@@ -1,0 +1,192 @@
+﻿@page "/role"
+@attribute [Authorize]
+@layout MainLayout
+@inject IDbContextFactory<EMSContext> DbFactory
+@inject ToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Roles</PageTitle>
+
+<section class="content">
+	<div class="content-header">
+		<div class="container-fluid p-0">
+			<div class="row">
+				<div class="col-6 col-lg-6">
+					<div class="main-title">
+					</div>
+				</div>
+				<div class="col-6 col-lg-6">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container-fluid p-0">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-header">
+						<h3>Create Role</h3>
+					</div>
+					<div class="card-body">
+						<EditForm Model="roles" OnValidSubmit="SaveRole">
+							<FluentValidationValidator />
+							<div class="form-group">
+								<label>Role Name</label>
+								<InputText class="form-control" placeholder="Role Name" @bind-Value="roles.RoleName"></InputText>
+								<ValidationMessage For="@(() => roles.RoleName)" />
+							</div>
+							<div class="row">
+								<div class="col-md-12">
+									<button type="submit" class="btn btn-primary">Save</button>
+									<button type="button" class="btn btn-secondary" @onclick="@(() => Clear())">Clear</button>
+								</div>
+							</div>
+
+						</EditForm>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-8">
+				<div class="card">
+					<div class="card-header">
+						<h3>Roles List</h3>
+					</div>
+					<div class="card-body table-responsive">
+						@if (RolesList == null)
+						{
+							<p><em>Loading...</em></p>
+						}
+						else
+						{
+							<table class="table table-bordered border-3 border-black">
+								<thead>
+									<tr>
+										<th>RoleId</th>
+										<th>Role Name</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var role in RolesList)
+									{
+										<tr>
+											<td>@role.RoleID</td>
+											<td>@role.RoleName</td>
+											<td>
+												<a class="btn btn-sm btn-primary" @onclick="() => GetRoleDetail(role.RoleID)"><i class="fa-solid fa-pen"></i></a>
+												<a class="btn btn-sm btn-danger" @onclick="() => AskDelete(role.RoleID)"><i class="fa-solid fa-trash"></i></a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</section>
+
+<ConfirmationModal Show="@ShowConfirmDialog"
+				   Title="Delete Role"
+				   Message="Are you sure you want to delete this Role?"
+				   ConfirmationChanged="OnDeleteConfirmation" />
+
+@code {
+	private List<Mst_Role> RolesList = new List<Mst_Role>();
+	private Mst_Role roles = new();
+	private int DeleteRoleId { get; set; }
+	private bool ShowConfirmDialog { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Delay(500);
+		await GetRoleList();
+	}
+
+	private async Task GetRoleList()
+	{
+		using var Db = DbFactory.CreateDbContext();
+		var roleslist = await Db.Mst_Role.Where(r => r.DeletedBy == null).ToListAsync();
+		if (roleslist.Count > 0)
+		{
+			RolesList = roleslist;
+		}
+    }
+
+	private void Clear()
+	{
+		roles = new();
+	}
+
+	private void AskDelete(int RoleId)
+	{
+		DeleteRoleId = RoleId;
+		ShowConfirmDialog = true;
+	}
+
+	private async Task OnDeleteConfirmation(bool confirmed)
+	{
+		ShowConfirmDialog = false;
+		if (confirmed)
+		{
+			await DeleteRole(DeleteRoleId);
+		}
+	}
+
+	private async Task DeleteRole(int RoleId)
+	{
+		using var Db = DbFactory.CreateDbContext();
+		var exisrole = await Db.Mst_Role.Where(m => m.DeletedBy == null && m.RoleID == RoleId).FirstOrDefaultAsync();
+		if (exisrole == null) { ToastService.ShowToast("No Role found!", "warning", "Warning"); await GetRoleList(); return; }
+
+		exisrole.DeletedBy = 1;
+		exisrole.DeletedOn = DateTime.Now;
+		await Db.SaveChangesAsync();
+		ToastService.ShowToast("Menu Deleted successfully!", "success", "Success");
+		await GetRoleList();
+	}
+
+	private async Task GetRoleDetail(int RoleId)
+	{
+		using var Db = DbFactory.CreateDbContext();
+		var roledetail = await Db.Mst_Role.Where(m => m.DeletedBy == null && m.RoleID == RoleId).FirstOrDefaultAsync();
+		if (roledetail == null) { ToastService.ShowToast("No Role found!", "warning", "Warning"); await GetRoleList(); return; }
+		roles = roledetail;
+	}
+
+	private async Task SaveRole()
+	{
+		using var Db = DbFactory.CreateDbContext();
+		if (roles.RoleID == 0)
+		{
+			Mst_Role mst_Roles = new Mst_Role
+			{
+				RoleName = roles.RoleName,
+				CreatedBy = 1,
+				CreatedOn = DateTime.Now
+			};
+			Db.Mst_Role.Add(mst_Roles);
+			await Db.SaveChangesAsync();
+			StateHasChanged();
+			ToastService.ShowToast("Role Saved Successfully", "success", "Success");
+			await GetRoleList();
+			Clear();
+		}
+		else
+		{
+			var existrole = await Db.Mst_Role.Where(m => m.DeletedBy == null && m.RoleID == roles.RoleID).FirstOrDefaultAsync();
+			if (existrole == null) { ToastService.ShowToast("No Role found!", "warning", "Warning"); await GetRoleList(); return; }
+			existrole.RoleName = roles.RoleName;
+			existrole.UpdatedBy = 1;
+			existrole.UpdatedOn = DateTime.Now;
+			await Db.SaveChangesAsync();
+			StateHasChanged();
+			ToastService.ShowToast("Role Updated Successfully", "success", "Success");
+			await GetRoleList();
+			Clear();
+		}
+	}
+}

@@ -309,12 +309,13 @@
 				MenuDesc = menu.MenuDesc,
 				MainMenu = menu.MenuName?.Replace(" ", "").ToLower(),
 				SortOrder = menu.SortOrder,
-				PMID = IsSubmenu ? menu.PMID : null,
+				PMID = IsSubmenu ? menu.PMID : 0,
 				CreatedBy = 1,
 				CreatedOn = DateTime.Now
             };
 			Db.Mst_Menu_New.Add(mst_Menu_New);
 			await Db.SaveChangesAsync();
+            StateHasChanged();
 			ToastService.ShowToast("Menu Saved Successfully", "success", "Success");
 			await LoadMenuList();
 			await GetMainMenuList();
@@ -329,10 +330,11 @@
 			existmenu.MenuDesc = menu.MenuDesc;
 			existmenu.MainMenu = menu.MenuName?.Replace(" ", "").ToLower();
 			existmenu.SortOrder = menu.SortOrder;
-			existmenu.PMID = IsSubmenu ? menu.PMID : null;
+			existmenu.PMID = IsSubmenu ? menu.PMID : 0;
 			existmenu.UpdatedBy = 1;
 			existmenu.UpdatedOn = DateTime.Now;
 			await Db.SaveChangesAsync();
+            StateHasChanged();
 			ToastService.ShowToast("Menu Updated Successfully", "success", "Success");
             await LoadMenuList();
 			await GetMainMenuList();
