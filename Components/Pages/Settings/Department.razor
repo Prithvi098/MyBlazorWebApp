@@ -255,6 +255,7 @@
             existDept.IsActive = newDepartment.IsActive;
             existDept.UpdatedBy = 1;
             existDept.UpdatedOn = DateTime.Now;
+            await ShowModalMessage("Department updated successfully!", "success");
         }
 
     }

@@ -8,6 +8,7 @@
         public string? MenuUrl { get; set; }
         public string? MenuDesc { get; set; }
         public int SortOrder { get; set; }
+        public bool IsChecked { get; set; } = false;
 
         public List<MenuModel> SubMenus { get; set; } = new();
     }

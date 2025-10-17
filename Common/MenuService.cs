@@ -88,5 +88,52 @@ namespace MyBlazorApp.Common
                 throw;
             }
         }
+
+        public async Task<List<MenuModel>> GetMenuTreeAsync()
+        {
+            SqlParameter[] AllParameter = { };
+            DataSet ds = _datacontext.DSExcecuteSP("Usp_Get_MenuTree_new", AllParameter);
+
+            List<MenuModel> parentMenus = new();
+
+            if (ds != null && ds.Tables.Count >= 2)
+            {
+                // Parent Menus
+                parentMenus = ds.Tables[0].AsEnumerable().Select(r => new MenuModel
+                {
+                    MID = r.Field<int>("MID"),
+                    PMID = r.Field<int?>("PMID"),
+                    MenuName = r.Field<string>("MenuName"),
+                    //MenuUrl = r.Field<string>("MenuUrl"),
+                    MenuDesc = r.Field<string>("MenuDesc"),
+                    SortOrder = r.Field<int>("SortOrder"),
+                    SubMenus = new List<MenuModel>()
+                }).ToList();
+
+                if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
+                {
+                    var subMenus = ds.Tables[1].AsEnumerable().Select(r => new MenuModel
+                    {
+                        MID = r.Field<int>("MID"),
+                        PMID = r.Field<int?>("PMID"),
+                        MenuName = r.Field<string>("MenuName"),
+                        //MenuUrl = r.Field<string>("MenuUrl"),
+                        MenuDesc = r.Field<string>("MenuDesc"),
+                        SortOrder = r.Field<int>("SortOrder")
+                    }).ToList();
+
+                    // --- Attach Submenus to Main Menus ---
+                    foreach (var main in parentMenus)
+                    {
+                        main.SubMenus = subMenus
+                            .Where(x => x.PMID == main.MID)
+                            .OrderBy(x => x.SortOrder)
+                            .ToList();
+                    }
+                }
+            }
+
+            return parentMenus.OrderBy(p => p.SortOrder).ToList();
+        }
     }
 }

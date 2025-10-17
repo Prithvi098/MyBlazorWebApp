@@ -35,9 +35,9 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body table-responsive">
-                        @if (employeelist == null)
+                        @if (employeelist.Count == 0)
                         {
-                            <p><em>Loading...</em></p>
+                            <Loader />
                         }
                         else
                         {
