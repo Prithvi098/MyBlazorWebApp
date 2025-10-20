@@ -17,7 +17,7 @@ namespace MyBlazorApp.Data
         public virtual DbSet<Mst_Right> Mst_Right { get; set; }
         public virtual DbSet<Mst_UserRights> Mst_UserRight { get; set; }
         public virtual DbSet<Mst_Role> Mst_Role { get; set; }
-        public virtual DbSet<Mst_RolePermission> Mst_RolePermission { get; set; }
+        public virtual DbSet<Mst_RolePermission_New> Mst_RolePermission_New { get; set; }
 
     }
 }

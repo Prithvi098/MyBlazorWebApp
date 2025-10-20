@@ -11,74 +11,129 @@
 <section class="content inner-tbl pt-5 pb-3">
    <div class="container-fluid p-0">
         <div class="row">
-            <div class=" col-12 col-lg-7">
+            <div class=" col-12 col-lg-6">
+                <div class="card">
+                    <EditForm Model="rolePermission" OnValidSubmit="SaveRolePermissions">
+                        <FluentValidationValidator />
+
+                        <div class="content-header">
+                            <div class="container-fluid">
+                                <div class="row align-items-center">
+                                    <div class="col-12 col-md-6 col-lg-6">
+                                        <div class="main-title text-center text-md-left text-lg-left">
+                                            <h2>Role Permission</h2>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
+                                        <button type="button" class="btn btn-secondary">Clear</button>
+                                        <button type="submit" class="btn btn-primary">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row justify-content-center">
+                                <div class="col-4">
+                                    <div class="input-group cus-select">
+                                        <select class="form-control" id="DdlAllRole" name="DdlAllRole" @bind="@rolePermission.RoleID">
+                                            <option value="">-- Select Role --</option>
+                                            @foreach (var role in Roleslist)
+                                            {
+                                                <option value="@role.RoleID">@role.RoleName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <ValidationMessage For="@(() => rolePermission.RoleID)" />
+                                </div>
+                            </div>
+
+                            <ValidationMessage For="@(() => rolePermission.MenuId)" />
+                            <div class="row custom-multi-chkbox" id="menuTree">
+                                @if (menuModels.Count == 0)
+                                {
+                                   
+                                }
+                                else
+                                {
+                                    <div class="row">
+                                        @foreach (var parent in menuModels)
+                                        {
+                                            <div class="col-md-12 mb-3 p-1">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" checked="@parent.IsChecked" id="menu_@parent.MID" @onchange="(e) => AddMainMenu(parent, (bool)e.Value!)" />
+                                                    <label class="form-check-label fw-bold" for="menu_@parent.MID">@parent.MenuName</label>
+                                                </div>
+
+                                                @if (parent.SubMenus?.Count > 0)
+                                                {
+                                                    <div class="ms-4">
+                                                        @foreach (var child in parent.SubMenus)
+                                                        {
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" checked="@child.IsChecked" id="submenu_@child.MID" @onchange="(e) => AddSubMenu(child, parent, (bool)e.Value!)" />
+                                                                <label class="form-check-label" for="submenu_@child.MID">@child.MenuName</label>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </EditForm>
+                    
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
                 <div class="card">
                     <div class="content-header">
                         <div class="container-fluid">
                             <div class="row align-items-center">
                                 <div class="col-12 col-md-6 col-lg-6">
                                     <div class="main-title text-center text-md-left text-lg-left">
-                                        <h2>Role Permission</h2>
+                                        <h2>Role Permission List</h2>
                                     </div>
                                 </div>
-
-                                <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
-                                    <a href="#!" class="btn btn-secondary" id="btnClear" type="button">Clear</a>
-                                    <a href="#!" class="btn btn-primary ml-2" id="btnSaveRoleMapping" type="button">Save</a>
-                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row justify-content-center">
-                            <div class="col-4">
-                                <div class="input-group cus-select mb-4">
-                                    <select class="form-control" id="DdlAllRole" name="DdlAllRole">
-                                        <option value="">-- Select Role --</option>
-                                        @foreach (var role in Roleslist)
-                                        {
-                                            <option value="@role.RoleID">@role.RoleName</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row custom-multi-chkbox" id="menuTree">
-                            @if (menuModels.Count == 0)
-                            {
-                                <Loader />
-                            }
-                            else
-                            {
-                                <div class="row">
-                                    @foreach (var parent in menuModels)
+                    <div class="card-body table-responsive">
+                        @if (rolePermissionLists.Count == 0)
+                        {
+                           
+                        }
+                        else
+                        {
+                            <table class="table table-bordered border-3 border-black">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Role Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for(var i = 0; i < rolePermissionLists.Count; i++)
                                     {
-                                        <div class="col-md-12 mb-3 border rounded p-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" @bind="parent.IsChecked" id="menu_@parent.MID" />
-                                                <label class="form-check-label fw-bold" for="menu_@parent.MID">@parent.MenuName</label>
-                                            </div>
-
-                                            @if (parent.SubMenus != null && parent.SubMenus.Count > 0)
-                                            {
-                                                <div class="ms-4 mt-2">
-                                                    @foreach (var child in parent.SubMenus)
-                                                    {
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" @bind="child.IsChecked" id="submenu_@child.MID" />
-                                                            <label class="form-check-label" for="submenu_@child.MID">@child.MenuName</label>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
+                                        var role = rolePermissionLists[i];
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>@role.RoleName</td>
+                                            <td>
+                                                <a class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i></a>
+                                                <a class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></a>
+                                            </td>
+                                        </tr>
                                     }
-                                </div>
-                            }
-                        </div>
+                                </tbody>
+                            </table>
+                        }
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -87,7 +142,8 @@
 @code {
     private List<Mst_Role> Roleslist = new();
     private List<MenuModel> menuModels = new();
-
+    private List<RolePermissionList> rolePermissionLists = new();
+    private Mst_RolePermission_New rolePermission = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,5 +155,45 @@
     public async Task GetMenuTree()
     {
         menuModels = await MenuService.GetMenuTreeAsync();
+    }
+
+    private class RolePermissionList
+    {
+        public int PerId { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+    }
+
+    private void AddMainMenu(MenuModel mainMenu, bool isChecked)
+    {
+        mainMenu.IsChecked = isChecked;
+        rolePermission.MenuId = isChecked ? (rolePermission.MenuId != null && rolePermission.MenuId != "" ? rolePermission.MenuId : "") + mainMenu.MID.ToString() + "," : rolePermission.MenuId.Replace(mainMenu.MID.ToString() + ",", "");
+        foreach (var sub in mainMenu.SubMenus)
+        {
+            rolePermission.MenuId = isChecked ? (rolePermission.MenuId != null && rolePermission.MenuId != "" ? rolePermission.MenuId : "") + sub.MID.ToString() + "," : rolePermission.MenuId.Replace(sub.MID.ToString() + ",", "");
+            sub.IsChecked = isChecked;
+        }
+    }
+
+    private void AddSubMenu(MenuModel subMenu, MenuModel parentMenu, bool isChecked)
+    {
+        subMenu.IsChecked = isChecked;
+        rolePermission.MenuId = isChecked ? (rolePermission.MenuId != null && rolePermission.MenuId != "" ? rolePermission.MenuId : "") + subMenu.MID.ToString() + "," : rolePermission.MenuId.Replace(subMenu.MID.ToString() + ",", "");
+        //auto-uncheck parent if all children are unchecked
+        parentMenu.IsChecked = !parentMenu.SubMenus.Any(s => s.IsChecked) ? false : true;
+    }
+
+    private async Task SaveRolePermissions()
+    {
+        using var Db = await DbFactory.CreateDbContextAsync();
+        if (rolePermission.PerID == 0)
+        {
+            rolePermission.CreatedBy = 1;
+            rolePermission.CreatedOn = DateTime.Now;
+            Db.Mst_RolePermission_New.Add(rolePermission);
+            await Db.SaveChangesAsync();
+            StateHasChanged();
+            ToastService.ShowToast("Role Permission Saved Successfully", "success", "Success");
+        }
+
     }
 }

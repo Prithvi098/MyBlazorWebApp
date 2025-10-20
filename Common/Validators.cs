@@ -84,5 +84,18 @@ namespace MyBlazorApp.Common
 
             }
         }
+
+        public class RolePermissionValidator : AbstractValidator<Mst_RolePermission_New>
+        {
+            public RolePermissionValidator()
+            {
+                RuleFor(e => e.RoleID)
+                    .NotEmpty().WithMessage("Please select a Role");
+
+                RuleFor(e => e.MenuId)
+                    .NotEmpty().WithMessage("Please select at least one Menu");
+
+            }
+        }
     }
 }
