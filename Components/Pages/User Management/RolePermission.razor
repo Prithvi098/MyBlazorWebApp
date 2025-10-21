@@ -52,7 +52,7 @@
                             <div class="row custom-multi-chkbox" id="menuTree">
                                 @if (menuModels.Count == 0)
                                 {
-                                   
+                                   <Loader />
                                 }
                                 else
                                 {
@@ -103,7 +103,7 @@
                     <div class="card-body table-responsive">
                         @if (rolePermissionLists.Count == 0)
                         {
-                           
+                            @* <Loader /> *@
                         }
                         else
                         {
@@ -147,14 +147,41 @@
 
     protected override async Task OnInitializedAsync()
     {
+		await GetRoleList();
+        await GetMenuTree();
+    }
+
+    private async Task GetRoleList()
+    {
         using var dbContext = await DbFactory.CreateDbContextAsync();
         Roleslist = await dbContext.Mst_Role.Where(r => r.DeletedBy == null).ToListAsync();
-        await GetMenuTree();
     }
 
     public async Task GetMenuTree()
     {
         menuModels = await MenuService.GetMenuTreeAsync();
+    }
+
+    public async Task LoadRolePermissions()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        rolePermissionLists = await dbContext.Mst_RolePermission_New
+            .Where(rp => rp.DeletedBy == null)
+            .Join(dbContext.Mst_Role.Where(r => r.DeletedBy == null),
+                  rp => rp.RoleID,
+                  r => r.RoleID,
+                  (rp, r) => new RolePermissionList
+                  {
+                      PerId = rp.PerID,
+                      RoleName = r.RoleName
+                  })
+            .ToListAsync();
+    }
+
+    private async Task Clear()
+    {
+        await GetRoleList();
+        await GetMenuTree();
     }
 
     private class RolePermissionList
@@ -194,6 +221,18 @@
             StateHasChanged();
             ToastService.ShowToast("Role Permission Saved Successfully", "success", "Success");
         }
+        else
+        {
+            var existingPermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.PerID == rolePermission.PerID).FirstOrDefaultAsync();
+            if (existingPermission == null) { ToastService.ShowToast("Role Permission not found", "success", "Success"); return; }
 
+			existingPermission.RoleID = rolePermission.RoleID;
+			existingPermission.MenuId = rolePermission.MenuId;
+			existingPermission.UpdatedBy = 1;
+            existingPermission.UpdatedOn = DateTime.Now;
+            await Db.SaveChangesAsync();
+            StateHasChanged();
+			ToastService.ShowToast("Role Permission Updated Successfully", "success", "Success");
+        }
     }
 }
