@@ -429,10 +429,10 @@ input:checked + .slider .off {
 
 /* ---------------- Login ---------------*/
 .authentication-wrapper {
-    display: flex;
+    /*display: flex;
     flex-basis: 100%;
-    min-height: 100vh;
-    width: 100%;
+    min-height: 100vh;*/
+    width: 500px;
 }
 
 .authentication-inner {

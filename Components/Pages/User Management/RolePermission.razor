@@ -26,7 +26,7 @@
                                     </div>
 
                                     <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
-                                        <button type="button" class="btn btn-secondary">Clear</button>
+                                        <button type="button" class="btn btn-secondary" @onclick="() => Clear()">Clear</button>
                                         <button type="submit" class="btn btn-primary">Save</button>
                                     </div>
                                 </div>
@@ -37,7 +37,7 @@
                                 <div class="col-4">
                                     <div class="input-group cus-select">
                                         <select class="form-control" id="DdlAllRole" name="DdlAllRole" @bind="@rolePermission.RoleID">
-                                            <option value="">-- Select Role --</option>
+                                            <option value="0">-- Select Role --</option>
                                             @foreach (var role in Roleslist)
                                             {
                                                 <option value="@role.RoleID">@role.RoleName</option>
@@ -147,8 +147,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-		await GetRoleList();
+        await GetRoleList();
         await GetMenuTree();
+        await LoadRolePermissions();
     }
 
     private async Task GetRoleList()
@@ -182,6 +183,7 @@
     {
         await GetRoleList();
         await GetMenuTree();
+        rolePermission = new();
     }
 
     private class RolePermissionList
@@ -209,6 +211,25 @@
         parentMenu.IsChecked = !parentMenu.SubMenus.Any(s => s.IsChecked) ? false : true;
     }
 
+    private async Task DeleteRolePermission(int PerId)
+    {
+        using var Db = await DbFactory.CreateDbContextAsync();
+        var rolepermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.PerID == PerId).FirstOrDefaultAsync();
+        if (rolepermission == null) { ToastService.ShowToast("Role Permission not found", "success", "Success"); return; }
+
+        rolepermission.DeletedBy = 1;
+        rolepermission.DeletedOn = DateTime.Now;
+        await Db.SaveChangesAsync();
+        await LoadRolePermissions();
+        StateHasChanged();
+        ToastService.ShowToast("Role Permission Deleted Successfully", "success", "Success");
+    }
+
+    public async Task GetRolePermissionDetails()
+    {
+        
+    }
+
     private async Task SaveRolePermissions()
     {
         using var Db = await DbFactory.CreateDbContextAsync();
@@ -219,6 +240,8 @@
             Db.Mst_RolePermission_New.Add(rolePermission);
             await Db.SaveChangesAsync();
             StateHasChanged();
+            await LoadRolePermissions();
+            await Clear();
             ToastService.ShowToast("Role Permission Saved Successfully", "success", "Success");
         }
         else
@@ -232,6 +255,8 @@
             existingPermission.UpdatedOn = DateTime.Now;
             await Db.SaveChangesAsync();
             StateHasChanged();
+            await LoadRolePermissions();
+            await Clear();
 			ToastService.ShowToast("Role Permission Updated Successfully", "success", "Success");
         }
     }

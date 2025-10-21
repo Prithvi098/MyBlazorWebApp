@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<style>
+@* <style>
     .minimal-container {
         display: flex;
         justify-content: center;
@@ -44,20 +44,16 @@
             background-color: #005a9e;
         }
 
-</style>
+</style> *@
 
-<div class="page">
-    @* <div class="sidebar">
-        <NavMenu />
-    </div> *@
-
-    <main>
-        <div class="minimal-container">
-            <div class="login-card">
+<div class="login-page">
+    <div class="authentication-wrapper">
+        <main>
+            <div class="row authentication-inner">
                 @Body
             </div>
-
-        </div>
-    </main>
+        </main>
+    </div>
 </div>
+
 

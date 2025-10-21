@@ -150,7 +150,10 @@
         using var db = DbFactory.CreateDbContext();
         if (employee.Emp_id == 0)
         {
-
+            var lastemp = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_code != null && e.Emp_code != "" && e.Emp_code.StartsWith("TVSSL")).OrderByDescending(e => e.Emp_id).FirstOrDefault();
+            var laempcode = lastemp == null ? "TVSSL-001" : lastemp.Emp_code;
+            var lastcodenumber = int.Parse(laempcode.Split('-')[1]);
+            employee.Emp_code = "TVSSL-" + (lastcodenumber + 1).ToString();
             employee.Password = _helper.Encrypt(plainPassword);
             db.Mst_Employees.Add(employee);
             await db.SaveChangesAsync();
