@@ -123,8 +123,8 @@
                                             <td>@(i + 1)</td>
                                             <td>@role.RoleName</td>
                                             <td>
-                                                <a class="btn btn-sm btn-primary"><i class="fa-solid fa-pen"></i></a>
-                                                <a class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></a>
+                                                <a class="btn btn-sm btn-primary" @onclick="() => GetRolePermissionDetails(role.PerId)"><i class="fa-solid fa-pen"></i></a>
+                                                <a class="btn btn-sm btn-danger" @onclick="() => AskDelete(role.PerId)"><i class="fa-solid fa-trash"></i></a>
                                             </td>
                                         </tr>
                                     }
@@ -138,12 +138,21 @@
         </div>
     </div>
 </section>
+<ConfirmationModal Show="@ShowConfirmDialog"
+                   Title=@ConfirmationTitle
+                   Message=@ConfirmationMessage
+                   ConfirmationChanged="OnDeleteConfirmation" />
+
 
 @code {
     private List<Mst_Role> Roleslist = new();
     private List<MenuModel> menuModels = new();
     private List<RolePermissionList> rolePermissionLists = new();
     private Mst_RolePermission_New rolePermission = new();
+    private string? ConfirmationTitle;
+    private string? ConfirmationMessage;
+    private int DeleteId { get; set; }
+    private bool ShowConfirmDialog { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -211,6 +220,23 @@
         parentMenu.IsChecked = !parentMenu.SubMenus.Any(s => s.IsChecked) ? false : true;
     }
 
+    private void AskDelete(int PerId)
+    {
+        DeleteId = PerId;
+        ConfirmationTitle = "Delete Role Permission";
+        ConfirmationMessage = "Are you sure you want to delete this Role Permission?";
+        ShowConfirmDialog = true;
+    }
+
+    private async Task OnDeleteConfirmation(bool confirmed)
+    {
+        ShowConfirmDialog = false;
+        if (confirmed)
+        {
+            await DeleteRolePermission(DeleteId);
+        }
+    }
+
     private async Task DeleteRolePermission(int PerId)
     {
         using var Db = await DbFactory.CreateDbContextAsync();
@@ -225,15 +251,29 @@
         ToastService.ShowToast("Role Permission Deleted Successfully", "success", "Success");
     }
 
-    public async Task GetRolePermissionDetails()
+    public async Task GetRolePermissionDetails(int PerId)
     {
-        
+        using var Db = await DbFactory.CreateDbContextAsync();
+        var existrolepermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.PerID == PerId).FirstOrDefaultAsync();
+        if (existrolepermission == null) { ToastService.ShowToast("Role Permission not found", "warning", "Waring"); return; }
+
+        rolePermission = existrolepermission;
+        var menuIds = rolePermission.MenuId.TrimEnd(',').Split(',').Select(id => int.Parse(id)).ToList();
+        foreach (var menu in menuModels)
+        {
+            menu.IsChecked = menuIds.Contains(menu.MID);
+            foreach (var sub in menu.SubMenus)
+            {
+                sub.IsChecked = menuIds.Contains(sub.MID);
+            }
+        }
     }
 
     private async Task SaveRolePermissions()
     {
         using var Db = await DbFactory.CreateDbContextAsync();
-        if (rolePermission.PerID == 0)
+        var existingPermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.RoleID == rolePermission.RoleID).FirstOrDefaultAsync();
+        if (existingPermission == null)
         {
             rolePermission.CreatedBy = 1;
             rolePermission.CreatedOn = DateTime.Now;
@@ -246,9 +286,6 @@
         }
         else
         {
-            var existingPermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.PerID == rolePermission.PerID).FirstOrDefaultAsync();
-            if (existingPermission == null) { ToastService.ShowToast("Role Permission not found", "success", "Success"); return; }
-
 			existingPermission.RoleID = rolePermission.RoleID;
 			existingPermission.MenuId = rolePermission.MenuId;
 			existingPermission.UpdatedBy = 1;
