@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+
+<div class="wrapper">
+    <div class="content-wrapper" style="min-height:100vh; margin-left:0;">
+        <section>
+            <Toast />
+            @Body
+        </section>
+    </div>
+    <div id="loading" style="display:none;">
+        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+    <footer class="main-footer">
+        <strong>Copyright © @DateTime.Now.Year <a href="#!"></a>.</strong>
+        All rights reserved.
+    </footer>
+</div>

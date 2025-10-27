@@ -43,8 +43,14 @@
             <ValidationMessage For="@(() => loginModel.Password)" />
 
             <div class="submit-btn">
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
-                <button type="button" class="btn btn-primary btn-block">Register</button>
+                <div class="row">
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-primary btn-block" @onclick="() => NavigateToRegister()">Register</button>
+                    </div>
+                </div>
             </div>
         </EditForm>
     </div>
@@ -92,6 +98,11 @@
         {
             errorMessage = "Something went wrong: " + ex.Message;
         }*/
+    }
+
+    private void NavigateToRegister()
+    {
+        Navigation.NavigateTo("/register");
     }
 
     protected override void OnInitialized()

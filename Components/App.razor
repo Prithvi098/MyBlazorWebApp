@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Components.Routing
+@inject NavigationManager NavManager
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -16,7 +19,7 @@
     <HeadOutlet />
 </head>
 
-<body class="layout-top-nav layout-navbar-fixed dashboard-wrap" style="height: auto;">
+<body class="@BodyClass" style="height: auto;">
     <Routes />
     <script src="lib/Login.js"></script>
     <script src="lib/ModalHelper.js"></script>
@@ -26,3 +29,21 @@
 </body>
 
 </html>
+
+
+@code {
+    private string BodyClass => ShouldUseDashboardLayout()
+        ? "layout-top-nav layout-navbar-fixed dashboard-wrap"
+        : ""; // no classes for RegisterLayout or LoginLayout
+
+    private bool ShouldUseDashboardLayout()
+    {
+        var uri = NavManager.Uri.ToLower();
+
+        // Add any route that uses RegisterLayout here
+        if (uri.Contains("/register"))
+            return false;
+
+        return true;
+    }
+}

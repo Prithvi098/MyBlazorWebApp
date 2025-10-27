@@ -1,9 +1,167 @@
 ﻿@page "/register"
-@layout LoginLayout
+@using Microsoft.AspNetCore.Mvc.Rendering
+@layout RegisterLayout
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject ToastService ToastService
 @rendermode InteractiveServer
 
-@code {
+<style>
+    .layout-navbar-fixed .wrapper .content-wrapper {
+        margin-top: 0px;
+    }
+</style>
 
+<section class="content inner-tbl pt-5 pb-3">
+    <div class="content-header">
+        <div class="container-fluid p-0">
+            <div style="text-align:center">
+                <img class="mb-2" style="align-items:center;" src="/Logo.png" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-info card-outline" style="background-color: #f4f6f9;">
+                <div class="card-header">
+                    <h1 class="card-title"><strong> &nbsp;</strong></h1>
+                    <div style="text-align:right">
+                        <a href="/" class="btn btn-info mb-3"> Back</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-group mt-3">
+                    </div>
+                    <div class="card-group" style="margin-bottom:15px">
+                        <div class="panel card card-info">
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <h1 class="card-title" style="font-size: x-large;">
+                                        <strong>Employee Registration Form</strong>
+                                    </h1>
+                                </div>
+                                <div class="row">
+                                    <p>Fields marked with  <span class="required"></span>  are mandatory.</p>
+                                </div>
+                                <div class="row">
+                                    <p>Use Your Email Address to start filling the form.</p>
+                                </div>
+                                <div class="row">
+                                    <p>If your email is used before, Data already saved will be loaded.</p>
+                                </div>
+                                <div class="row">
+                                    <p>If you are not able to fill form using the email, contact admin for further details.</p>
+                                </div>
+                                @if (!HideEmail)
+                                {
+                                   <EditForm Model="employee" OnValidSubmit="CheckForExistingEmail">
+                                       <FluentValidationValidator />
+                                       <div class="row">
+                                           <div class="col-md-3">
+                                               <div class="form-group">
+                                                   <label class="required">Personal Email:</label>
+                                                   <input type="text" name="Email" class="form-control" @bind-value="@employee.Email_address"/>
+                                                   <ValidationMessage For="@(() => employee.Email_address)" />
+                                               </div>
+                                           </div>
+                                       </div>
+                                       @* <div class="cf-turnstile" data-sitekey="0x4AAAAAABfyCw48RIANHyo_">
+                                       </div> *@
+                                       <div class="col-2">
+                                           <input type="submit" value="Submit" class="btn btn-sm btn-info float-left" />
+                                       </div>
+                                   </EditForm>
+                                    
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (ShowPersonalInfo)
+                    {
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <EditForm Model="employee">
+                                        <FluentValidationValidator />
+                                        <div class="content-header">
+                                            <div class="container-fluid">
+                                                <div class="row align-items-center">
+                                                    <div class="col-12 col-md-7 col-lg-7">
+                                                        <div class="main-title text-center text-md-left text-lg-left">
+                                                            <h2>Employee Information</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>First Name</label>
+                                                        <InputText type="text" @bind-Value="employee.Emp_firstname" class="form-control" id="empfirstname" />
+                                                        <ValidationMessage For="@(() => employee.Emp_firstname)" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Middle Name</label>
+                                                        <InputText type="text" @bind-Value="employee.Emp_middlename" class="form-control" id="empmiddlename" />
+                                                        <ValidationMessage For="@(() => employee.Emp_middlename)" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Last Name</label>
+                                                        <InputText type="text" @bind-Value="employee.Emp_surname" class="form-control" id="emplastname" />
+                                                        <ValidationMessage For="@(() => employee.Emp_surname)" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </EditForm>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+@code {
+    private bool HideEmail { get; set; } = false;
+    private bool ShowPersonalInfo { get; set; } = false;
+    private Mst_employees employee = new ();
+    private SelectListItem selectListItem = new();
+
+
+
+    private async Task CheckForExistingEmail()
+    {
+        using var Db = DbFactory.CreateDbContext();
+        var existingEmployee = await Db.Mst_Employees.FirstOrDefaultAsync(e => e.Email_address == employee.Email_address && e.DeletedBy == null);
+
+        if (existingEmployee == null)
+        {
+            HideEmail = true;
+            ShowPersonalInfo = true;
+        }
+        else if (existingEmployee.IsActive == true)
+        {
+            ToastService.ShowToast("User with this email is already Active, Please contact Admin for further details.", "warning", "Warning");
+            employee = new();
+        }
+        else
+        {
+            employee = existingEmployee;
+            HideEmail = true;
+            ShowPersonalInfo = true;
+        }
+    }
 }
