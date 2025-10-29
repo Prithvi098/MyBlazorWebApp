@@ -1,0 +1,43 @@
+﻿@page "/user-rights"
+@attribute [Authorize]
+@layout MainLayout
+@inject IDbContextFactory<EMSContext> DbFactory
+@inject ToastService ToastService
+@inject MenuService MenuService
+@rendermode InteractiveServer
+
+<PageTitle>User Rights</PageTitle>
+
+
+
+
+
+@code {
+    private List<SelectListItem> EmployeeList = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEmployees();
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            using var dbContext = await DbFactory.CreateDbContextAsync();
+            var employees = await dbContext.Mst_Employees
+                .Select(e => new SelectListItem
+                {
+                    Value = e.Emp_id.ToString(),
+                    Text = $"{e.Emp_firstname} {e.Emp_surname}"
+                })
+                .ToListAsync();
+            EmployeeList = employees;
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast($"Error loading employees: {ex.Message}", "warning", "warning");
+        }
+    }
+}

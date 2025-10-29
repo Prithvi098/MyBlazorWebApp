@@ -97,5 +97,29 @@ namespace MyBlazorApp.Common
 
             }
         }
+
+        public class EmailCheckValidator : AbstractValidator<EmailCheckModel>
+        {
+            public EmailCheckValidator()
+            {
+                RuleFor(x => x.Email_address)
+                    .Cascade(CascadeMode.Stop)
+                    .NotEmpty().WithMessage("Email is required")
+                    .Matches(@"^[^@\s]+@[^@\s]+\.[^@\s]+$").WithMessage("Invalid Email");
+            }
+        }
+
+        public class UserRolePermissionValidator : AbstractValidator<UserRolePermissionModel>
+        {
+            public UserRolePermissionValidator()
+            {
+                RuleFor(e => e.EmpId)
+                    .NotEmpty().WithMessage("Please select a Employee");
+
+                RuleFor(e => e.RoleId)
+                    .NotEmpty().WithMessage("Please select a Role");
+
+            }
+        }
     }
 }

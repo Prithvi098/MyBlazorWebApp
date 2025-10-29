@@ -54,23 +54,23 @@
                                 </div>
                                 @if (!HideEmail)
                                 {
-                                   <EditForm Model="employee" OnValidSubmit="CheckForExistingEmail">
-                                       <FluentValidationValidator />
-                                       <div class="row">
-                                           <div class="col-md-3">
-                                               <div class="form-group">
-                                                   <label class="required">Personal Email:</label>
-                                                   <input type="text" name="Email" class="form-control" @bind-value="@employee.Email_address"/>
-                                                   <ValidationMessage For="@(() => employee.Email_address)" />
-                                               </div>
-                                           </div>
-                                       </div>
-                                       @* <div class="cf-turnstile" data-sitekey="0x4AAAAAABfyCw48RIANHyo_">
-                                       </div> *@
-                                       <div class="col-2">
-                                           <input type="submit" value="Submit" class="btn btn-sm btn-info float-left" />
-                                       </div>
-                                   </EditForm>
+                                    <EditForm Model="emailModel" OnValidSubmit="CheckForExistingEmail">
+                                        <FluentValidationValidator />
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label class="required">Personal Email:</label>
+                                                    <input type="text" name="Email" class="form-control" @bind-value="@emailModel.Email_address" />
+                                                    <ValidationMessage For="@(() => emailModel.Email_address)" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @* <div class="cf-turnstile" data-sitekey="0x4AAAAAABfyCw48RIANHyo_">
+                                        </div> *@
+                                        <div class="col-2">
+                                            <input type="submit" value="Submit" class="btn btn-sm btn-info float-left" />
+                                        </div>
+                                    </EditForm>
                                     
                                 }
                             </div>
@@ -139,13 +139,13 @@
     private bool ShowPersonalInfo { get; set; } = false;
     private Mst_employees employee = new ();
     private SelectListItem selectListItem = new();
-
+    private EmailCheckModel emailModel = new();
 
 
     private async Task CheckForExistingEmail()
     {
         using var Db = DbFactory.CreateDbContext();
-        var existingEmployee = await Db.Mst_Employees.FirstOrDefaultAsync(e => e.Email_address == employee.Email_address && e.DeletedBy == null);
+        var existingEmployee = await Db.Mst_Employees.FirstOrDefaultAsync(e => e.Email_address == emailModel.Email_address && e.DeletedBy == null);
 
         if (existingEmployee == null)
         {

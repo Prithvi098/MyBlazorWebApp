@@ -1,0 +1,223 @@
+﻿@page "/user-role-permission"
+@attribute [Authorize]
+@layout MainLayout
+@inject IDbContextFactory<EMSContext> DbFactory
+@inject ToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>User Role Permission</PageTitle>
+
+<section class="content inner-tbl pt-5 pb-3">
+    <div class="container-fluid p-0">
+        <div class="row">
+            <div class=" col-12 col-lg-6">
+                <div class="card">
+                    <EditForm Model="userRolePermission" >
+                        <FluentValidationValidator />
+
+                        <div class="content-header">
+                            <div class="container-fluid">
+                                <div class="row align-items-center">
+                                    <div class="col-12 col-md-6 col-lg-6">
+                                        <div class="main-title text-center text-md-left text-lg-left">
+                                            <h2>User Role Permission</h2>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
+                                        <button type="button" class="btn btn-secondary">Clear</button>
+                                        <button type="submit" class="btn btn-primary">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3">
+                                <div class="col">
+                                    <div class="input-group cus-select">
+                                        <label class="form-label">User List</label>
+                                        <select class="form-control" @bind="@userRolePermission.EmpId">
+                                            <option value="0">-- Select Employee --</option>
+                                            @foreach (var role in EmployeeList)
+                                            {
+                                                <option value="@role.Value">@role.Text</option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => userRolePermission.EmpId)" />
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="input-group cus-select">
+                                        <label class="form-label">Role List</label>
+                                        <select class="form-control" @bind="@userRolePermission.RoleId">
+                                            <option value="0">-- Select Role --</option>
+                                            @foreach (var role in RoleList)
+                                            {
+                                                <option value="@role.Value">@role.Text</option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => userRolePermission.RoleId)" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card">
+                    <div class="content-header">
+                        <div class="container-fluid">
+                            <div class="row align-items-center">
+                                <div class="col-12 col-md-6 col-lg-6">
+                                    <div class="main-title text-center text-md-left text-lg-left">
+                                        <h2>Role Permission List</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive">
+                        @if (userRolePermissionList.Count == 0)
+                        {
+                            @* <Loader /> *@
+                        }
+                        else
+                        {
+                            <table class="table table-bordered border-3 border-black">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Employee Name</th>
+                                        <th>Role name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (var i = 0; i < userRolePermissionList.Count; i++)
+                                    {
+                                        var role = userRolePermissionList[i];
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>@role.EmployeeName</td>
+                                            <td>@role.RoleName</td>
+                                            <td>
+                                                @* <a class="btn btn-sm btn-primary" @onclick="() => GetRolePermissionDetails(role.PerId)"><i class="fa-solid fa-pen"></i></a>
+                                                <a class="btn btn-sm btn-danger" @onclick="() => AskDelete(role.PerId)"><i class="fa-solid fa-trash"></i></a> *@
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@code {
+    private UserRolePermissionModel userRolePermission = new();
+    private List<UserRolePermissionModel> userRolePermissionList = new();
+    private List<SelectListItem> EmployeeList = new();
+    private List<SelectListItem> RoleList = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEmployees();
+        await LoadRoles();
+        await LoadUserRolePermissionList();
+    }
+
+    private async Task LoadUserRolePermissionList()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        var userpermissionlist = await (from emp in dbContext.Mst_Employees
+                                        join role in dbContext.Mst_Role on emp.RoleId equals role.RoleID
+                                        where emp.DeletedBy == null && emp.RoleId != null && role.DeletedBy == null
+                                        select new UserRolePermissionModel
+                                        {
+                                            EmpId = emp.Emp_id,
+                                            EmployeeName = emp.Emp_firstname + " " + emp.Emp_surname,
+                                            RoleId = role.RoleID,
+                                            RoleName = role.RoleName,
+                                        }).ToListAsync();
+        if (userpermissionlist.Count > 0)
+        {
+            userRolePermissionList = userpermissionlist;
+        }
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            using var dbContext = await DbFactory.CreateDbContextAsync();
+            var roles = await dbContext.Mst_Role
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RoleID.ToString(),
+                    Text = r.RoleName
+                })
+                .ToListAsync();
+            RoleList = roles;
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast($"Error loading roles: {ex.Message}", "warning", "warning");
+        }
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            using var dbContext = await DbFactory.CreateDbContextAsync();
+            var employees = await dbContext.Mst_Employees
+                .Select(e => new SelectListItem
+                {
+                    Value = e.Emp_id.ToString(),
+                    Text = $"{e.Emp_firstname} {e.Emp_surname}"
+                })
+                .ToListAsync();
+            EmployeeList = employees;
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast($"Error loading employees: {ex.Message}", "warning", "warning");
+        }
+    }
+
+    private async Task SaveEmployeeRole()
+    {
+        try
+        {
+            using var dbContext = await DbFactory.CreateDbContextAsync();
+            var employee = await dbContext.Mst_Employees.FirstOrDefaultAsync(e => e.Emp_id == userRolePermission.EmpId);
+            if (employee != null)
+            {
+                employee.RoleId = userRolePermission.RoleId;
+                await dbContext.SaveChangesAsync();
+                ToastService.ShowToast("User Role Permission Saved Successfully.", "success", "Success");
+                await LoadUserRolePermissionList();
+            }
+            else
+            {
+                ToastService.ShowToast("Employee not found.", "warning", "Warning");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast($"Error saving user role permission: {ex.Message}", "danger", "Error");
+        }
+    }
+
+
+}
