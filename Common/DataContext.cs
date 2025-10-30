@@ -7,7 +7,7 @@ namespace MyBlazorApp.Common
 {
     public class DataContext
     {
-        private readonly string ConnectionString;
+        public readonly string ConnectionString;
         private readonly EMSContext eMSContext;
 
         public DataContext(IConfiguration config, EMSContext context)

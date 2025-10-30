@@ -4,6 +4,7 @@
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject ToastService ToastService
 @inject NavigationManager Navigation
+@inject Helper _helper
 @rendermode InteractiveServer
 
 <PageTitle>Employee List</PageTitle>
@@ -37,7 +38,22 @@
                     <div class="card-body table-responsive">
                         @if (employeelist.Count == 0)
                         {
-                            <Loader />
+                            <table class="table table-bordered border-3 border-black">
+                                <thead>
+                                    <tr>
+                                        <th>EmpId</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Department</th>
+                                        <th>Is Active</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
                         }
                         else
                         {
@@ -82,6 +98,10 @@
         </div>
     </div>
 </section>
+@if (IsLoading)
+{
+    <Loader />
+}
 
 <ConfirmationModal Show="@ShowConfirmDialog"
                    Title="Delete Employee"
@@ -93,25 +113,38 @@
     private bool IsActive { get; set; } = true;
     private bool ShowConfirmDialog { get; set; }
     private int DeleteEmpId { get; set; }
+    private bool IsLoading { get; set; } = false;
 
     private async Task LoadEmployees()
     {
-        using var db = DbFactory.CreateDbContext();
-        employeelist = await (
-                       from e in db.Mst_Employees
-                       join d in db.Mst_Department.Where(x => x.DeletedBy == null) on e.Department_type equals d.Id into deptJoin
-                       from d in deptJoin.DefaultIfEmpty() // LEFT JOIN
-                       where e.DeletedBy == null && e.IsActive == IsActive 
-                       select new EmployeeListModel
-                       {
-                           Empid = e.Emp_id,
-                           EmpFirstName = e.Emp_firstname,
-                           EmpLastName = e.Emp_surname,
-                           Username = e.Username,
-                           Email = e.Email_address,
-                           DepartmentName = d != null ? d.DepartmentName : string.Empty, // blank if no department
-                           IsActive = e.IsActive ?? false
-                       }).ToListAsync();
+        try
+        {
+            IsLoading = true;
+            using var db = DbFactory.CreateDbContext();
+            employeelist = await (
+                           from e in db.Mst_Employees
+                           join d in db.Mst_Department.Where(x => x.DeletedBy == null) on e.Department_type equals d.Id into deptJoin
+                           from d in deptJoin.DefaultIfEmpty() // LEFT JOIN
+                           where e.DeletedBy == null && e.IsActive == IsActive
+                           select new EmployeeListModel
+                           {
+                               Empid = e.Emp_id,
+                               EmpFirstName = e.Emp_firstname,
+                               EmpLastName = e.Emp_surname,
+                               Username = e.Username,
+                               Email = e.Email_address,
+                               DepartmentName = d != null ? d.DepartmentName : string.Empty, // blank if no department
+                               IsActive = e.IsActive ?? false
+                           }).ToListAsync();
+            IsLoading = false;
+        }
+        catch (Exception ex)
+        {
+            _helper.SaveException(ex, "EmployeeList/LoadEmployees");
+            ToastService.ShowToast("Error while loading Employee List", "error", "Error");
+        }
+
+
     }
 
     private void AskDelete(int id)
@@ -148,20 +181,27 @@
 
     async Task DeleteEmployee(int Id)
     {
-        using var db = DbFactory.CreateDbContext();
-        var emp = await db.Mst_Employees.Where(e => e.Emp_id == Id).FirstOrDefaultAsync();
+        try
+        {
+            using var db = DbFactory.CreateDbContext();
+            var emp = await db.Mst_Employees.Where(e => e.Emp_id == Id).FirstOrDefaultAsync();
 
-        if(emp == null)
-            ToastService.ShowToast("No Data Found.", "error", "Error");
+            if (emp == null)
+                ToastService.ShowToast("No Data Found.", "error", "Error");
 
-        emp.DeletedBy = 1;
-        emp.DeletedOn = DateTime.Now;
-        await db.SaveChangesAsync();
-        ToastService.ShowToast("Employee Deleted Successfully.", "success", "Success");
+            emp.DeletedBy = 1;
+            emp.DeletedOn = DateTime.Now;
+            await db.SaveChangesAsync();
+            ToastService.ShowToast("Employee Deleted Successfully.", "success", "Success");
 
-        await LoadEmployees();
-        StateHasChanged();
-
+            await LoadEmployees();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _helper.SaveException(ex, "EmployeeList/DeleteEmployee");
+            ToastService.ShowToast("Error while Deleting Employee", "error", "Error");
+        }
     }
 
     private class EmployeeListModel

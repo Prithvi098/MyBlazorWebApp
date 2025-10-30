@@ -120,6 +120,10 @@
         </div>
     </div>
 </section>
+<ConfirmationModal Show="@ShowConfirmDialog"
+                   Title=@ConfirmationTitle
+                   Message=@ConfirmationMessage
+                   ConfirmationChanged="OnDeleteConfirmation" />
 
 
 @code {
@@ -127,6 +131,10 @@
     private List<UserRolePermissionModel> userRolePermissionList = new();
     private List<SelectListItem> EmployeeList = new();
     private List<SelectListItem> RoleList = new();
+    private string? ConfirmationTitle;
+    private string? ConfirmationMessage;
+    private int DeleteId { get; set; }
+    private bool ShowConfirmDialog { get; set; }
 
 
     protected override async Task OnInitializedAsync()
@@ -192,6 +200,55 @@
         catch (Exception ex)
         {
             ToastService.ShowToast($"Error loading employees: {ex.Message}", "warning", "warning");
+        }
+    }
+
+    private void AskDelete(int PerId)
+    {
+        DeleteId = PerId;
+        ConfirmationTitle = "Delete User Role Permission";
+        ConfirmationMessage = "Are you sure you want to delete this User Role Permission?";
+        ShowConfirmDialog = true;
+    }
+
+    private async Task OnDeleteConfirmation(bool confirmed)
+    {
+        ShowConfirmDialog = false;
+        if (confirmed)
+        {
+            await DeleteUserRolePermission(DeleteId);
+        }
+    }
+
+    private async Task DeleteUserRolePermission(int EmpId)
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        var employee = await dbContext.Mst_Employees.FirstOrDefaultAsync(e => e.Emp_id == EmpId);
+        if (employee != null)
+        {
+            employee.RoleId = null;
+            await dbContext.SaveChangesAsync();
+            ToastService.ShowToast("User Role Permission Deleted Successfully.", "success", "Success");
+            await LoadUserRolePermissionList();
+        }
+        else
+        {
+            ToastService.ShowToast("Employee not found.", "warning", "Warning");
+        }
+    }
+
+    public async Task GetUserRolePermision(int EmpId)
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        var employee = await dbContext.Mst_Employees.FirstOrDefaultAsync(e => e.Emp_id == EmpId);
+        if (employee != null)
+        {
+            userRolePermission.EmpId = employee.Emp_id;
+            userRolePermission.RoleId = employee.RoleId ?? 0;
+        }
+        else
+        {
+            ToastService.ShowToast("Employee not found.", "warning", "Warning");
         }
     }
 

@@ -1,4 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.EntityFrameworkCore;
+using MyBlazorApp.Data;
+using MyBlazorApp.Models;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace MyBlazorApp.Common
@@ -6,6 +9,16 @@ namespace MyBlazorApp.Common
     public class Helper
     {
         public static string key = "KeyEMS2019";
+
+        private readonly EMSContext _context;
+        private readonly DataContext _datacontext;
+
+        public Helper(EMSContext context, DataContext datacontext)
+        {
+            _context = context;
+            _datacontext = datacontext;
+        }
+
         public string Encrypt(string input)
         {
             //Getting the bytes of Input String.
@@ -52,6 +65,21 @@ namespace MyBlazorApp.Common
             objTripleDESCryptoService.Clear();
             //Convert and return the decrypted data/byte into string format.
             return UTF8Encoding.UTF8.GetString(resultArray);
+        }
+
+        public void SaveException(Exception ex, string ControllerName)
+        {
+            ErrorLog logger = new ErrorLog()
+            {
+                Error = ex.Message,
+                ErroMsg = ex.StackTrace,
+                ErrorPage = ControllerName,
+                ErrorMode = "Web",
+                ErrorDate = DateTime.Now
+            };
+
+            _context.ErrorLogs.Add(logger);
+            _context.SaveChanges();
         }
     }
 }

@@ -120,14 +120,23 @@
 
     protected override void OnInitialized()
     {
-        using var db = DbFactory.CreateDbContext();
-        
-        if (EmpId != null)
+        try
         {
-            employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
-            plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
+            using var db = DbFactory.CreateDbContext();
+
+            if (EmpId != null)
+            {
+                employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
+                plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
+            }
+            departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.IsActive == true).ToList();
         }
-        departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.IsActive == true).ToList();
+        catch (Exception ex)
+        {
+            _helper.SaveException(ex, "EmployeeCreate/OnInitialized");
+            ToastService.ShowToast($"Error loading data: {ex.Message}", "warning", "Warning");
+        }
+
     }
 
     private void AskDelete()
@@ -145,36 +154,43 @@
     }
 
     private async Task SaveEmployee()
-    {   
-
-        using var db = DbFactory.CreateDbContext();
-        if (employee.Emp_id == 0)
+    {
+        try
         {
-            var lastemp = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_code != null && e.Emp_code != "" && e.Emp_code.StartsWith("TVSSL")).OrderByDescending(e => e.Emp_id).FirstOrDefault();
-            var laempcode = lastemp == null ? "TVSSL-001" : lastemp.Emp_code;
-            var lastcodenumber = int.Parse(laempcode.Split('-')[1]);
-            employee.Emp_code = "TVSSL-" + (lastcodenumber + 1).ToString();
-            employee.Password = _helper.Encrypt(plainPassword);
-            db.Mst_Employees.Add(employee);
-            await db.SaveChangesAsync();
-            ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
-            db.Dispose();
-            Navigation.NavigateTo("/employeelist");
+            using var db = DbFactory.CreateDbContext();
+            if (employee.Emp_id == 0)
+            {
+                var lastemp = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_code != null && e.Emp_code != "" && e.Emp_code.StartsWith("TVSSL")).OrderByDescending(e => e.Emp_id).FirstOrDefault();
+                var laempcode = lastemp == null ? "TVSSL-001" : lastemp.Emp_code;
+                var lastcodenumber = int.Parse(laempcode.Split('-')[1]);
+                employee.Emp_code = "TVSSL-" + (lastcodenumber + 1).ToString();
+                employee.Password = _helper.Encrypt(plainPassword);
+                db.Mst_Employees.Add(employee);
+                await db.SaveChangesAsync();
+                ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
+                db.Dispose();
+                Navigation.NavigateTo("/employeelist");
+            }
+            else
+            {
+                var existingEmployee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == employee.Emp_id).FirstOrDefaultAsync();
+                existingEmployee.Emp_firstname = employee.Emp_firstname;
+                existingEmployee.Emp_middlename = employee.Emp_middlename;
+                existingEmployee.Emp_surname = employee.Emp_surname;
+                existingEmployee.Email_address = employee.Email_address;
+                existingEmployee.Username = employee.Username;
+                existingEmployee.Department_type = employee.Department_type;
+                existingEmployee.Password = _helper.Encrypt(plainPassword);
+                await db.SaveChangesAsync();
+                ToastService.ShowToast("Employee Updated Successfully.", "success", "Success");
+                db.Dispose();
+                Navigation.NavigateTo("/employeelist");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var existingEmployee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == employee.Emp_id).FirstOrDefaultAsync();
-            existingEmployee.Emp_firstname = employee.Emp_firstname;
-            existingEmployee.Emp_middlename = employee.Emp_middlename;
-            existingEmployee.Emp_surname = employee.Emp_surname;
-            existingEmployee.Email_address = employee.Email_address;
-            existingEmployee.Username = employee.Username;
-            existingEmployee.Department_type = employee.Department_type;
-            existingEmployee.Password = _helper.Encrypt(plainPassword);
-            await db.SaveChangesAsync();
-            ToastService.ShowToast("Employee Updated Successfully.", "success", "Success");
-            db.Dispose();
-            Navigation.NavigateTo("/employeelist");
+            _helper.SaveException(ex, "EmployeeCreate/SaveEmployee");
+            ToastService.ShowToast("Error while saving Employee details", "error", "Error");
         }
     }
 
