@@ -9,12 +9,91 @@
 <PageTitle>User Rights</PageTitle>
 
 
+<section class="content inner-tbl pt-5 pb-3">
+    <div class="container-fluid">
+        <EditForm Model="UserRight" OnValidSubmit="SaveUserRights">
+            <div class="row">
+                <FluentValidationValidator />
+                <div class="col-12 col-lg-5">
+                    <div class="card">
+                        <div class="content-header">
+                            <div class="container-fluid">
+                                <div class="row align-items-center">
+                                    <div class="col-12 col-md-6 col-lg-6">
+                                        <div class="main-title text-center text-md-left text-lg-left">
+                                            <h2>User Rights</h2>
+                                        </div>
+                                    </div>
 
+                                    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="input-group cus-select mb-2">
+                                        <label class="form-label" for="exampleFormControlSelect1">User List</label>
+                                        <InputSelect class="form-control" @bind-Value="UserRight.EmpId">
+                                            <option value="">-- Select User --</option>
+                                            @foreach (var employee in EmployeeList)
+                                            {
+                                                <option value="@employee.Value">@employee.Text</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <ValidationMessage For="@(() => UserRight.EmpId)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <CopyUserRightsForm CopyUserRights="CopyUserRights"
+                                        EmployeeList="EmployeeList"
+                                        OnSave="SavedCopyUserRights" />
+                </div>
+                <div class="col-12 col-lg-7">
+                    <div class="card">
+                        <div class="content-header">
+                            <div class="container-fluid">
+                                <div class="row align-items-center">
+                                    <div class="col-12 col-md-6 col-lg-6">
+                                        <div class="main-title text-center text-md-left text-lg-left">
+                                            <h2>User Rights Menu List</h2>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
+                                        <button class="btn btn-secondary" id="btnClear" type="button">Clear</button>
+                                        <button class="btn btn-primary ml-2" id="btnSaveUserRight" type="submit">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <ValidationMessage For="@(() => UserRight.UserRights)" />
+                        <div class="card-body user-rights-menu">
+                            <div class="row" id="selectallhide" style="display:none">
+                                <div class="col-12">
+                                    <input type="checkbox" id="selectall" datauri="#" onchange="checkAllCheckbox()">
+                                    <label for="selectall" class="custom-unchecked">Select All</label>
+                                </div>
+                            </div>
+                            <ul id="menuTree" class="treeview"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+
+</section>
 
 
 @code {
     private List<SelectListItem> EmployeeList = new();
-
+    private UserRightsModel UserRight = new UserRightsModel();
+    private CopyUserRightsModel CopyUserRights = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,4 +119,16 @@
             ToastService.ShowToast($"Error loading employees: {ex.Message}", "warning", "warning");
         }
     }
+
+    private async Task SaveUserRights()
+    {
+        
+    }
+
+    private async Task SavedCopyUserRights()
+    {
+        
+    }
+
+
 }

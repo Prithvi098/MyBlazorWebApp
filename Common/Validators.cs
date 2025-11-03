@@ -121,5 +121,19 @@ namespace MyBlazorApp.Common
 
             }
         }
+
+        public class UserRightsValidator : AbstractValidator<UserRightsModel>
+        {
+            public UserRightsValidator()
+            {
+                RuleFor(e => e.EmpId)
+                    .NotEmpty().WithMessage("Please select a Employee");
+
+                RuleFor(e => e.UserRights)
+                    .Must(list => list != null && list.Count > 0)
+                    .WithMessage("Please select at least one Menu");
+
+            }
+        }
     }
 }

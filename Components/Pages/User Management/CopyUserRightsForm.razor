@@ -1,0 +1,77 @@
+﻿@rendermode InteractiveServer
+
+<EditForm Model="CopyUserRights" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="card mt-3">
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="main-title text-center text-md-left text-lg-left">
+                            <h2>Copy User Rights</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <div class="input-group cus-select mb-2">
+                        <label class="form-label">From User</label>
+                        <InputSelect class="form-control" @bind-Value="CopyUserRights.FromUserId">
+                            <option value="">-- Select User --</option>
+                            @foreach (var employee in EmployeeList)
+                            {
+                                <option value="@employee.Value">@employee.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => CopyUserRights.FromUserId)" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Role Assigned</label>
+                    <label class="form-control" id="FromUserRightsRole"></label>
+                </div>
+            </div>
+
+            <div class="row mt-2">
+                <div class="col-6">
+                    <div class="input-group cus-select mb-2">
+                        <label class="form-label">To User</label>
+                        <InputSelect class="form-control" @bind-Value="CopyUserRights.ToUserId">
+                            <option value="">-- Select User --</option>
+                            @foreach (var employee in EmployeeList)
+                            {
+                                <option value="@employee.Value">@employee.Text</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => CopyUserRights.ToUserId)" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Role Assigned</label>
+                    <label class="form-control" id="ToUserRightsRole"></label>
+                </div>
+            </div>
+
+            <div class="col-12 text-center text-md-right text-lg-right mt-3">
+                <button class="btn btn-secondary" type="button">Clear</button>
+                <button class="btn btn-primary ml-2" type="submit">Save Copied Rights</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public CopyUserRightsModel CopyUserRights { get; set; } = new();
+    [Parameter] public List<SelectListItem> EmployeeList { get; set; } = new();
+    [Parameter] public EventCallback OnSave { get; set; }
+
+
+    private async Task HandleValidSubmit()
+    {
+        
+    }
+}
