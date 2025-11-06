@@ -4,7 +4,9 @@
 @* @inject EMSContext Db *@
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject IJSRuntime JS
-@inject ToastService ToastService
+@using MyBlazorApp.Common
+@using static MyBlazorApp.Common.ToastService
+@inject MyBlazorApp.Common.ToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Department</PageTitle>

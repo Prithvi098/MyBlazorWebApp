@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @layout RegisterLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@inject ToastService ToastService
+@using MyBlazorApp.Common
+@using static MyBlazorApp.Common.ToastService
+@inject MyBlazorApp.Common.ToastService ToastService
 @rendermode InteractiveServer
 
 <style>

@@ -1,5 +1,6 @@
-﻿@using static MyBlazorApp.Common.ToastService
-@inject ToastService ToastService
+﻿@using MyBlazorApp.Common
+@using static MyBlazorApp.Common.ToastService
+@inject MyBlazorApp.Common.ToastService ToastService
 @inject IJSRuntime JS
 @implements IDisposable
 @rendermode InteractiveServer
@@ -24,9 +25,6 @@
         
     }
 </div>
-
-
-
 
 @code {
 

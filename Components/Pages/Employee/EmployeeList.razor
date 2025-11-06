@@ -2,7 +2,9 @@
 @attribute [Authorize]
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@inject ToastService ToastService
+@using MyBlazorApp.Common
+@using static MyBlazorApp.Common.ToastService
+@inject MyBlazorApp.Common.ToastService ToastService
 @inject NavigationManager Navigation
 @inject Helper _helper
 @rendermode InteractiveServer

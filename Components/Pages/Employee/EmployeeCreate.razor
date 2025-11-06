@@ -2,7 +2,9 @@
 @page "/employeeedit/{EmpId:int}"
 @attribute [Authorize]
 @layout MainLayout
-@inject ToastService ToastService
+@using MyBlazorApp.Common
+@using static MyBlazorApp.Common.ToastService
+@inject MyBlazorApp.Common.ToastService ToastServiceservice
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject NavigationManager Navigation
 @inject Helper _helper
@@ -134,7 +136,7 @@
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeCreate/OnInitialized");
-            ToastService.ShowToast($"Error loading data: {ex.Message}", "warning", "Warning");
+            ToastServiceservice.ShowToast($"Error loading data: {ex.Message}", "warning", "Warning");
         }
 
     }
@@ -167,7 +169,7 @@
                 employee.Password = _helper.Encrypt(plainPassword);
                 db.Mst_Employees.Add(employee);
                 await db.SaveChangesAsync();
-                ToastService.ShowToast("Employee Saved Successfully.", "success", "Success");
+                ToastServiceservice.ShowToast("Employee Saved Successfully.", "success", "Success");
                 db.Dispose();
                 Navigation.NavigateTo("/employeelist");
             }
@@ -182,7 +184,7 @@
                 existingEmployee.Department_type = employee.Department_type;
                 existingEmployee.Password = _helper.Encrypt(plainPassword);
                 await db.SaveChangesAsync();
-                ToastService.ShowToast("Employee Updated Successfully.", "success", "Success");
+                ToastServiceservice.ShowToast("Employee Updated Successfully.", "success", "Success");
                 db.Dispose();
                 Navigation.NavigateTo("/employeelist");
             }
@@ -190,7 +192,7 @@
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeCreate/SaveEmployee");
-            ToastService.ShowToast("Error while saving Employee details", "error", "Error");
+            ToastServiceservice.ShowToast("Error while saving Employee details", "error", "Error");
         }
     }
 
