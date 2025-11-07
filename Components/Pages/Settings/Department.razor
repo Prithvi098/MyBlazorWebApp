@@ -4,9 +4,7 @@
 @* @inject EMSContext Db *@
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject IJSRuntime JS
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Department</PageTitle>
@@ -209,7 +207,7 @@
         var department = Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == Id).FirstOrDefault();
         if (department == null || department.Id == 0)
         {
-            ToastService.ShowToast("No Department found!", "warning", "Warning");
+            ToastService.Show("No Department found!", ToastType.Warning, "Warning");
             await LoadDepartment();
         }
         else
@@ -266,12 +264,12 @@
     {
         using var Db = DbFactory.CreateDbContext();
         var department = await Db.Mst_Department.Where(d => d.DeletedBy == null && d.Id == Id).FirstOrDefaultAsync();
-        if (department == null) { ToastService.ShowToast("No Department found!", "warning", "Warning"); await LoadDepartment(); return; }
+        if (department == null) { ToastService.Show("No Department found!", ToastType.Warning, "Warning"); await LoadDepartment(); return; }
 
         department.DeletedBy = 1;
         department.DeletedOn = DateTime.Now;
         await Db.SaveChangesAsync();
-        ToastService.ShowToast("Department Deleted successfully!", "success", "Success");
+        ToastService.Show("Department Deleted successfully!", ToastType.Success, "Success");
         await LoadDepartment();
     }
 

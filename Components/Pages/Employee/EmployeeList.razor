@@ -2,9 +2,7 @@
 @attribute [Authorize]
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @inject NavigationManager Navigation
 @inject Helper _helper
 @rendermode InteractiveServer
@@ -143,7 +141,7 @@
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeList/LoadEmployees");
-            ToastService.ShowToast("Error while loading Employee List", "error", "Error");
+            ToastService.Show("Error while loading Employee List", ToastType.Danger, "Error");
         }
 
 
@@ -189,12 +187,12 @@
             var emp = await db.Mst_Employees.Where(e => e.Emp_id == Id).FirstOrDefaultAsync();
 
             if (emp == null)
-                ToastService.ShowToast("No Data Found.", "error", "Error");
+                ToastService.Show("No Data Found.", ToastType.Danger, "Error");
 
             emp.DeletedBy = 1;
             emp.DeletedOn = DateTime.Now;
             await db.SaveChangesAsync();
-            ToastService.ShowToast("Employee Deleted Successfully.", "success", "Success");
+            ToastService.Show("Employee Deleted Successfully.", ToastType.Success, "Success");
 
             await LoadEmployees();
             StateHasChanged();
@@ -202,7 +200,7 @@
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeList/DeleteEmployee");
-            ToastService.ShowToast("Error while Deleting Employee", "error", "Error");
+            ToastService.Show("Error while Deleting Employee", ToastType.Danger, "Error");
         }
     }
 

@@ -5,7 +5,7 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject BlazorBootstrap.ToastService ToastService
+@inject AppToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -29,9 +29,9 @@
                 <h1>Hello, @context.User.Identity?.Name!</h1>
                 <p>Welcome to your new app.</p>
 
-                <button class="btn btn-sm btn-success" @onclick="() => ShowMessage(ToastType.Success)">Show Success</button>
-                @* <button class="btn btn-sm btn-warning" @onclick="ShowWarning">Show Warning</button>
-                <button class="btn btn-sm btn-danger" @onclick="ShowError">Show Danger</button> *@
+                <button class="btn btn-sm btn-success" @onclick="ShowSuccess">Show Success</button>
+                <button class="btn btn-sm btn-warning" @onclick="ShowWarning">Show Warning</button>
+                <button class="btn btn-sm btn-danger" @onclick="ShowError">Show Danger</button>
             </Authorized>
             <NotAuthorized>
                 <p>You are not authorized. Please log in.</p>
@@ -59,16 +59,16 @@
 
     void ShowSuccess()
     {
-        ToastService.Notify(new(ToastType.Success, $"Employee details saved successfully."));
+        ToastService.Show("Data saved successfully 🎉", ToastType.Success, "Data Saved");
     }
 
-    //void ShowWarning()
-    //{
-    //    ToastService.ShowToast("This action might have consequences.", "warning", "Warning");
-    //}
-    //
-    //void ShowError()
-    //{
-    //    ToastService.ShowToast("Something went wrong!", "error", "Error");
-    //}
+    void ShowWarning()
+    {
+        ToastService.Show("This action might have consequences.", ToastType.Warning, "Warning");
+    }
+    
+    void ShowError()
+    {
+        ToastService.Show("Something went wrong!", ToastType.Danger, "Error");
+    }
 }

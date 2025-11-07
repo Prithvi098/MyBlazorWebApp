@@ -112,7 +112,7 @@ builder.Services.AddAuthorization();
 
 /*builder.Services.AddScoped<ModalServices>();*/
 
-builder.Services.AddSingleton<ToastService>();
+builder.Services.AddScoped<AppToastService>();
 builder.Services.AddScoped<MenuService>();
 builder.Services.AddScoped<DataContext>();
 

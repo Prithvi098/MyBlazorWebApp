@@ -2,9 +2,7 @@
 @attribute [Authorize]
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @inject MenuService MenuService
 @rendermode InteractiveServer
 
@@ -243,21 +241,21 @@
     {
         using var Db = await DbFactory.CreateDbContextAsync();
         var rolepermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.PerID == PerId).FirstOrDefaultAsync();
-        if (rolepermission == null) { ToastService.ShowToast("Role Permission not found", "success", "Success"); return; }
+        if (rolepermission == null) { ToastService.Show("Role Permission not found", ToastType.Success, "Success"); return; }
 
         rolepermission.DeletedBy = 1;
         rolepermission.DeletedOn = DateTime.Now;
         await Db.SaveChangesAsync();
         await LoadRolePermissions();
         StateHasChanged();
-        ToastService.ShowToast("Role Permission Deleted Successfully", "success", "Success");
+        ToastService.Show("Role Permission Deleted Successfully", ToastType.Success, "Success");
     }
 
     public async Task GetRolePermissionDetails(int PerId)
     {
         using var Db = await DbFactory.CreateDbContextAsync();
         var existrolepermission = await Db.Mst_RolePermission_New.Where(rp => rp.DeletedBy == null && rp.PerID == PerId).FirstOrDefaultAsync();
-        if (existrolepermission == null) { ToastService.ShowToast("Role Permission not found", "warning", "Waring"); return; }
+        if (existrolepermission == null) { ToastService.Show("Role Permission not found", ToastType.Warning, "Waring"); return; }
 
         rolePermission = existrolepermission;
         var menuIds = rolePermission.MenuId.TrimEnd(',').Split(',').Select(id => int.Parse(id)).ToList();
@@ -284,7 +282,7 @@
             StateHasChanged();
             await LoadRolePermissions();
             await Clear();
-            ToastService.ShowToast("Role Permission Saved Successfully", "success", "Success");
+            ToastService.Show("Role Permission Saved Successfully", ToastType.Success, "Success");
         }
         else
         {
@@ -296,7 +294,7 @@
             StateHasChanged();
             await LoadRolePermissions();
             await Clear();
-			ToastService.ShowToast("Role Permission Updated Successfully", "success", "Success");
+			ToastService.Show("Role Permission Updated Successfully", ToastType.Success, "Success");
         }
     }
 }

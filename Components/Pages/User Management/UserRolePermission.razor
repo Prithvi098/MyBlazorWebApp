@@ -2,9 +2,7 @@
 @attribute [Authorize]
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>User Role Permission</PageTitle>
@@ -181,7 +179,7 @@
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast($"Error loading roles: {ex.Message}", "warning", "warning");
+            ToastService.Show($"Error loading roles: {ex.Message}", ToastType.Warning, "Warning");
         }
     }
 
@@ -201,7 +199,7 @@
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast($"Error loading employees: {ex.Message}", "warning", "warning");
+            ToastService.Show($"Error loading employees: {ex.Message}", ToastType.Warning, "Warning");
         }
     }
 
@@ -230,12 +228,12 @@
         {
             employee.RoleId = null;
             await dbContext.SaveChangesAsync();
-            ToastService.ShowToast("User Role Permission Deleted Successfully.", "success", "Success");
+            ToastService.Show("User Role Permission Deleted Successfully.", ToastType.Success, "Success");
             await LoadUserRolePermissionList();
         }
         else
         {
-            ToastService.ShowToast("Employee not found.", "warning", "Warning");
+            ToastService.Show("Employee not found.", ToastType.Warning, "Warning");
         }
     }
 
@@ -250,7 +248,7 @@
         }
         else
         {
-            ToastService.ShowToast("Employee not found.", "warning", "Warning");
+            ToastService.Show("Employee not found.", ToastType.Warning, "Warning");
         }
     }
 
@@ -264,17 +262,17 @@
             {
                 employee.RoleId = userRolePermission.RoleId;
                 await dbContext.SaveChangesAsync();
-                ToastService.ShowToast("User Role Permission Saved Successfully.", "success", "Success");
+                ToastService.Show("User Role Permission Saved Successfully.", ToastType.Success, "Success");
                 await LoadUserRolePermissionList();
             }
             else
             {
-                ToastService.ShowToast("Employee not found.", "warning", "Warning");
+                ToastService.Show("Employee not found.", ToastType.Warning, "Warning");
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast($"Error saving user role permission: {ex.Message}", "danger", "Error");
+            ToastService.Show($"Error saving user role permission: {ex.Message}", ToastType.Danger, "Error");
         }
     }
 

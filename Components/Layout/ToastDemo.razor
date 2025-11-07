@@ -4,39 +4,29 @@
 
 <h3>Toast Demo</h3>
 
-<Toasts class="p-3"
+@* <Toasts class="p-3"
         Messages="messages"
-        Delay="6000"
-        Placement="ToastsPlacement.TopRight" />
+        Delay="5000" 
+        Autohide="true"
+        Placement="ToastsPlacement.TopRight" /> *@
 
 <Button Color="ButtonColor.Success"
-        @onclick="() => ShowMessage(ToastType.Success)">
+        @onclick="() => ShowToast()">
     Success Toast
 </Button>
 
-<Button Color="ButtonColor.Danger"
-        @onclick="() => ShowMessage(ToastType.Danger)"
-        class="ms-2">
-    Danger Toast
-</Button>
+
 
 @code {
     List<ToastMessage> messages = new();
 
-    private void ShowMessage(ToastType toastType)
-        => messages.Add(CreateToastMessage(toastType));
-
-    private ToastMessage CreateToastMessage(ToastType toastType)
+    void ShowToast()
     {
-        var toastMessage = new ToastMessage();
-
-        toastMessage.Type = toastType;
-        toastMessage.Title = "Blazor Bootstrap";
-        toastMessage.HelpText = $"{DateTime.Now}";
-        toastMessage.Message = $"Hello, world! This is a toast message. DateTime: {DateTime.Now}";
-        // disable auto hide for `danger` and `warning` messages.
-        toastMessage.AutoHide = !(toastType == ToastType.Danger || toastType == ToastType.Warning);
-
-        return toastMessage;
+        messages.Add(new ToastMessage
+        {
+            Type = ToastType.Warning,
+            Title = "Success",
+            Message = "It finally works 🎉"
+        });
     }
 }

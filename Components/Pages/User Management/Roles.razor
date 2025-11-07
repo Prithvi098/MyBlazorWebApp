@@ -2,9 +2,7 @@
 @attribute [Authorize]
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @rendermode InteractiveServer
 
 <PageTitle>Roles</PageTitle>
@@ -19,7 +17,7 @@
 						<div class="container-fluid">
 							<div class="row align-items-center">
 								<div class="col-12 col-md-6 col-lg-6">
-									<div class="main-title text-center text-md-left text-lg-left">
+									<div class="main-title text-lg-left">
 										<h2>Role List</h2>
 									</div>
 								</div>
@@ -51,7 +49,7 @@
 						<div class="container-fluid">
 							<div class="row align-items-center">
 								<div class="col-12 col-md-6 col-lg-6">
-									<div class="main-title text-center text-md-left text-lg-left">
+									<div class="main-title text-lg-left">
 										<h2>Role List</h2>
 									</div>
 								</div>
@@ -173,12 +171,12 @@
 	{
 		using var Db = DbFactory.CreateDbContext();
 		var exisrole = await Db.Mst_Role.Where(m => m.DeletedBy == null && m.RoleID == RoleId).FirstOrDefaultAsync();
-		if (exisrole == null) { ToastService.ShowToast("No Role found!", "warning", "Warning"); await GetRoleList(); return; }
+		if (exisrole == null) { ToastService.Show("No Role found!", ToastType.Warning, "Warning"); await GetRoleList(); return; }
 
 		exisrole.DeletedBy = 1;
 		exisrole.DeletedOn = DateTime.Now;
 		await Db.SaveChangesAsync();
-		ToastService.ShowToast("Menu Deleted successfully!", "success", "Success");
+		ToastService.Show("Menu Deleted successfully!", ToastType.Success, "Success");
 		await GetRoleList();
 	}
 
@@ -186,7 +184,7 @@
 	{
 		using var Db = DbFactory.CreateDbContext();
 		var roledetail = await Db.Mst_Role.Where(m => m.DeletedBy == null && m.RoleID == RoleId).FirstOrDefaultAsync();
-		if (roledetail == null) { ToastService.ShowToast("No Role found!", "warning", "Warning"); await GetRoleList(); return; }
+		if (roledetail == null) { ToastService.Show("No Role found!", ToastType.Warning, "Warning"); await GetRoleList(); return; }
 		roles = roledetail;
 	}
 
@@ -204,20 +202,20 @@
 			Db.Mst_Role.Add(mst_Roles);
 			await Db.SaveChangesAsync();
 			StateHasChanged();
-			ToastService.ShowToast("Role Saved Successfully", "success", "Success");
+			ToastService.Show("Role Saved Successfully", ToastType.Success, "Success");
 			await GetRoleList();
 			Clear();
 		}
 		else
 		{
 			var existrole = await Db.Mst_Role.Where(m => m.DeletedBy == null && m.RoleID == roles.RoleID).FirstOrDefaultAsync();
-			if (existrole == null) { ToastService.ShowToast("No Role found!", "warning", "Warning"); await GetRoleList(); return; }
+			if (existrole == null) { ToastService.Show("No Role found!", ToastType.Warning, "Warning"); await GetRoleList(); return; }
 			existrole.RoleName = roles.RoleName;
 			existrole.UpdatedBy = 1;
 			existrole.UpdatedOn = DateTime.Now;
 			await Db.SaveChangesAsync();
 			StateHasChanged();
-			ToastService.ShowToast("Role Updated Successfully", "success", "Success");
+			ToastService.Show("Role Updated Successfully", ToastType.Success, "Success");
 			await GetRoleList();
 			Clear();
 		}

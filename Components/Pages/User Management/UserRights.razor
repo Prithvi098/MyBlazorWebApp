@@ -3,8 +3,7 @@
 @layout MainLayout
 @inject IDbContextFactory<EMSContext> DbFactory
 @using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @inject MenuService MenuService
 @rendermode InteractiveServer
 
@@ -116,7 +115,7 @@
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast($"Error loading employees: {ex.Message}", "warning", "warning");
+            ToastService.Show($"Error loading employees: {ex.Message}", ToastType.Warning, "warning");
         }
     }
 

@@ -1,0 +1,28 @@
+﻿@inject AppToastService AppToastServices
+@rendermode InteractiveServer
+
+<Toasts class="p-3"
+        Messages="messages"
+        Delay="5000"
+        Autohide="true"
+        Placement="ToastsPlacement.TopRight" />
+
+@code {
+    private List<ToastMessage> messages = new();
+
+    protected override void OnInitialized()
+    {
+        AppToastServices.OnShow += AddToast;
+    }
+
+    private void AddToast(ToastMessage msg)
+    {
+        messages.Add(msg);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AppToastServices.OnShow -= AddToast;
+    }
+}

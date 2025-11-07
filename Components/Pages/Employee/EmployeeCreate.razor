@@ -2,9 +2,7 @@
 @page "/employeeedit/{EmpId:int}"
 @attribute [Authorize]
 @layout MainLayout
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastServiceservice
+@inject AppToastService ToastService
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject NavigationManager Navigation
 @inject Helper _helper
@@ -136,7 +134,7 @@
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeCreate/OnInitialized");
-            ToastServiceservice.ShowToast($"Error loading data: {ex.Message}", "warning", "Warning");
+            ToastService.Show($"Error loading data: {ex.Message}", ToastType.Warning, "Warning");
         }
 
     }
@@ -169,7 +167,7 @@
                 employee.Password = _helper.Encrypt(plainPassword);
                 db.Mst_Employees.Add(employee);
                 await db.SaveChangesAsync();
-                ToastServiceservice.ShowToast("Employee Saved Successfully.", "success", "Success");
+                ToastService.Show("Employee Saved Successfully.", ToastType.Success, "Success");
                 db.Dispose();
                 Navigation.NavigateTo("/employeelist");
             }
@@ -184,7 +182,7 @@
                 existingEmployee.Department_type = employee.Department_type;
                 existingEmployee.Password = _helper.Encrypt(plainPassword);
                 await db.SaveChangesAsync();
-                ToastServiceservice.ShowToast("Employee Updated Successfully.", "success", "Success");
+                ToastService.Show("Employee Updated Successfully.", ToastType.Success, "Success");
                 db.Dispose();
                 Navigation.NavigateTo("/employeelist");
             }
@@ -192,7 +190,7 @@
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeCreate/SaveEmployee");
-            ToastServiceservice.ShowToast("Error while saving Employee details", "error", "Error");
+            ToastService.Show("Error while saving Employee details", ToastType.Danger, "Error");
         }
     }
 

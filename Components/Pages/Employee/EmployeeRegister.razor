@@ -2,9 +2,7 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @layout RegisterLayout
 @inject IDbContextFactory<EMSContext> DbFactory
-@using MyBlazorApp.Common
-@using static MyBlazorApp.Common.ToastService
-@inject MyBlazorApp.Common.ToastService ToastService
+@inject AppToastService ToastService
 @rendermode InteractiveServer
 
 <style>
@@ -156,7 +154,7 @@
         }
         else if (existingEmployee.IsActive == true)
         {
-            ToastService.ShowToast("User with this email is already Active, Please contact Admin for further details.", "warning", "Warning");
+            ToastService.Show("User with this email is already Active, Please contact Admin for further details.", ToastType.Warning, "Warning");
             employee = new();
         }
         else

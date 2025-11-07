@@ -1,10 +1,27 @@
-﻿namespace MyBlazorApp.Common
-{
-    public class ToastService
-    {
-        public event Action<ToastEntry>? OnShow;
+﻿using BlazorBootstrap;
 
-        public void ShowToast(string message, string type, string title)
+namespace MyBlazorApp.Common
+{
+    public class AppToastService
+    {
+        /*public event Action<ToastEntry>? OnShow;*/
+
+        public event Action<ToastMessage>? OnShow;
+
+        public void Show(string message, ToastType type = ToastType.Success, string title = "")
+        {
+            var toast = new ToastMessage
+            {
+                Type = type,
+                Title = string.IsNullOrWhiteSpace(title) ? type.ToString() : title,
+                Message = message,
+                
+            };
+
+            OnShow?.Invoke(toast);
+        }
+
+        /*public void ShowToast(string message, string type, string title)
         {
             var entry = new ToastEntry
             {
@@ -16,7 +33,7 @@
             };
 
             OnShow?.Invoke(entry); // type = "success", "warning", "error"
-        }
+        }*/
 
         public class ToastEntry
         {
