@@ -36,9 +36,52 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body table-responsive">
+                        <Grid TItem="EmployeeListModel"
+                              Class="table table-hover table-bordered table-striped"
+                              DataProvider="LoadEmployeesDataProvider"
+                              AllowFiltering="true"
+                              AllowPaging="true"
+                              AllowSorting="true"
+                              AllowSelection="true"
+                              PageSize="10"
+                              Responsive="true">
+
+                            <GridColumns>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Emp ID" PropertyName="Empid" SortKeySelector="e => e.Empid">
+                                    @context.Empid
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="First Name" PropertyName="EmpFirstName" SortKeySelector="e => e.EmpFirstName">
+                                    @context.EmpFirstName
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Last Name" PropertyName="EmpLastName" SortKeySelector="e => e.EmpLastName">
+                                    @context.EmpLastName
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Username" PropertyName="Username" SortKeySelector="e => e.Username">
+                                    @context.Username
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Email" PropertyName="Email" SortKeySelector="e => e.Email">
+                                    @context.Email
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Department" PropertyName="DepartmentName" SortKeySelector="e => e.DepartmentName">
+                                    @context.DepartmentName
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Active" PropertyName="IsActive" SortKeySelector="e => e.IsActive">
+                                    <input type="checkbox" checked="@context.IsActive" disabled />
+                                </GridColumn>
+                                <GridColumn TItem="EmployeeListModel" HeaderText="Action">
+                                    <button class="btn btn-sm btn-primary me-1" @onclick="@(() => EditEmployee(context.Empid))">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" @onclick="@(() => AskDelete(context.Empid))">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </GridColumn>
+                            </GridColumns>
+
+                        </Grid>
                         @if (employeelist.Count == 0)
                         {
-                            <table class="table table-bordered border-3 border-black">
+                            @* <table class="table table-bordered border-3 border-black">
                                 <thead>
                                     <tr>
                                         <th>EmpId</th>
@@ -53,11 +96,15 @@
                                 </thead>
                                 <tbody>
                                 </tbody>
-                            </table>
+                            </table> *@
                         }
                         else
                         {
-                            <table class="table table-bordered border-3 border-black">
+                            
+
+
+
+                            @* <table class="table table-bordered border-3 border-black">
                                 <thead>
                                     <tr>
                                         <th>EmpId</th>
@@ -90,7 +137,7 @@
                                         </tr>
                                     }
                                 </tbody>
-                            </table>
+                            </table> *@
                         }
                     </div>
                 </div>
@@ -115,37 +162,91 @@
     private int DeleteEmpId { get; set; }
     private bool IsLoading { get; set; } = false;
 
-    private async Task LoadEmployees()
+    private async Task<GridDataProviderResult<EmployeeListModel>> LoadEmployeesDataProvider(GridDataProviderRequest<EmployeeListModel> request)
     {
         try
         {
-            IsLoading = true;
-            using var db = DbFactory.CreateDbContext();
-            employeelist = await (
-                           from e in db.Mst_Employees
-                           join d in db.Mst_Department.Where(x => x.DeletedBy == null) on e.Department_type equals d.Id into deptJoin
-                           from d in deptJoin.DefaultIfEmpty() // LEFT JOIN
-                           where e.DeletedBy == null && e.IsActive == IsActive
-                           select new EmployeeListModel
-                           {
-                               Empid = e.Emp_id,
-                               EmpFirstName = e.Emp_firstname,
-                               EmpLastName = e.Emp_surname,
-                               Username = e.Username,
-                               Email = e.Email_address,
-                               DepartmentName = d != null ? d.DepartmentName : string.Empty, // blank if no department
-                               IsActive = e.IsActive ?? false
-                           }).ToListAsync();
-            IsLoading = false;
+            using var db = await DbFactory.CreateDbContextAsync();
+
+            var query =
+                from e in db.Mst_Employees
+                join d in db.Mst_Department.Where(x => x.DeletedBy == null)
+                    on e.Department_type equals d.Id into deptJoin
+                from d in deptJoin.DefaultIfEmpty()
+                where e.DeletedBy == null && e.IsActive == IsActive
+                select new EmployeeListModel
+                {
+                    Empid = e.Emp_id,
+                    EmpFirstName = e.Emp_firstname,
+                    EmpLastName = e.Emp_surname,
+                    Username = e.Username,
+                    Email = e.Email_address,
+                    DepartmentName = d != null ? d.DepartmentName : string.Empty,
+                    IsActive = e.IsActive ?? false
+                };
+
+            // ✅ Sorting (new API)
+            if (request.Sorting.Any())
+            {
+                var sort = request.Sorting.FirstOrDefault();
+                query = sort.SortDirection == SortDirection.Descending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, sort.SortString))
+					: query.OrderBy(e => EF.Property<object>(e, sort.SortString));
+            }
+            else
+            {
+                query = query.OrderBy(e => e.Empid);
+            }
+
+            // ✅ Filtering (manual)
+            if (request.Filters?.Any() == true)
+            {
+                foreach (var filter in request.Filters)
+                {
+                    var value = filter.Value?.ToString()?.ToLower();
+                    if (string.IsNullOrWhiteSpace(value)) continue;
+
+                    switch (filter.PropertyName)
+                    {
+                        case nameof(EmployeeListModel.EmpFirstName):
+                            query = query.Where(e => e.EmpFirstName.ToLower().Contains(value));
+                            break;
+                        case nameof(EmployeeListModel.Email):
+                            query = query.Where(e => e.Email.ToLower().Contains(value));
+                            break;
+                        case nameof(EmployeeListModel.DepartmentName):
+                            query = query.Where(e => e.DepartmentName.ToLower().Contains(value));
+                            break;
+                    }
+                }
+            }
+
+            // ✅ Paging (new API)
+            var totalCount = await query.CountAsync();
+            var data = await query
+                .Skip(request.PageNumber)
+                .Take(request.PageSize)
+                .ToListAsync();
+
+            // ✅ Result (new API)
+            return new GridDataProviderResult<EmployeeListModel>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
         }
         catch (Exception ex)
         {
-            _helper.SaveException(ex, "EmployeeList/LoadEmployees");
-            ToastService.Show("Error while loading Employee List", ToastType.Danger, "Error");
+            _helper.SaveException(ex, "EmployeeList/LoadEmployeesDataProvider");
+            ToastService.Show("Error loading employee data", ToastType.Danger, "Error");
+            return new GridDataProviderResult<EmployeeListModel>
+            {
+                Data = new List<EmployeeListModel>(),
+                TotalCount = 0
+            };
         }
-
-
     }
+
 
     private void AskDelete(int id)
     {
@@ -165,13 +266,13 @@
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
-        await LoadEmployees();
+        //await LoadEmployees();
     }
 
     private async Task GetInActiveEmployeeList()
     {
         IsActive = !IsActive;
-        await LoadEmployees();
+        //await LoadEmployees();
     }
 
     private async Task EditEmployee(int EmpId)
@@ -194,7 +295,7 @@
             await db.SaveChangesAsync();
             ToastService.Show("Employee Deleted Successfully.", ToastType.Success, "Success");
 
-            await LoadEmployees();
+            //await LoadEmployees();
             StateHasChanged();
         }
         catch (Exception ex)

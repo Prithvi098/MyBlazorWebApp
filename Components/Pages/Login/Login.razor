@@ -35,10 +35,7 @@
 
             <div class="input-group mb-3">
                 <label class="form-label required">Password</label>
-                <InputText @bind-Value="loginModel.Password" Type="password" class="form-control" />
-                <div class="input-group-text">
-                    <span class="fas fa-lock"></span>
-                </div>
+                <PasswordInput @bind-Value="loginModel.Password" Type="password" />
             </div>
             <ValidationMessage For="@(() => loginModel.Password)" />
 
