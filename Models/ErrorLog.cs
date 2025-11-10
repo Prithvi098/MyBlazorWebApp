@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyBlazorApp.Models
 {
+    [Table("ErrorLog")]
     public class ErrorLog
     {
         [Key]

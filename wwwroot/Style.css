@@ -1241,3 +1241,26 @@ input.form-control:invalid {
 }
 
 /* ---------------- Blazor/FluentValidation Validation Styling ---------------*/
+
+
+/* ---------------- Table css ---------------*/
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(4px);
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------------- Table css ---------------*/
