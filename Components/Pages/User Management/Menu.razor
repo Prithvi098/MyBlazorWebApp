@@ -102,13 +102,21 @@
 			</div>
 			<div class="col-12 col-lg-7">
 				<div class="card">
-					<div class="card-header">
-						<h3>Menu List</h3>
+					<div class="content-header">
+						<div class="container-fluid">
+							<div class="row align-items-center">
+								<div class="col-12 col-md-7 col-lg-7">
+									<div class="main-title text-lg-left">
+										<h2>Menu List</h2>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
-					<div class="card-body table-responsive position-relative">
+					<div class="card-body table-responsive">
 
 					    <!-- Header Row -->
-					    <div class="row mb-3">
+					    <div class="row mb-2">
 					        <!-- Page Size -->
 					        <div class="col-md-6">
 					            <label class="fw-semibold me-2">Page Size:</label>
@@ -122,7 +130,7 @@
 					
 					        <!-- Search -->
 							<div class="col-md-6">
-								<div class="mb-2 float-right">
+								<div class="float-right">
 									<div class="input-group">
 										<span class="input-group-text bg-light">
 											<i class="fa-solid fa-search"></i>
@@ -149,7 +157,7 @@
 					
 					    <!-- Grid -->
 					    <Grid TItem="Mst_Menu_New"
-					          Class="table table-hover table-bordered table-striped fade-container"
+					          Class="table table-head-fixed text-nowrap m-0 w-100 responsive-tbl"
 					          AllowFiltering="false"
 					          AllowPaging="true"
 					          AllowSorting="true"

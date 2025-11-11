@@ -21,12 +21,14 @@
                             <div class="container-fluid">
                                 <div class="row align-items-center">
                                     <div class="col-12 col-md-6 col-lg-6">
-                                        <div class="main-title text-center text-md-left text-lg-left">
+                                        <div class="main-title text-lg-left">
                                             <h2>User Rights</h2>
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
+                                    <div class="col-12 col-md-6 col-lg-6 text-lg-right">
+                                        <button class="btn btn-secondary" type="button" >Clear</button>
+                                        <button class="btn btn-primary ml-2" type="submit">Save Copied Rights</button>
                                     </div>
                                 </div>
                             </div>
@@ -37,8 +39,8 @@
                                 <div class="col-12">
                                     <div class="input-group cus-select mb-2">
                                         <label class="form-label" for="exampleFormControlSelect1">User List</label>
-                                        <InputSelect class="form-control" @bind-Value="UserRight.EmpId">
-                                            <option value="">-- Select User --</option>
+                                        <InputSelect class="form-control" @bind-Value="EmpId">
+                                            <option value="0">-- Select User --</option>
                                             @foreach (var employee in EmployeeList)
                                             {
                                                 <option value="@employee.Value">@employee.Text</option>
@@ -58,12 +60,12 @@
                             <div class="container-fluid">
                                 <div class="row align-items-center">
                                     <div class="col-12 col-md-6 col-lg-6">
-                                        <div class="main-title text-center text-md-left text-lg-left">
+                                        <div class="main-title text-lg-left">
                                             <h2>User Rights Menu List</h2>
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right text-lg-right">
+                                    <div class="col-12 col-md-6 col-lg-6 text-lg-right">
                                         <button class="btn btn-secondary" id="btnClear" type="button">Clear</button>
                                         <button class="btn btn-primary ml-2" id="btnSaveUserRight" type="submit">Save</button>
                                     </div>
@@ -72,13 +74,60 @@
                         </div>
                         <ValidationMessage For="@(() => UserRight.UserRights)" />
                         <div class="card-body user-rights-menu">
-                            <div class="row" id="selectallhide" style="display:none">
-                                <div class="col-12">
-                                    <input type="checkbox" id="selectall" datauri="#" onchange="checkAllCheckbox()">
-                                    <label for="selectall" class="custom-unchecked">Select All</label>
+                            @if (UserRightsList.Count > 0)
+                            {
+                                <div class="row" id="selectallhide" >
+                                    <div class="col-12">
+                                        <input type="checkbox" id="selectall" datauri="#" onchange="checkAllCheckbox()">
+                                        <label for="selectall" class="custom-unchecked">Select All</label>
+                                    </div>
                                 </div>
-                            </div>
-                            <ul id="menuTree" class="treeview"></ul>
+                                <ul id="menuTree" class="treeview">
+                                    
+                                    @foreach (var parent in UserRightsList)
+                                    {
+                                        <li>
+                                            <input type="checkbox" checked="@parent.IsChecked" id="menu_@parent.MID" />
+                                            <label class="custom-unchecked fw-bold" for="menu_@parent.MID">@parent.MenuName</label>
+                                            <ul>
+                                                @if (parent.SubMenus.Count > 0)
+                                                {
+                                                    foreach (var submenu in parent.SubMenus)
+                                                    {
+                                                        <li>
+                                                            <input type="checkbox" checked="@submenu.IsChecked" id="menu_@submenu.MID" />
+                                                            <label class="custom-unchecked fw-bold" for="menu_@submenu.MID">@submenu.MenuName</label>
+                                                            <ul>
+                                                                <li>
+                                                                    @foreach (var right in submenu.Rights)
+                                                                    {
+                                                                        <input type="checkbox" checked="@right.IsChecked" id="menu_Ur_@right.rights.RID" />
+                                                                        <label class="custom-unchecked fw-bold" for="menu_Ur_@right.rights.RID">@right.rights.RightsName &nbsp;&nbsp;</label>
+                                                                    }
+                                                                </li>
+                                                            </ul>
+                                                        </li>
+                                                        
+                                                        
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                   <li>
+                                                        @foreach (var right in parent.Rights)
+                                                        {
+
+                                                            <input type="checkbox" checked="@right.IsChecked" id="menu_Ur_@right.rights.RID" />
+                                                            <label class="custom-unchecked fw-bold" for="menu_Ur_@right.rights.RID">@right.rights.RightsName</label>
+                                                        }
+                                                   </li>
+                                                }
+                                            </ul>
+                                        </li>
+                                    }
+                                    
+                                </ul>
+                            }
                         </div>
                     </div>
                 </div>
@@ -92,7 +141,20 @@
 @code {
     private List<SelectListItem> EmployeeList = new();
     private UserRightsModel UserRight = new UserRightsModel();
-    private CopyUserRightsModel CopyUserRights = new();
+    private List<MenuModel> UserRightsList = new List<MenuModel>();
+    private int _empId;
+    public int EmpId
+    {
+        get => _empId;
+        set
+        {
+            if (_empId != value)
+            {
+                _empId = value;
+                _ = GetUserRightsDetails(); // call async method without blocking
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,6 +179,13 @@
         {
             ToastService.Show($"Error loading employees: {ex.Message}", ToastType.Warning, "warning");
         }
+    }
+
+    private async Task GetUserRightsDetails()
+    {
+        UserRight.EmpId = EmpId;
+        UserRightsList = await MenuService.GetMenuTreeAsync();
+        StateHasChanged();
     }
 
     private async Task SaveUserRights()

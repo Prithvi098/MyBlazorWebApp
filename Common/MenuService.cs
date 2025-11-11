@@ -107,6 +107,15 @@ namespace MyBlazorApp.Common
                     //MenuUrl = r.Field<string>("MenuUrl"),
                     MenuDesc = r.Field<string>("MenuDesc"),
                     SortOrder = r.Field<int>("SortOrder"),
+                    Rights = ds.Tables[2].AsEnumerable().Select(r2 => new RightsModel
+                    {
+                       rights = new Mst_Right
+                       {
+                           RID = r2.Field<int>("RID"),
+                           RightsName = r2.Field<string>("RightsName"),
+                       },
+                       IsChecked = false
+                    }).ToList(),
                     SubMenus = new List<MenuModel>()
                 }).ToList();
 
@@ -119,7 +128,16 @@ namespace MyBlazorApp.Common
                         MenuName = r.Field<string>("MenuName"),
                         //MenuUrl = r.Field<string>("MenuUrl"),
                         MenuDesc = r.Field<string>("MenuDesc"),
-                        SortOrder = r.Field<int>("SortOrder")
+                        SortOrder = r.Field<int>("SortOrder"),
+                        Rights = ds.Tables[2].AsEnumerable().Select(r2 => new RightsModel
+                        {
+                            rights = new Mst_Right
+                            {
+                                RID = r2.Field<int>("RID"),
+                                RightsName = r2.Field<string>("RightsName"),
+                            },
+                            IsChecked = false
+                        }).ToList(),
                     }).ToList();
 
                     // --- Attach Submenus to Main Menus ---

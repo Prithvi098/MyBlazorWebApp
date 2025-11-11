@@ -7,7 +7,7 @@
             <div class="container-fluid">
                 <div class="row align-items-center">
                     <div class="col-12 col-md-6 col-lg-6">
-                        <div class="main-title text-center text-md-left text-lg-left">
+                        <div class="main-title text-lg-left">
                             <h2>Copy User Rights</h2>
                         </div>
                     </div>
@@ -56,8 +56,8 @@
                 </div>
             </div>
 
-            <div class="col-12 text-center text-md-right text-lg-right mt-3">
-                <button class="btn btn-secondary" type="button">Clear</button>
+            <div class="col-12 text-lg-right mt-3">
+                <button class="btn btn-secondary" type="button" @onclick="Clear">Clear</button>
                 <button class="btn btn-primary ml-2" type="submit">Save Copied Rights</button>
             </div>
         </div>
@@ -66,12 +66,16 @@
 
 @code {
     public CopyUserRightsModel CopyUserRights { get; set; } = new();
-    public EventCallback OnSave { get; set; }
     [Parameter] public List<SelectListItem> EmployeeList { get; set; } = new();
 
 
     private async Task HandleValidSubmit()
     {
-        
+
+    }
+
+    private void Clear()
+    {
+        CopyUserRights = new();
     }
 }

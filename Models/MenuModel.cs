@@ -10,6 +10,14 @@
         public int SortOrder { get; set; }
         public bool IsChecked { get; set; } = false;
 
+        public List<RightsModel> Rights { get; set; } = new();
+
         public List<MenuModel> SubMenus { get; set; } = new();
+    }
+
+    public class RightsModel
+    {
+        public Mst_Right rights { get; set; } = new();
+        public bool IsChecked { get; set; } = false;
     }
 }
