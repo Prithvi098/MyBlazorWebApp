@@ -107,7 +107,7 @@ namespace MyBlazorApp.Common
                     //MenuUrl = r.Field<string>("MenuUrl"),
                     MenuDesc = r.Field<string>("MenuDesc"),
                     SortOrder = r.Field<int>("SortOrder"),
-                    Rights = ds.Tables[2].AsEnumerable().Select(r2 => new RightsModel
+                    Rights = ds.Tables[1].Rows.Count > 0 ? null : ds.Tables[2].AsEnumerable().Select(r2 => new RightsModel
                     {
                        rights = new Mst_Right
                        {

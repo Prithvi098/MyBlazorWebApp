@@ -87,7 +87,7 @@
                                     @foreach (var parent in UserRightsList)
                                     {
                                         <li>
-                                            <input type="checkbox" checked="@parent.IsChecked" id="menu_@parent.MID" />
+                                            <input type="checkbox" checked="@parent.IsChecked" id="menu_@parent.MID" @onchange="(e) => ToggleMenu(parent, (bool)((ChangeEventArgs)e).Value!)" />
                                             <label class="custom-unchecked fw-bold" for="menu_@parent.MID">@parent.MenuName</label>
                                             <ul>
                                                 @if (parent.SubMenus.Count > 0)
@@ -95,30 +95,33 @@
                                                     foreach (var submenu in parent.SubMenus)
                                                     {
                                                         <li>
-                                                            <input type="checkbox" checked="@submenu.IsChecked" id="menu_@submenu.MID" />
+                                                            <input type="checkbox" checked="@submenu.IsChecked" id="menu_@submenu.MID" @onchange="(e) => ToggleSubMenu(parent, submenu, (bool)((ChangeEventArgs)e).Value!)" />
                                                             <label class="custom-unchecked fw-bold" for="menu_@submenu.MID">@submenu.MenuName</label>
                                                             <ul>
                                                                 <li>
-                                                                    @foreach (var right in submenu.Rights)
+                                                                    @if (submenu.Rights != null)
                                                                     {
-                                                                        <input type="checkbox" checked="@right.IsChecked" id="menu_Ur_@right.rights.RID" />
-                                                                        <label class="custom-unchecked fw-bold" for="menu_Ur_@right.rights.RID">@right.rights.RightsName &nbsp;&nbsp;</label>
+                                                                        @foreach (var right in submenu.Rights)
+                                                                        {
+                                                                            <input type="checkbox" checked="@right.IsChecked" id="menu_Ur_@right.rights.RID" @onchange="(e) => ToggleRight(submenu, right, (bool)((ChangeEventArgs)e).Value!)" />
+                                                                            <label class="custom-unchecked fw-bold" for="menu_Ur_@right.rights.RID">@right.rights.RightsName &nbsp;&nbsp;</label>
+                                                                        }
                                                                     }
                                                                 </li>
                                                             </ul>
                                                         </li>
-                                                        
-                                                        
                                                     }
                                                 }
                                                 else
                                                 {
                                                    <li>
-                                                        @foreach (var right in parent.Rights)
+                                                        @if (parent.Rights != null)
                                                         {
-
-                                                            <input type="checkbox" checked="@right.IsChecked" id="menu_Ur_@right.rights.RID" />
-                                                            <label class="custom-unchecked fw-bold" for="menu_Ur_@right.rights.RID">@right.rights.RightsName</label>
+                                                            @foreach (var right in parent.Rights)
+                                                            {
+                                                                <input type="checkbox" checked="@right.IsChecked" id="menu_Ur_@right.rights.RID" @onchange="(e) => ToggleRight(parent, right, (bool)((ChangeEventArgs)e).Value!)" />
+                                                                <label class="custom-unchecked fw-bold" for="menu_Ur_@right.rights.RID">@right.rights.RightsName</label>
+                                                            }
                                                         }
                                                    </li>
                                                 }
@@ -186,6 +189,208 @@
         UserRight.EmpId = EmpId;
         UserRightsList = await MenuService.GetMenuTreeAsync();
         StateHasChanged();
+    }
+
+    private async Task ToggleMenu(MenuModel menu, bool isChecked)
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        if (isChecked)
+        {
+            menu.IsChecked = isChecked;
+            Mst_UserRight_New rights = new();
+            rights.EmpID = UserRight.EmpId;
+            rights.MenuID = menu.MID;
+            rights.RID = (menu.Rights != null && menu.Rights.Any()) ? string.Join(",", menu.Rights.Select(r => r.rights.RID.ToString()).ToList()) : "4";
+            rights.CreatedOn = DateTime.Now;
+            UserRight.UserRights.Add(rights);
+        }
+        else
+        {
+            UserRight.UserRights.RemoveAll(u => u.MenuID == menu.MID);
+        }
+
+        if (menu.SubMenus.Any())
+        {
+            foreach (var submenu in menu.SubMenus)
+            {
+                ToggleSubMenu(menu, submenu, isChecked);
+            }
+        }
+        
+
+        foreach (var right in menu.Rights)
+        {
+            right.IsChecked = isChecked;
+        }
+
+        UpdateUserRights(menu);
+        StateHasChanged();
+    }
+
+    private void ToggleSubMenu(MenuModel parent, MenuModel submenu, bool isChecked)
+    {
+        submenu.IsChecked = isChecked;
+
+        foreach (var right in submenu.Rights)
+        {
+            right.IsChecked = isChecked;
+        }
+
+        UpdateUserRights(submenu);
+
+        // Auto-uncheck parent if all children are unchecked
+        parent.IsChecked = parent.SubMenus.Any(s => s.IsChecked) || parent.Rights.Any(r => r.IsChecked);
+        StateHasChanged();
+    }
+
+    private void ToggleRight(MenuModel menu, RightsModel right, bool isChecked)
+    {
+        right.IsChecked = isChecked;
+
+        // Auto-check parent if any right is checked
+        menu.IsChecked = menu.Rights.Any(r => r.IsChecked);
+
+        UpdateUserRights(menu);
+        StateHasChanged();
+    }
+
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = Convert.ToBoolean(e.Value);
+
+        foreach (var parent in UserRightsList)
+        {
+            ToggleMenu(parent, isChecked);
+        }
+
+        StateHasChanged();
+    }
+
+    private void UpdateUserRights(MenuModel menu)
+    {
+        // Remove existing rights for this menu
+        UserRight.UserRights.RemoveAll(r => r.MenuID == menu.MID);
+
+        if (menu.IsChecked)
+        {
+            // Add rights for checked menu
+            if (menu.Rights.Any())
+            {
+                foreach (var right in menu.Rights.Where(r => r.IsChecked))
+                {
+                    UserRight.UserRights.Add(new Mst_UserRight_New
+                    {
+                        MenuID = menu.MID,
+                        UserID = UserRight.EmpId,
+                        RID = right.rights.RID.ToString(),
+                        CreatedOn = DateTime.Now
+                    });
+                }
+            }
+            else
+            {
+                // Default right (View)
+                UserRight.UserRights.Add(new Mst_UserRight_New
+                {
+                    MenuID = menu.MID,
+                    UserID = UserRight.EmpId,
+                    RID = "4",
+                    CreatedOn = DateTime.Now
+                });
+            }
+        }
+
+        // Apply same logic recursively for submenus
+        foreach (var sub in menu.SubMenus)
+        {
+            UpdateUserRights(sub);
+        }
+    }
+
+    private void AddMainMenu(MenuModel mainMenu, bool isChecked)
+    {
+        // Mark this menu’s checkbox state
+        mainMenu.IsChecked = isChecked;
+
+        // If menu is unchecked, remove its rights from UserRight.UserRights
+        if (!isChecked)
+        {
+            UserRight.UserRights.RemoveAll(r => r.MenuID == mainMenu.MID);
+            foreach (var sub in mainMenu.SubMenus)
+            {
+                sub.IsChecked = false;
+                UserRight.UserRights.RemoveAll(r => r.MenuID == sub.MID);
+                RemoveRightsRecursive(sub); // recursive cleanup
+            }
+            return;
+        }
+
+        // ✅ Add rights for this main menu (if any)
+        if (!mainMenu.SubMenus.Any())
+        {
+            AddRightsForMenu(mainMenu);
+        }
+
+        // ✅ Process all submenus recursively
+        foreach (var sub in mainMenu.SubMenus)
+        {
+            sub.IsChecked = isChecked;
+            AddRightsForMenu(sub); // add submenu rights
+
+            if (sub.SubMenus.Any())
+            {
+                AddMainMenu(sub, isChecked); // recursion
+            }
+        }
+    }
+
+    private void AddRightsForMenu(MenuModel menu)
+    {
+        // If there are explicit rights attached to this menu
+        if (menu.Rights.Any())
+        {
+            foreach (var right in menu.Rights.Where(r => r.IsChecked))
+            {
+                Mst_UserRight_New newRight = new Mst_UserRight_New
+                {
+                    MenuID = menu.MID,
+                    UserID = UserRight.EmpId,
+                    RID = right.rights.RID.ToString(),
+                    CreatedOn = DateTime.Now
+                };
+
+                // Avoid duplicates
+                if (!UserRight.UserRights.Any(x => x.MenuID == newRight.MenuID && x.RID == newRight.RID))
+                {
+                    UserRight.UserRights.Add(newRight);
+                }
+            }
+        }
+        else
+        {
+            // If menu has no explicit rights, add a single default one (like View permission)
+            Mst_UserRight_New defaultRight = new Mst_UserRight_New
+            {
+                MenuID = menu.MID,
+                UserID = UserRight.EmpId,
+                RID = "4", // or your default right ID
+                CreatedOn = DateTime.Now
+            };
+
+            if (!UserRight.UserRights.Any(x => x.MenuID == defaultRight.MenuID && x.RID == defaultRight.RID))
+            {
+                UserRight.UserRights.Add(defaultRight);
+            }
+        }
+    }
+
+    private void RemoveRightsRecursive(MenuModel menu)
+    {
+        UserRight.UserRights.RemoveAll(r => r.MenuID == menu.MID);
+        foreach (var sub in menu.SubMenus)
+        {
+            RemoveRightsRecursive(sub);
+        }
     }
 
     private async Task SaveUserRights()

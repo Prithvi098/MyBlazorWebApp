@@ -10,7 +10,7 @@
         public int SortOrder { get; set; }
         public bool IsChecked { get; set; } = false;
 
-        public List<RightsModel> Rights { get; set; } = new();
+        public List<RightsModel>? Rights { get; set; }
 
         public List<MenuModel> SubMenus { get; set; } = new();
     }
