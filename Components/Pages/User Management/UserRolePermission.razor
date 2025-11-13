@@ -12,7 +12,7 @@
         <div class="row">
             <div class=" col-12 col-lg-6">
                 <div class="card">
-                    <EditForm Model="userRolePermission" >
+                    <EditForm Model="userRolePermission" OnValidSubmit="SaveEmployeeRole">
                         <FluentValidationValidator />
 
                         <div class="content-header">
@@ -264,6 +264,7 @@
                 await dbContext.SaveChangesAsync();
                 ToastService.Show("User Role Permission Saved Successfully.", ToastType.Success, "Success");
                 await LoadUserRolePermissionList();
+                userRolePermission = new();
             }
             else
             {

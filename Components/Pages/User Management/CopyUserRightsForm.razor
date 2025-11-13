@@ -21,7 +21,7 @@
                     <div class="input-group cus-select mb-2">
                         <label class="form-label">From User</label>
                         <InputSelect class="form-control" @bind-Value="CopyUserRights.FromUserId">
-                            <option value="">-- Select From User --</option>
+                            <option value="0">-- Select From User --</option>
                             @foreach (var employee in EmployeeList)
                             {
                                 <option value="@employee.Value">@employee.Text</option>
@@ -41,7 +41,7 @@
                     <div class="input-group cus-select mb-2">
                         <label class="form-label">To User</label>
                         <InputSelect class="form-control" @bind-Value="CopyUserRights.ToUserId">
-                            <option value="">-- Select To User --</option>
+                            <option value="0">-- Select To User --</option>
                             @foreach (var employee in EmployeeList)
                             {
                                 <option value="@employee.Value">@employee.Text</option>

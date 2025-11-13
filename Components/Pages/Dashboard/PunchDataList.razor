@@ -1,0 +1,33 @@
+﻿@rendermode InteractiveServer
+
+@if (PunchList is null || PunchList.Count == 0)
+{
+    <p>No punch data available.</p>
+}
+else
+{
+    foreach (var item in PunchList)
+    {
+        <div class="mb-2">
+            @if (item.PunchIn.HasValue)
+            {
+                <span style="font-size:large;">
+                    <label style="color:blue">IN TIME :</label>
+                    @item.PunchIn.Value.ToString("HH:mm:ss")
+                </span>
+            }
+
+            @if (item.PunchOut.HasValue)
+            {
+                <span style="font-size:large; margin-left:20px;">
+                    <label style="color:blue">OUT TIME :</label>
+                    @item.PunchOut.Value.ToString("HH:mm:ss")
+                </span>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public List<EmployeePunchDetail>? PunchList { get; set; }
+}

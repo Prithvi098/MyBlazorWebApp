@@ -5,26 +5,28 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDbContextFactory<EMSContext> DbFactory
 @inject AppToastService ToastService
+@inject AuthenticationStateProvider Auth
+@inject PunchService PunchService
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
+
+<style>
+    /* Add CSS styles for the digital clock */
+    .digital-clock {
+        font-size: 24px;
+        font-family: Arial, sans-serif;
+        
+        padding-top: 10px;
+    }
+</style>
+
 <section class="content">
-    <div class="content-header">
-        <div class="container-fluid p-0">
-            <div class="row">
-                <div class="col-6 col-lg-6">
-					<div class="main-title">
-                        <h2 class="m-0">Dashboard</h2>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-6">
-                </div>
-            </div>
-        </div>
-    </div>
+    
     <div class="container-fluid p-0">
-        <AuthorizeView>
+        @* <AuthorizeView>
             <Authorized>
                 <h1>Hello, @context.User.Identity?.Name!</h1>
                 <p>Welcome to your new app.</p>
@@ -36,16 +38,129 @@
             <NotAuthorized>
                 <p>You are not authorized. Please log in.</p>
             </NotAuthorized>
-        </AuthorizeView>
+        </AuthorizeView> *@
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="content-header">
+                    <div class="container-fluid p-0">
+                        <div class="row">
+                            <div class="col-6 col-lg-6">
+                                <div class="main-title">
+                                    <h3 class="m-0">Dashboard</h3>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-6">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- small box -->
+                <div class="small-box bg-teal">
+                    <div class="inner">
+                        <h3>@LeaveAppliedCount</h3>
+                        <p>Leave Apply</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-folder" style="font-size:xx-large"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-9 justify-content-center" style="text-align:center">
+                <div class="digital-clock">@CurrentTime</div>
+
+                <button class="btn btn-info btn-lg mt-3 mb-4"
+                        @onclick="Punching"
+                        disabled="@IsBusy">
+                    @ButtonText
+                </button>
+
+
+                <PunchDataList PunchList="PunchList" />
+            </div>
+        </div>
+
     </div>
-    @* <Toasts class="p-3" Messages="messages" AutoHide="true" Delay="6000" Placement="ToastsPlacement.TopRight" /> *@
+    
 </section>
 
 
 @code {
     List<ToastMessage> messages = new List<ToastMessage>();
+    private int LeaveAppliedCount { get; set; } = 0;
+    private int EmpId;
+    private List<EmployeePunchDetail> PunchList = new();
+    private bool IsBusy = false;
 
-    private void ShowMessage(ToastType toastType) => messages.Add(CreateToastMessage(toastType));
+    private string INOUTSTATUS => PunchList.Any(p => p.PunchIn.HasValue && !p.PunchOut.HasValue) ? "IN" : "OUT";
+    private string ButtonText => INOUTSTATUS == "OUT" ? "PUNCH IN" : "PUNCH OUT";
+
+    private string CurrentTime => DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("HH:mm:ss");
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var EmpId = 0;
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var empIdClaim = user.FindFirst("EmpId")?.Value;
+
+            if (int.TryParse(empIdClaim, out int empId))
+            {
+                EmpId = empId;
+            }
+        }
+
+        DateTime currentDate = DateTime.Now;
+        DateTime startFinancialYear = currentDate.Month < 4 ? new DateTime(currentDate.Year - 1, 4, 1) : new DateTime(currentDate.Year, 4, 1);
+        DateTime endFinancialYear = currentDate.Month < 4 ? new DateTime(currentDate.Year, 3, 31) : new DateTime(currentDate.Year + 1, 3, 31);
+        LeaveAppliedCount = dbContext.Mst_Leave_Apllications.Where(l => l.EmpId == EmpId && l.DeletedBy == null && l.Leave_Status != "Rejected" && l.Leave_Status != "Canceled" && l.LeaveStartDate >= startFinancialYear && l.LeaveStartDate <= endFinancialYear).Count();
+
+        await LoadUserId();
+        await LoadPunchList();
+
+        // Auto-refresh clock
+        var timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (_, _) => InvokeAsync(StateHasChanged);
+        timer.Start();
+    }
+
+    private async Task LoadUserId()
+    {
+        var state = await Auth.GetAuthenticationStateAsync();
+        var empIdClaim = state.User.FindFirst("EmpId");
+        EmpId = empIdClaim != null ? int.Parse(empIdClaim.Value) : 0;
+    }
+
+    private async Task LoadPunchList()
+    {
+        PunchList = await PunchService.GetTodayPunches(EmpId);
+    }
+
+    private async Task Punching()
+    {
+        IsBusy = true;
+
+        if (INOUTSTATUS == "OUT")
+        {
+            var result = await PunchService.PunchIn(EmpId);
+            //if (result.success)
+            //    ToastService.Show("Punched In Successfully", ToastType.Success);
+        }
+        else
+        {
+            var result = await PunchService.PunchOut(EmpId);
+            //if (result.success)
+            //    ToastService.Show("Punched Out Successfully", ToastType.Warning);
+        }
+
+        await LoadPunchList();
+        IsBusy = false;
+    }
+
 
     private ToastMessage CreateToastMessage(ToastType toastType)
     => new ToastMessage

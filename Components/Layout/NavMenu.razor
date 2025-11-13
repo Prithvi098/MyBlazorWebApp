@@ -1,4 +1,5 @@
 ﻿@inject MenuService MenuService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @rendermode InteractiveServer
 
 @* <nav class="main-header navbar navbar-expand-md navbar-light border-0">
@@ -108,10 +109,31 @@
     private List<MenuModel> Menus = new();
     private string UserFullName = "User";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        int userId = 381; // Replace with actual session/user
-        Menus = MenuService.GetUserMenus(userId, 1);
-        UserFullName = "John Doe"; // Example
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Get EmpId claim (ensure this claim is added when logging in)
+            var empIdClaim = user.FindFirst("EmpId")?.Value;
+
+            if (int.TryParse(empIdClaim, out int empId))
+            {
+                // ✅ Use EmpId in your MenuService
+                Menus = MenuService.GetUserMenus(empId, 1);
+            }
+
+            // Example: get full name claim or use fallback
+            UserFullName = user.FindFirst("FullName")?.Value ?? user.Identity?.Name ?? "User";
+        }
+        else
+        {
+            // Not logged in
+            UserFullName = "Guest";
+            Menus = new List<MenuModel>();
+        }
+
     }
 }

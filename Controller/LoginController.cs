@@ -38,7 +38,8 @@ namespace MyBlazorApp.Controller
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
-                new Claim("EmpId", emp.Emp_id.ToString())
+                new Claim("EmpId", emp.Emp_id.ToString()),
+                new Claim("FullName", emp.Emp_firstname + " " + emp.Emp_surname),
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
