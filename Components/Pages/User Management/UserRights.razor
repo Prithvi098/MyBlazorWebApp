@@ -191,205 +191,214 @@
         StateHasChanged();
     }
 
-    private async Task ToggleMenu(MenuModel menu, bool isChecked)
+    // -------------------------------
+    // MAIN TOGGLE: Parent Menu
+    // -------------------------------
+    private void ToggleMenu(MenuModel parent, bool isChecked)
     {
-        using var dbContext = await DbFactory.CreateDbContextAsync();
-        if (isChecked)
+        parent.IsChecked = isChecked;
+
+        if (parent.SubMenus.Any())
         {
-            menu.IsChecked = isChecked;
-            Mst_UserRight_New rights = new();
-            rights.EmpID = UserRight.EmpId;
-            rights.MenuID = menu.MID;
-            rights.RID = (menu.Rights != null && menu.Rights.Any()) ? string.Join(",", menu.Rights.Select(r => r.rights.RID.ToString()).ToList()) : "4";
-            rights.CreatedOn = DateTime.Now;
-            UserRight.UserRights.Add(rights);
+            // parent has submenus → only save RID = 4
+            if (isChecked)
+                AddUserRight(parent.MID, "4");
+            else
+                UserRight.UserRights.RemoveAll(x => x.MenuID == parent.MID);
+
+            // apply to all submenus
+            foreach (var sub in parent.SubMenus)
+            {
+                ToggleSubMenu(parent, sub, isChecked, fromParent: true);
+            }
         }
         else
         {
-            UserRight.UserRights.RemoveAll(u => u.MenuID == menu.MID);
-        }
-
-        if (menu.SubMenus.Any())
-        {
-            foreach (var submenu in menu.SubMenus)
+            // Parent without children → use full rights list from parent.Rights
+            if (isChecked)
             {
-                ToggleSubMenu(menu, submenu, isChecked);
+                var allRids = string.Join(",", parent.Rights.Select(r => r.rights.RID));
+                AddUserRight(parent.MID, allRids);
+
+                foreach (var r in parent.Rights)
+                    r.IsChecked = true;
+            }
+            else
+            {
+                foreach (var r in parent.Rights)
+                    r.IsChecked = false;
+
+                UserRight.UserRights.RemoveAll(x => x.MenuID == parent.MID);
             }
         }
-        
 
-        foreach (var right in menu.Rights)
-        {
-            right.IsChecked = isChecked;
-        }
-
-        UpdateUserRights(menu);
         StateHasChanged();
     }
 
-    private void ToggleSubMenu(MenuModel parent, MenuModel submenu, bool isChecked)
+
+
+    // -------------------------------
+    // SUBMENU toggle logic
+    // -------------------------------
+    private void ToggleSubMenu(MenuModel parent, MenuModel submenu, bool isChecked, bool fromParent = false)
     {
         submenu.IsChecked = isChecked;
 
-        foreach (var right in submenu.Rights)
+        if (isChecked)
         {
-            right.IsChecked = isChecked;
+            // If parent triggered → select all rights
+            if (fromParent && submenu.Rights != null)
+            {
+                foreach (var r in submenu.Rights)
+                    r.IsChecked = true;
+            }
+
+            var selected = submenu.Rights
+                .Where(r => r.IsChecked)
+                .Select(r => r.rights.RID)
+                .ToList() ?? new List<int>();
+
+            AddUserRight(submenu.MID, string.Join(",", selected));
+        }
+        else
+        {
+            // unselect all rights when submenu unchecked
+            if (submenu.Rights != null)
+            {
+                foreach (var r in submenu.Rights)
+                    r.IsChecked = false;
+            }
+
+            UserRight.UserRights.RemoveAll(x => x.MenuID == submenu.MID);
         }
 
-        UpdateUserRights(submenu);
-
-        // Auto-uncheck parent if all children are unchecked
-        parent.IsChecked = parent.SubMenus.Any(s => s.IsChecked) || parent.Rights.Any(r => r.IsChecked);
-        StateHasChanged();
+        // update parent checked state (auto-check/uncheck)
+        UpdateParentAutoCheck(parent);
     }
 
+
+
+
+    // -------------------------------
+    // TOGGLE RIGHT (submenu or parent)
+    // -------------------------------
     private void ToggleRight(MenuModel menu, RightsModel right, bool isChecked)
     {
         right.IsChecked = isChecked;
 
-        // Auto-check parent if any right is checked
-        menu.IsChecked = menu.Rights.Any(r => r.IsChecked);
+        var selectedRids = menu.Rights
+            .Where(r => r.IsChecked)
+            .Select(r => r.rights.RID)
+            .ToList();
 
-        UpdateUserRights(menu);
-        StateHasChanged();
-    }
-
-    private void ToggleSelectAll(ChangeEventArgs e)
-    {
-        bool isChecked = Convert.ToBoolean(e.Value);
-
-        foreach (var parent in UserRightsList)
+        if (selectedRids.Count > 0)
         {
-            ToggleMenu(parent, isChecked);
-        }
+            AddUserRight(menu.MID, string.Join(",", selectedRids));
 
-        StateHasChanged();
-    }
-
-    private void UpdateUserRights(MenuModel menu)
-    {
-        // Remove existing rights for this menu
-        UserRight.UserRights.RemoveAll(r => r.MenuID == menu.MID);
-
-        if (menu.IsChecked)
-        {
-            // Add rights for checked menu
-            if (menu.Rights.Any())
-            {
-                foreach (var right in menu.Rights.Where(r => r.IsChecked))
-                {
-                    UserRight.UserRights.Add(new Mst_UserRight_New
-                    {
-                        MenuID = menu.MID,
-                        UserID = UserRight.EmpId,
-                        RID = right.rights.RID.ToString(),
-                        CreatedOn = DateTime.Now
-                    });
-                }
-            }
-            else
-            {
-                // Default right (View)
-                UserRight.UserRights.Add(new Mst_UserRight_New
-                {
-                    MenuID = menu.MID,
-                    UserID = UserRight.EmpId,
-                    RID = "4",
-                    CreatedOn = DateTime.Now
-                });
-            }
-        }
-
-        // Apply same logic recursively for submenus
-        foreach (var sub in menu.SubMenus)
-        {
-            UpdateUserRights(sub);
-        }
-    }
-
-    private void AddMainMenu(MenuModel mainMenu, bool isChecked)
-    {
-        // Mark this menu’s checkbox state
-        mainMenu.IsChecked = isChecked;
-
-        // If menu is unchecked, remove its rights from UserRight.UserRights
-        if (!isChecked)
-        {
-            UserRight.UserRights.RemoveAll(r => r.MenuID == mainMenu.MID);
-            foreach (var sub in mainMenu.SubMenus)
-            {
-                sub.IsChecked = false;
-                UserRight.UserRights.RemoveAll(r => r.MenuID == sub.MID);
-                RemoveRightsRecursive(sub); // recursive cleanup
-            }
-            return;
-        }
-
-        // ✅ Add rights for this main menu (if any)
-        if (!mainMenu.SubMenus.Any())
-        {
-            AddRightsForMenu(mainMenu);
-        }
-
-        // ✅ Process all submenus recursively
-        foreach (var sub in mainMenu.SubMenus)
-        {
-            sub.IsChecked = isChecked;
-            AddRightsForMenu(sub); // add submenu rights
-
-            if (sub.SubMenus.Any())
-            {
-                AddMainMenu(sub, isChecked); // recursion
-            }
-        }
-    }
-
-    private void AddRightsForMenu(MenuModel menu)
-    {
-        // If there are explicit rights attached to this menu
-        if (menu.Rights.Any())
-        {
-            foreach (var right in menu.Rights.Where(r => r.IsChecked))
-            {
-                Mst_UserRight_New newRight = new Mst_UserRight_New
-                {
-                    MenuID = menu.MID,
-                    UserID = UserRight.EmpId,
-                    RID = right.rights.RID.ToString(),
-                    CreatedOn = DateTime.Now
-                };
-
-                // Avoid duplicates
-                if (!UserRight.UserRights.Any(x => x.MenuID == newRight.MenuID && x.RID == newRight.RID))
-                {
-                    UserRight.UserRights.Add(newRight);
-                }
-            }
+            // auto check menu if any right is selected
+            menu.IsChecked = true;
         }
         else
         {
-            // If menu has no explicit rights, add a single default one (like View permission)
-            Mst_UserRight_New defaultRight = new Mst_UserRight_New
-            {
-                MenuID = menu.MID,
-                UserID = UserRight.EmpId,
-                RID = "4", // or your default right ID
-                CreatedOn = DateTime.Now
-            };
+            // no rights selected → remove entry
+            UserRight.UserRights.RemoveAll(x => x.MenuID == menu.MID);
+            menu.IsChecked = false;
+        }
 
-            if (!UserRight.UserRights.Any(x => x.MenuID == defaultRight.MenuID && x.RID == defaultRight.RID))
-            {
-                UserRight.UserRights.Add(defaultRight);
-            }
+        StateHasChanged();
+    }
+
+
+
+
+    // -------------------------------
+    // Parent WITH NO Submenus
+    // dynamic CSV from rights
+    // -------------------------------
+    private void UpdateParentMenuRights(MenuModel parent)
+    {
+        UserRight.UserRights?.RemoveAll(x => x.MenuID == parent.MID);
+
+        var selectedRights = parent.Rights
+            .Where(r => r.IsChecked)
+            .Select(r => r.rights.RID)
+            .ToList();
+
+        if (selectedRights?.Any() == true)
+        {
+            AddUserRight(parent.MID, string.Join(",", selectedRights));
+            parent.IsChecked = true;
+        }
+        else
+        {
+            parent.IsChecked = false;
         }
     }
 
-    private void RemoveRightsRecursive(MenuModel menu)
+
+
+    // -------------------------------
+    // SUBMENU dynamic CSV update
+    // -------------------------------
+    private void UpdateSubMenuRights(MenuModel submenu)
     {
-        UserRight.UserRights.RemoveAll(r => r.MenuID == menu.MID);
-        foreach (var sub in menu.SubMenus)
+        UserRight.UserRights?.RemoveAll(x => x.MenuID == submenu.MID);
+
+        var selectedRights = submenu.Rights
+            .Where(r => r.IsChecked)
+            .Select(r => r.rights.RID)
+            .ToList();
+
+        if (selectedRights.Any())
         {
-            RemoveRightsRecursive(sub);
+            AddUserRight(submenu.MID, string.Join(",", selectedRights));
+            submenu.IsChecked = true;
+        }
+        else
+        {
+            submenu.IsChecked = false;
+        }
+    }
+
+
+
+    // -------------------------------
+    // AUTO CHECK PARENT
+    // -------------------------------
+    private void UpdateParentAutoCheck(MenuModel parent)
+    {
+        //UserRight.UserRights?.RemoveAll(x => x.MenuID == parent.MID);
+
+        bool allChecked = parent.SubMenus.All(sm => sm.IsChecked);
+
+        parent.IsChecked = allChecked;
+
+        if (allChecked)
+            AddUserRight(parent.MID, "4"); // parent always gets only 4
+    }
+
+
+
+    // -------------------------------
+    // helper
+    // -------------------------------
+    private void AddUserRight(int menuId, string rid)
+    {
+        if (!UserRight.UserRights.Any(x => x.MenuID == menuId))
+        {
+            UserRight.UserRights.Add(new Mst_UserRight_New
+            {
+                EmpID = UserRight.EmpId,
+                MenuID = menuId,
+                RID = rid,
+                CreatedOn = DateTime.Now
+            });
+        }
+        else
+        {
+            // update existing entry
+            var existing = UserRight.UserRights.First(x => x.MenuID == menuId);
+            existing.RID = rid;
         }
     }
 
