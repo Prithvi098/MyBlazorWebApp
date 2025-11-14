@@ -94,7 +94,8 @@
     private string INOUTSTATUS => PunchList.Any(p => p.PunchIn.HasValue && !p.PunchOut.HasValue) ? "IN" : "OUT";
     private string ButtonText => INOUTSTATUS == "OUT" ? "PUNCH IN" : "PUNCH OUT";
 
-    private string CurrentTime => DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("HH") + ":" + DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("mm") + ":" + DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("ss");
+    private string CurrentTime => DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("HH:mm:ss");
+    //private string CurrentTime => DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("HH") + ":" + DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("mm") + ":" + DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("ss");
 
 
     protected override async Task OnInitializedAsync()

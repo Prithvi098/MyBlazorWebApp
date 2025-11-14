@@ -13,7 +13,8 @@ else
             {
                 <span style="font-size:large;">
                     <label style="color:blue">IN TIME :</label>
-                    @(item.PunchIn.Value.ToString("HH") + ":" + item.PunchIn.Value.ToString("mm") + ":" + item.PunchIn.Value.ToString("ss"))
+                    @* @(item.PunchIn.Value.ToString("HH") + ":" + item.PunchIn.Value.ToString("mm") + ":" + item.PunchIn.Value.ToString("ss")) *@
+                    @item.PunchIn.Value.ToString("HH:mm:ss")
                 </span>
             }
 
@@ -21,7 +22,8 @@ else
             {
                 <span style="font-size:large; margin-left:20px;">
                     <label style="color:blue">OUT TIME :</label>
-                    @(item.PunchOut.Value.ToString("HH") + ":" + item.PunchOut.Value.ToString("mm") + ":" + item.PunchOut.Value.ToString("ss"))
+                    @* @(item.PunchOut.Value.ToString("HH") + ":" + item.PunchOut.Value.ToString("mm") + ":" + item.PunchOut.Value.ToString("ss")) *@
+                    @item.PunchOut.Value.ToString("HH:mm:ss")
                 </span>
             }
         </div>

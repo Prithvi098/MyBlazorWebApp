@@ -1,6 +1,6 @@
 ﻿@rendermode InteractiveServer
 
-<div class="modal fade @(Show ? "show d-block" : "")" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="background-color: rgba(0,0,0,0.5);">
+@* <div class="modal fade @(Show ? "show d-block" : "")" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header @HeaderClass">
@@ -16,7 +16,19 @@
             </div>
         </div>
     </div>
-</div>
+</div> *@
+
+@* <Modal @ref="modal" title="@Title" IsVerticallyCentered="true">
+    <BodyTemplate>
+        @Message
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnCancel">Cancel</Button>
+        <Button Color="ButtonColor.Primary" @onclick="OnConfirm">Confirm</Button>
+    </FooterTemplate>
+</Modal> *@
+
+<ConfirmDialog @ref="confirmBox" />
 
 @code {
     [Parameter] public bool Show { get; set; }
@@ -24,6 +36,15 @@
     [Parameter] public string Message { get; set; } = "Are you sure?";
     [Parameter] public string HeaderClass { get; set; } = "text-black";
     [Parameter] public EventCallback<bool> ConfirmationChanged { get; set; }
+    private Modal modal = default!;
+    private ConfirmDialog confirmBox = default!;
+    [Parameter] public ConfirmDialog? GlobalConfirmRef { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            confirmBox = GlobalConfirmRef;
+    }
 
     private async Task OnConfirm()
     {

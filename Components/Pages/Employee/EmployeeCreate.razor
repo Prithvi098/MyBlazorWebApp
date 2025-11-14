@@ -143,7 +143,7 @@
                 employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
                 plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
             }
-            departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.IsActive == true).ToList();
+            departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.Isactive == true).ToList();
         }
         catch (Exception ex)
         {
