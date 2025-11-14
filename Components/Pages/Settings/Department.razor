@@ -32,40 +32,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body table-responsive">
-                        @if (departmentlist == null)
-                        {
-                            <p><em>Loading...</em></p>
-                        }
-                        <div class="row">
-                            <div class="col-12">
-                                <table class="table table-bordered border-black">
-                                    <thead>
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Department Name</th>
-                                            <th>Is Active</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var department in departmentlist)
-                                        {
-                                            <tr>
-                                                <td>@department.Id</td>
-                                                <td>@department.DepartmentName</td>
-                                                <td>
-                                                    <input type="checkbox" @bind="department.IsActive" disabled />
-                                                </td>
-                                                <td>
-                                                    <a class="btn btn-sm btn-primary" @onclick="() => EditDepartment(department.Id)"><i class="fa-solid fa-pen"></i></a>
-                                                    <a class="btn btn-sm btn-danger" @onclick="() => AskDelete(department.Id)"><i class="fa-solid fa-trash"></i></a>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        
+                        
                     </div>
                 </div>
             </div>
