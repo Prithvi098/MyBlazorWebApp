@@ -9,6 +9,7 @@
         public string? MenuDesc { get; set; }
         public int SortOrder { get; set; }
         public bool IsChecked { get; set; } = false;
+        public bool IsHidden { get; set; } = false;
 
         public List<RightsModel>? Rights { get; set; }
 

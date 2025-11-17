@@ -1,0 +1,33 @@
+﻿@inject UserPermissionService PermissionService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthProvider
+
+@code {
+    [Parameter] public string MenuUrl { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
+
+        if (!user.Identity!.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        int empId = int.Parse(user.FindFirst("EmpId")!.Value);
+
+        // If not loaded yet, load user rights
+        if (PermissionService.UserId == null)
+            await PermissionService.LoadRightsAsync(empId);
+
+        if (!PermissionService.HasMenuAccess(MenuUrl))
+        {
+            NavigationManager.NavigateTo("/notauthorized");
+            return;
+        }
+    }
+}
+@ChildContent
