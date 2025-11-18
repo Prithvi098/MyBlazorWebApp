@@ -2,8 +2,9 @@
 @using static MyBlazorApp.Models.LoginModel
 @layout LoginLayout
 @inject IJSRuntime JS
-@inject NavigationManager Navigation
-@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IHttpClientFactory ClientFactory
+@inject AuthenticationStateProvider AuthProvider
 @rendermode InteractiveServer
 
 @* <h3 class="login-title">Welcome Back</h3> *@
@@ -60,46 +61,39 @@
 
     private async Task SubmitForm()
     {
+        var client = ClientFactory.CreateClient("API");
         // Pass the login model directly to JS
-            await JS.InvokeVoidAsync("submitLoginForm", loginModel);
-
-        /*try
+        //await JS.InvokeVoidAsync("submitLoginForm", loginModel);
+        var form = new Dictionary<string, string>
         {
-            var formData = new MultipartFormDataContent
-            {
-                { new StringContent(loginModel.Username), "username" },
-                { new StringContent(loginModel.Password), "password" }
-            };
+            { "username", loginModel.Username },
+            { "password", loginModel.Password }
+        };
 
-            var response = await Http.PostAsync("/api/login/userlogin", formData);
+        var content = new FormUrlEncodedContent(form);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var err = await response.Content.ReadAsStringAsync();
-                errorMessage = "Invalid username or password";
-                return;
-            }
+        var response = await client.PostAsync("api/login/userlogin", content);
 
-            var json = await response.Content.ReadFromJsonAsync<LoginResponse>();
-
-            if (json != null)
-            {
-                // ✅ Store JWT in localStorage
-                await JS.InvokeVoidAsync("localStorage.setItem", "auth_token", json.token);
-
-                // Redirect to home
-                Navigation.NavigateTo("/home", forceLoad: true);
-            }
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = "Invalid Username or Password";
+            return;
         }
-        catch (Exception ex)
-        {
-            errorMessage = "Something went wrong: " + ex.Message;
-        }*/
+
+        var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+        await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.token);
+        await JS.InvokeVoidAsync("localStorage.setItem", "fullName", result.username);
+        await JS.InvokeVoidAsync("localStorage.setItem", "empId", result.empid.ToString());
+
+        //await Auth.MarkUserAsAuthenticated(result.token);
+        Nav.NavigateTo("/home");
+        
     }
 
     private void NavigateToRegister()
     {
-        Navigation.NavigateTo("/register");
+        Nav.NavigateTo("/register");
     }
 
     protected override void OnInitialized()

@@ -1,37 +1,52 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace MyBlazorApp.Common
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IJSRuntime _js;
 
-        public CustomAuthenticationStateProvider(IHttpContextAccessor httpContextAccessor)
+        public CustomAuthenticationStateProvider(IJSRuntime js)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _js = js;
         }
 
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var user = _httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
-            return Task.FromResult(new AuthenticationState(user));
+            string token = "";
+
+            try
+            {
+                token = await _js.InvokeAsync<string>("localStorage.getItem", "authToken");
+            }
+            catch
+            {
+                // prerendering -> return anonymous
+                var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+                return new AuthenticationState(anonymousUser);
+            }
+
+            if (string.IsNullOrEmpty(token))
+            {
+                var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+                return new AuthenticationState(anonymousUser);
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            var identity = new ClaimsIdentity(jwt.Claims, "jwt");
+            var user = new ClaimsPrincipal(identity);
+
+            return new AuthenticationState(user);
         }
 
-        public void NotifyAuthenticationStateChanged()
+        public void NotifyAuthStateChanged()
         {
-            var user = _httpContextAccessor.HttpContext?.User ??
-                       new ClaimsPrincipal(new ClaimsIdentity());
-
-            var authState = Task.FromResult(new AuthenticationState(user));
-            NotifyAuthenticationStateChanged(authState);
-        }
-
-        public void MarkUserAsLoggedOut()
-        {
-            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
-            var authState = Task.FromResult(new AuthenticationState(anonymousUser));
-            NotifyAuthenticationStateChanged(authState);
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
     }
 }

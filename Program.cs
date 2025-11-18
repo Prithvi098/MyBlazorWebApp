@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.JSInterop;
 using MyBlazorApp.Common;
 using MyBlazorApp.Components;
 using MyBlazorApp.Data;
@@ -33,15 +34,14 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
+builder.Services.AddTransient<JwtDelegatingHandler>();
+
 builder.Services.AddHttpClient("API", (sp, client) =>
 {
     var settings = sp.GetRequiredService<IOptions<ApiSettings>>().Value;
     client.BaseAddress = new Uri(settings.BaseUrl);
-}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    UseCookies = true,
-    CookieContainer = new CookieContainer()
-});
+})
+.AddHttpMessageHandler<JwtDelegatingHandler>();
 
 builder.Services.AddCors(options =>
 {
@@ -53,10 +53,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+/*builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();*/
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+/*builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.Cookie.Name = "auth_token";
@@ -79,12 +79,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             }
             return Task.CompletedTask;
         };
-    });
+    });*/
 
 builder.Services.AddBlazorBootstrap();
 
 // JWT Configuration
-/*var jwtSettings = builder.Configuration.GetSection("Jwt");
+var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
 builder.Services.AddAuthentication(options =>
@@ -94,19 +94,23 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
+    var jwt = builder.Configuration.GetSection("Jwt");
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        ValidIssuer = jwt["Issuer"],
+        ValidAudience = jwt["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwt["Key"])
+        )
     };
-});*/
+});
+
+builder.Services.AddScoped<CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthenticationStateProvider>());
 
 builder.Services.AddAuthorization();
 
@@ -116,6 +120,8 @@ builder.Services.AddScoped<AppToastService>();
 builder.Services.AddScoped<MenuService>();
 builder.Services.AddScoped<DataContext>();
 builder.Services.AddScoped<PunchService>();
+builder.Services.AddScoped<UserPermissionService>();
+builder.Services.AddScoped<JwtTokenService>();
 
 builder.Services.AddScoped<Helper>();
 

@@ -15,11 +15,13 @@ namespace MyBlazorApp.Controller
     {
         private readonly EMSContext _context;
         private readonly Helper _helper;
+        private readonly JwtTokenService _jwt;
 
-        public LoginController(EMSContext context, Helper helper)
+        public LoginController(EMSContext context, Helper helper, JwtTokenService jwt)
         {
             _helper = helper;
             _context = context;
+            _jwt = jwt;
         }
 
 
@@ -35,7 +37,20 @@ namespace MyBlazorApp.Controller
                 return Redirect("/?error=Username or password are incorrect");
             }
 
-            var claims = new List<Claim>
+            var token = _jwt.GenerateToken(
+                emp.Emp_id,
+                $"{emp.Emp_firstname} {emp.Emp_surname}",
+                emp.Username
+            );
+
+            return Ok(new
+            {
+                token = token,
+                empId = emp.Emp_id,
+                fullName = $"{emp.Emp_firstname} {emp.Emp_surname}"
+            });
+
+            /*var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
                 new Claim("EmpId", emp.Emp_id.ToString()),
@@ -55,7 +70,7 @@ namespace MyBlazorApp.Controller
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            return Redirect("/home"); // after successful login
+            return Redirect("/home"); // after successful login*/
         }
 
 
