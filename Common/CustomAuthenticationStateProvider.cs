@@ -8,6 +8,10 @@ namespace MyBlazorApp.Common
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly IJSRuntime _js;
+        private AuthenticationState _authState =
+            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+
+        private bool _initialized = false;
 
         public CustomAuthenticationStateProvider(IJSRuntime js)
         {
@@ -16,23 +20,29 @@ namespace MyBlazorApp.Common
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            string token = "";
-
-            try
+            // During prerender → return empty identity
+            if (!_initialized && _js is not IJSInProcessRuntime)
             {
-                token = await _js.InvokeAsync<string>("localStorage.getItem", "authToken");
-            }
-            catch
-            {
-                // prerendering -> return anonymous
-                var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
-                return new AuthenticationState(anonymousUser);
+                return _authState;
             }
 
-            if (string.IsNullOrEmpty(token))
+            if (!_initialized)
             {
-                var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
-                return new AuthenticationState(anonymousUser);
+                await LoadUserFromToken();
+                _initialized = true;
+            }
+
+            return _authState;
+        }
+
+        private async Task LoadUserFromToken()
+        {
+            var token = await _js.InvokeAsync<string>("localStorage.getItem", "jwt");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                _authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                return;
             }
 
             var handler = new JwtSecurityTokenHandler();
@@ -41,7 +51,22 @@ namespace MyBlazorApp.Common
             var identity = new ClaimsIdentity(jwt.Claims, "jwt");
             var user = new ClaimsPrincipal(identity);
 
-            return new AuthenticationState(user);
+            _authState = new AuthenticationState(user);
+        }
+
+        public async Task MarkUserAsAuthenticated(string token)
+        {
+            await _js.InvokeVoidAsync("localStorage.setItem", "jwt", token);
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            var identity = new ClaimsIdentity(jwt.Claims, "jwt");
+            var user = new ClaimsPrincipal(identity);
+
+            _authState = new AuthenticationState(user);
+
+            NotifyAuthenticationStateChanged(Task.FromResult(_authState));
         }
 
         public void NotifyAuthStateChanged()

@@ -131,7 +131,7 @@
             if (int.TryParse(empIdClaim, out int empId))
             {
                 // ✅ Use EmpId in your MenuService
-                Menus = MenuService.GetUserMenus(empId, 1);
+                
             }
 
             // Example: get full name claim or use fallback
@@ -143,6 +143,8 @@
             UserFullName = "Guest";
             Menus = new List<MenuModel>();
         }
+
+        Menus = MenuService.GetUserMenus(381, 1);
 
     }
 }

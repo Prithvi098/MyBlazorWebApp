@@ -147,30 +147,4 @@
         await LoadPunchList();
         IsBusy = false;
     }
-
-
-    private ToastMessage CreateToastMessage(ToastType toastType)
-    => new ToastMessage
-    {
-        Type = toastType,
-        Title = "Blazor Bootstrap",
-        HelpText = $"{DateTime.Now}",
-        Message = $"Hello, world! This is a toast message. DateTime: {DateTime.Now}",
-    };
-
-
-    void ShowSuccess()
-    {
-        ToastService.Show("Data saved successfully 🎉", ToastType.Success, "Data Saved");
-    }
-
-    void ShowWarning()
-    {
-        ToastService.Show("This action might have consequences.", ToastType.Warning, "Warning");
-    }
-    
-    void ShowError()
-    {
-        ToastService.Show("Something went wrong!", ToastType.Danger, "Error");
-    }
 }

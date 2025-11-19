@@ -61,9 +61,14 @@
 
     private async Task SubmitForm()
     {
+        
+
+        await Task.Delay(2000); // Wait for a moment to ensure localStorage is set
+        Nav.NavigateTo("/home");
+
         var client = ClientFactory.CreateClient("API");
-        // Pass the login model directly to JS
-        //await JS.InvokeVoidAsync("submitLoginForm", loginModel);
+        // // Pass the login model directly to JS
+        // //await JS.InvokeVoidAsync("submitLoginForm", loginModel);
         var form = new Dictionary<string, string>
         {
             { "username", loginModel.Username },
@@ -82,9 +87,11 @@
 
         var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-        await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.token);
-        await JS.InvokeVoidAsync("localStorage.setItem", "fullName", result.username);
-        await JS.InvokeVoidAsync("localStorage.setItem", "empId", result.empid.ToString());
+        await JS.InvokeVoidAsync("loginWithJwt", result.token);
+
+        //await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.token);
+        //await JS.InvokeVoidAsync("localStorage.setItem", "fullName", result.username);
+        //await JS.InvokeVoidAsync("localStorage.setItem", "empId", result.empid.ToString());
 
         //await Auth.MarkUserAsAuthenticated(result.token);
         Nav.NavigateTo("/home");

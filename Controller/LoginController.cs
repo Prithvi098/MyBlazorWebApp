@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyBlazorApp.Common;
 using MyBlazorApp.Data;
 using System.Security.Claims;
+using static MyBlazorApp.Models.LoginModel;
 
 namespace MyBlazorApp.Controller
 {
@@ -43,11 +44,11 @@ namespace MyBlazorApp.Controller
                 emp.Username
             );
 
-            return Ok(new
+            return Ok(new LoginResponse
             {
                 token = token,
-                empId = emp.Emp_id,
-                fullName = $"{emp.Emp_firstname} {emp.Emp_surname}"
+                empid = emp.Emp_id,
+                username = $"{emp.Emp_firstname} {emp.Emp_surname}"
             });
 
             /*var claims = new List<Claim>

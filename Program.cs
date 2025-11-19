@@ -34,7 +34,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
-builder.Services.AddTransient<JwtDelegatingHandler>();
+builder.Services.AddScoped<JwtDelegatingHandler>();
 
 builder.Services.AddHttpClient("API", (sp, client) =>
 {
@@ -109,8 +109,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<CustomAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthenticationStateProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddAuthorization();
 
