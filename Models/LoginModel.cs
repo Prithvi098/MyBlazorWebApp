@@ -11,6 +11,8 @@ namespace MyBlazorApp.Models
 
             [Required]
             public string? Password { get; set; }
+
+            public bool RememberMe { get; set; } = true;
         }
 
         public class LoginResponse

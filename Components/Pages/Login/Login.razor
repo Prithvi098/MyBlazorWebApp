@@ -58,43 +58,37 @@
     private string errorMessage = string.Empty;
     private LoginModel.LoginRequest loginModel = new();
 
+    public static Login LoginPageInstance;
+
+    protected override void OnInitialized()
+    {
+        LoginPageInstance = this;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JS.InvokeVoidAsync("eval", @"
+            window.addEventListener('loginError', function(e) {
+                DotNet.invokeMethodAsync('MyBlazorApp', 'SetLoginError', e.detail);
+            });
+        ");
+        }
+    }
+
+    [JSInvokable]
+    public static void SetLoginError(string message)
+    {
+        LoginPageInstance.errorMessage = message;
+        LoginPageInstance.StateHasChanged();
+    }
+
+
     private async Task SubmitForm()
     {
         // Pass the login model directly to JS
             await JS.InvokeVoidAsync("submitLoginForm", loginModel);
-
-        /*try
-        {
-            var formData = new MultipartFormDataContent
-            {
-                { new StringContent(loginModel.Username), "username" },
-                { new StringContent(loginModel.Password), "password" }
-            };
-
-            var response = await Http.PostAsync("/api/login/userlogin", formData);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var err = await response.Content.ReadAsStringAsync();
-                errorMessage = "Invalid username or password";
-                return;
-            }
-
-            var json = await response.Content.ReadFromJsonAsync<LoginResponse>();
-
-            if (json != null)
-            {
-                // ✅ Store JWT in localStorage
-                await JS.InvokeVoidAsync("localStorage.setItem", "auth_token", json.token);
-
-                // Redirect to home
-                Navigation.NavigateTo("/home", forceLoad: true);
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = "Something went wrong: " + ex.Message;
-        }*/
     }
 
     private void NavigateToRegister()
@@ -102,15 +96,15 @@
         Navigation.NavigateTo("/register");
     }
 
-    protected override void OnInitialized()
-    {
-        var uri = new Uri(NavigationManager.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+    // protected override void OnInitialized()
+    // {
+    //     var uri = new Uri(NavigationManager.Uri);
+    //     var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        if (query.TryGetValue("error", out var err))
-        {
-            errorMessage = err!;
-        }
-    }
+    //     if (query.TryGetValue("error", out var err))
+    //     {
+    //         errorMessage = err!;
+    //     }
+    // }
 
 }
