@@ -21,13 +21,13 @@ namespace MyBlazorApp.Controller
     {
         private readonly EMSContext _context;
         private readonly Helper _helper;
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtTokenService _jwtSettings;
 
-        public LoginController(EMSContext context, Helper helper, IOptions<JwtSettings> jwtOptions)
+        public LoginController(EMSContext context, Helper helper, JwtTokenService jwtOptions)
         {
             _helper = helper;
             _context = context;
-            _jwtSettings = jwtOptions.Value;
+            _jwtSettings = jwtOptions;
         }
 
 
@@ -43,28 +43,18 @@ namespace MyBlazorApp.Controller
                 return Redirect("/?error=Username or password are incorrect");
             }
 
-            // Create Claims
+            var fullname = emp.Emp_firstname + " " + emp.Emp_surname;
+
+            // Craete Claims
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, emp.Username),
+                new Claim(ClaimTypes.Name, fullname),
                 new Claim("EmpId", emp.Emp_id.ToString()),
-                new Claim("FullName", emp.Emp_firstname + " " + emp.Emp_surname)
+                new Claim("Username", emp.Username),
+                new Claim("IssuedAt", DateTime.UtcNow.ToString()),
             };
 
-            // ---------------- JWT CREATION ----------------
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresMinutes);
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            var (jwt, expires) = _jwtSettings.GenerateToken(claims);
 
             // ---------------- COOKIE SIGN-IN ----------------
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

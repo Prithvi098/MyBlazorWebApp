@@ -88,7 +88,9 @@
     private async Task SubmitForm()
     {
         // Pass the login model directly to JS
-            await JS.InvokeVoidAsync("submitLoginForm", loginModel);
+        await JS.InvokeVoidAsync("submitLoginForm", loginModel);
+        await Task.Delay(2000); // Small delay to ensure JS processing
+        Navigation.NavigateTo("/register");
     }
 
     private void NavigateToRegister()

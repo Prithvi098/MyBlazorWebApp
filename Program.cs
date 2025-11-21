@@ -140,6 +140,7 @@ builder.Services.AddScoped<AppToastService>();
 builder.Services.AddScoped<MenuService>();
 builder.Services.AddScoped<DataContext>();
 builder.Services.AddScoped<PunchService>();
+builder.Services.AddScoped<JwtTokenService>();
 
 builder.Services.AddScoped<Helper>();
 

@@ -14,27 +14,25 @@ namespace MyBlazorApp.Common
             _config = config;
         }
 
-        public string GenerateToken(int empId, string fullName)
+        public (string, DateTime) GenerateToken(List<Claim> Claims)
         {
+            // ---------------- JWT CREATION ----------------//
             var jwt = _config.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expire = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwt["ExpiresInMinutes"]));
 
-            var claims = new[]
-            {
-            new Claim("EmpId", empId.ToString()),
-            new Claim(ClaimTypes.Name, fullName),
-            new Claim("IssuedAt", DateTime.UtcNow.ToString())
-        };
 
             var token = new JwtSecurityToken(
                 issuer: jwt["Issuer"],
                 audience: jwt["Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwt["ExpiresInMinutes"])),
-                signingCredentials: creds);
+                claims: Claims,
+                expires: expire,
+                signingCredentials: creds
+            );
+            var jwttoken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return (jwttoken, expire);
         }
     }
 }

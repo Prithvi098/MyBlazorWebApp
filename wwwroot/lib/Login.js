@@ -40,7 +40,7 @@ window.submitLoginForm = async function (model) {
         localStorage.setItem("jwt_token", data.token);
 
         // Redirect to home using JS
-        window.location.href = "/home";
+        //window.location.href = "/home";
     }
     catch (err) {
         window.dispatchEvent(new CustomEvent("loginError", { detail: err.message }));
