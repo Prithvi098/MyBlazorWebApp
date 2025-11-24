@@ -29,7 +29,7 @@
 		<div class="row">
 			<div class="col-12 col-lg-5">
 				<div class="card">
-					<EditForm Model="menu" OnValidSubmit="AskSave">
+					<EditForm Model="menu" OnValidSubmit="SaveMenu">
 						<FluentValidationValidator />
 						<div class="content-header">
 							<div class="container-fluid">
@@ -68,6 +68,12 @@
 								@* <InputText class="form-control" placeholder="Menu Sort Order" @bind-value="MenuSortOrder" @oninput="() => checksortorder(MenuSortOrder)"></InputText> *@
 								<InputNumber @bind-Value="menu.SortOrder" class="form-control" placeholder="Menu Sort Order" />
 								<ValidationMessage For="@(() => menu.SortOrder)" />
+							</div>
+							<div class="form-group">
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox" @bind="IsHidden" id="IsHidden" />
+									<label class="form-check-label" for="IsHidden">Is Menu Hidden</label>
+								</div>
 							</div>
 							<div class="form-group">
 								<div class="form-check">
@@ -209,6 +215,7 @@
 	private int DeleteMid { get; set; }
 	private bool ShowConfirmDialog { get; set; }
 	private bool IsSubmenu { get; set; } = false;
+	private bool IsHidden { get; set; } = false;
 	private bool IsSaveConfirmation { get; set; } = false;
 
 	private IEnumerable<Mst_Menu_New> FilteredMenus => string.IsNullOrWhiteSpace(GlobalSearch)
@@ -281,6 +288,7 @@
 	{
 		menu = new();
 		IsSubmenu = false;
+		IsHidden = false;
 		MenuSortOrder = string.Empty;
 	}
 
@@ -343,6 +351,7 @@
 		var menudetail = await Db.Mst_Menu_New.Where(m => m.DeletedBy == null && m.MID == Mid).FirstOrDefaultAsync();
 		if (menudetail == null) { ToastService.Show("No Menu found!", ToastType.Warning, "Warning"); await LoadMenuList(); await GetMainMenuList();  return; }
 		IsSubmenu = menudetail.PMID != 0 ? true : false;
+		IsHidden = menudetail.IsHidden ?? false;
 		menu = menudetail;
 	}
 
@@ -359,6 +368,7 @@
 				MainMenu = menu.MenuName?.Replace(" ", "").ToLower(),
 				SortOrder = menu.SortOrder,
 				PMID = IsSubmenu ? menu.PMID : 0,
+				IsHidden = IsHidden,
 				CreatedBy = 1,
 				CreatedOn = DateTime.Now
             };
@@ -380,6 +390,7 @@
 			existmenu.MainMenu = menu.MenuName?.Replace(" ", "").ToLower();
 			existmenu.SortOrder = menu.SortOrder;
 			existmenu.PMID = IsSubmenu ? menu.PMID : 0;
+			existmenu.IsHidden = IsHidden;
 			existmenu.UpdatedBy = 1;
 			existmenu.UpdatedOn = DateTime.Now;
 			await Db.SaveChangesAsync();

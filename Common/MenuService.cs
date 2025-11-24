@@ -42,6 +42,7 @@ namespace MyBlazorApp.Common
                         MenuUrl = r.Field<string>("MenuUrl"),
                         MenuDesc = r.Field<string>("MenuDesc"),
                         SortOrder = r.Field<int>("SortOrder"),
+                        IsHidden = r.Field<bool>("IsHidden"),
                         SubMenus = new List<MenuModel>()
                     }).ToList();
 
@@ -55,7 +56,8 @@ namespace MyBlazorApp.Common
                             MenuName = r.Field<string>("MenuName"),
                             MenuUrl = r.Field<string>("MenuUrl"),
                             MenuDesc = r.Field<string>("MenuDesc"),
-                            SortOrder = r.Field<int>("SortOrder")
+                            SortOrder = r.Field<int>("SortOrder"),
+                            IsHidden = r.Field<bool>("IsHidden"),
                         }).ToList();
 
                         // --- Attach Submenus to Main Menus ---

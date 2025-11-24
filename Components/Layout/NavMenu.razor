@@ -58,36 +58,45 @@
             <ul class="navbar-nav">
                 @foreach (var main in Menus)
                 {
-                    <li class="nav-item dropdown">
-                        <a href="@main.MenuUrl" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            @main.MenuName
-                        </a>
+                    if (!main.IsHidden)
+                    {
+                        <li class="nav-item dropdown">
+                            <a href="@main.MenuUrl" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                @main.MenuName
+                            </a>
 
-                        @if (main.SubMenus?.Any() == true)
-                        {
-                            <ul class="dropdown-menu border-0 shadow">
-                                @foreach (var sub in main.SubMenus)
-                                {
-                                    if (sub.SubMenus?.Any() == true)
+                            @if (main.SubMenus?.Any() == true)
+                            {
+                                <ul class="dropdown-menu border-0 shadow">
+                                    @foreach (var sub in main.SubMenus)
                                     {
-                                        <li class="dropdown-submenu dropdown-hover">
-                                            <a href="@sub.MenuUrl" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">@sub.MenuName</a>
-                                            <ul class="dropdown-menu border-0 shadow">
-                                                @foreach (var child in sub.SubMenus)
-                                                {
-                                                    <li><a href="@child.MenuUrl" class="dropdown-item">@child.MenuName</a></li>
-                                                }
-                                            </ul>
-                                        </li>
+                                        if (sub.SubMenus?.Any() == true)
+                                        {
+                                            <li class="dropdown-submenu dropdown-hover">
+                                                <a href="@sub.MenuUrl" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">@sub.MenuName</a>
+                                                <ul class="dropdown-menu border-0 shadow">
+                                                    @foreach (var child in sub.SubMenus)
+                                                    {
+                                                        if (!child.IsHidden)
+                                                        {
+                                                            <li><a href="@child.MenuUrl" class="dropdown-item">@child.MenuName</a></li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            if (!sub.IsHidden)
+                                            {
+                                                <li><a href="@sub.MenuUrl" class="dropdown-item">@sub.MenuName</a></li>
+                                            }
+                                        }
                                     }
-                                    else
-                                    {
-                                        <li><a href="@sub.MenuUrl" class="dropdown-item">@sub.MenuName</a></li>
-                                    }
-                                }
-                            </ul>
-                        }
-                    </li>
+                                </ul>
+                            }
+                        </li>
+                    }
                 }
             </ul>
 

@@ -38,5 +38,6 @@ namespace MyBlazorApp.Models
         public DateTime? DeletedOn { get; set; }
 
         public bool? IsFrontMenu { get; set; }
+        public bool? IsHidden { get; set; }
     }
 }
