@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -142,6 +143,8 @@ builder.Services.AddScoped<DataContext>();
 builder.Services.AddScoped<PunchService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<UserPermissionService>();
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddScoped<ProtectedLocalStorage>();
 
 builder.Services.AddScoped<Helper>();
 

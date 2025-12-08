@@ -200,23 +200,21 @@
 	</div>
 </section>
 
-<ConfirmationModal Show="@ShowConfirmDialog"
+@* <ConfirmationModal Show="@ShowConfirmDialog"
 				   Title=@ConfirmationTitle
 				   Message=@ConfirmationMessage
-				   ConfirmationChanged="OnDeleteConfirmation"/>
+				   ConfirmationChanged="OnDeleteConfirmation"/> *@
+
+<ConfirmDialog @ref="confirmDialog" />
 
 @code {
 	private List<Mst_Menu_New> MenuList = new List<Mst_Menu_New>();
 	private List<Mst_Menu_New> MainMenuList = new List<Mst_Menu_New>();
 	private Mst_Menu_New menu = new();
 	private string? MenuSortOrder;
-	private string? ConfirmationTitle;
-	private string? ConfirmationMessage;
-	private int DeleteMid { get; set; }
-	private bool ShowConfirmDialog { get; set; }
 	private bool IsSubmenu { get; set; } = false;
 	private bool IsHidden { get; set; } = false;
-	private bool IsSaveConfirmation { get; set; } = false;
+	private ConfirmDialog confirmDialog;
 
 	private IEnumerable<Mst_Menu_New> FilteredMenus => string.IsNullOrWhiteSpace(GlobalSearch)
 		? MenuList
@@ -292,43 +290,30 @@
 		MenuSortOrder = string.Empty;
 	}
 
-	private void AskDelete(int MId)
+	private async Task AskDelete(int MId)
 	{
-		DeleteMid = MId;
-		ConfirmationTitle = "Delete Menu";
-		ConfirmationMessage = "Are you sure you want to delete this Menu?";
-		ShowConfirmDialog = true;
-		IsSaveConfirmation = false;
+		var options = new ConfirmDialogOptions { IsVerticallyCentered = true };
+		bool confirmed = await confirmDialog!.ShowAsync(
+			"Delete Menu", "Are you sure you want to delete this Menu?", options
+		);
+		if (confirmed)
+		{
+			await DeleteMenu(MId);
+        }
 	}
 
-	private void AskSave()
+	private async Task AskSave()
 	{
-		ConfirmationTitle = menu.MID == 0 ? "Save Menu" : "Update Menu";
-		ConfirmationMessage = menu.MID == 0 ? "Are you sure you want to save this Menu?" : "Are you sure you want to update this Menu?";
-		ShowConfirmDialog = true;
-		IsSaveConfirmation = true;
-	}
-
-	private async Task OnDeleteConfirmation(bool confirmed)
-	{
-		ShowConfirmDialog = false;
-		if (IsSaveConfirmation)
+		var options = new ConfirmDialogOptions { IsVerticallyCentered = true };
+		var title = menu.MID == 0 ? "Save Menu" : "Update Menu";
+        var message = menu.MID == 0 ? "Are you sure you want to save this Menu?" : "Are you sure you want to update this Menu?";
+		bool confirmed = await confirmDialog!.ShowAsync(
+			title, message, options
+		);
+		if (confirmed)
 		{
-			if (confirmed)
-			{
-				await SaveMenu();
-				IsSaveConfirmation = false;
-			}
+			await SaveMenu();
 		}
-		else
-		{
-			if (confirmed)
-			{
-				await DeleteMenu(DeleteMid);
-				IsSaveConfirmation = false;
-			}
-		}
-		
 	}
 
 	private async Task DeleteMenu(int MId)

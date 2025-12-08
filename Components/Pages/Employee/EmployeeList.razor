@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 @inject Helper _helper
 @inject IJSRuntime JS
+@inject ProtectedSessionStorage ProtectedBrowserStorage
 @rendermode InteractiveServer
 
 <PageTitle>Employee List</PageTitle>
@@ -384,7 +385,7 @@
         {
             // The grid provides a reload method in Blazor.Bootstrap.
             // Depending on your exact package minor, method name can be ReloadDataAsync or ReloadAsync.
-            // Try ReloadDataAsync() first; if compiler complains, try ReloadAsync().
+            // Try ReloadDataAsync() first; if compiler complains, try RefreshDataAsync().
             await employeeGrid.RefreshDataAsync();
         }
         else
@@ -393,9 +394,10 @@
         }
     }
 
-    private void EditEmployee(int EmpId)
+    private async Task EditEmployee(int EmpId)
     {
-        Navigation.NavigateTo($"/employeeedit/{EmpId}");
+        await ProtectedBrowserStorage.SetAsync("EditEmployeeId", EmpId);
+        Navigation.NavigateTo($"/employeeedit");
     }
 
     async Task DeleteEmployee(int Id)

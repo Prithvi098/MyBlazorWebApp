@@ -1,11 +1,12 @@
 ﻿@page "/employeecreate"
-@page "/employeeedit/{EmpId:int}"
+@page "/employeeedit"
 @attribute [Authorize]
 @layout MainLayout
 @inject AppToastService ToastService
 @inject IDbContextFactory<EMSContext> DbFactory
 @inject NavigationManager Navigation
 @inject Helper _helper
+@inject ProtectedSessionStorage ProtectedBrowserStorage
 @rendermode InteractiveServer
 
 <AuthorizeMenu MenuUrl="@(EmpId == null ? "/employeecreate" : "/employeeedit")">
@@ -132,19 +133,38 @@
     private string plainPassword = string.Empty;
     private List<Mst_Department> departments = new();
     private bool ShowConfirmDialog { get; set; }
+    private bool loadedFromStorage = false;
 
     protected override void OnInitialized()
     {
+        using var db = DbFactory.CreateDbContext();
+        departments = db.Mst_Department
+            .Where(d => d.DeletedBy == null && d.Isactive == true)
+            .ToList();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
         try
         {
-            using var db = DbFactory.CreateDbContext();
-
-            if (EmpId != null)
+            if (firstRender && !loadedFromStorage)
             {
-                employee = db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefault();
-                plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
+                loadedFromStorage = true;
+                using var db = DbFactory.CreateDbContext();
+                var result = await ProtectedBrowserStorage.GetAsync<int>("EditEmployeeId");
+                if (result.Success)
+                {
+                    EmpId = result.Value;
+                    await ProtectedBrowserStorage.DeleteAsync("EditEmployeeId");
+                }
+                if (EmpId != null)
+                {
+                    employee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefaultAsync();
+                    plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
+                    StateHasChanged();
+                }
             }
-            departments = db.Mst_Department.Where(d => d.DeletedBy == null && d.Isactive == true).ToList();
+            
         }
         catch (Exception ex)
         {
