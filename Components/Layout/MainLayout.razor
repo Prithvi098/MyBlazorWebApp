@@ -1,37 +1,26 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="wrapper">
-    <NavMenu />
-    <div class="content-wrapper" style="margin-left:0;">
-        <section class="content">
+<RadzenLayout class="app-shell-layout">
+    <RadzenHeader class="app-shell-header">
+        <NavMenu />
+    </RadzenHeader>
+    <RadzenBody class="app-shell-body">
+        <div class="content-wrapper dashboard-content">
             <GlobalToast />
-            
-            @Body
-        </section>
-    </div>
-    <div id="loading" style="display:none;">
-        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-    </div>
-    <footer class="main-footer">
-        <strong>Copyright © @DateTime.Now.Year <a href="#!"></a>.</strong>
-        All rights reserved.
-    </footer>
-</div>
-@* <div class="page">
-    <div class="sidebar">
-        
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="/api/login/userlogout" type="button" class="btn btn-primary">Logout</a>
+            <section class="content app-content">
+                @Body
+            </section>
         </div>
+    </RadzenBody>
+    <RadzenFooter class="app-shell-footer">
+        <div class="footer-inner">
+            <span class="footer-brand">Employee Management System</span>
+            <span class="footer-copy">Copyright © @DateTime.Now.Year. All rights reserved.</span>
+        </div>
+    </RadzenFooter>
+</RadzenLayout>
 
-        <article class="content px-4">
-
-            
-            @Body
-        </article>
-    </main>
-</div> *@
+<div id="loading" class="app-loading-mask">
+    <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+</div>
 

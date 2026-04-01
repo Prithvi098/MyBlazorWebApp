@@ -9,26 +9,11 @@
 
 <PageTitle>Menu</PageTitle>
 
-<style>
-
-	.table-overlay {
-		position: absolute;
-		inset: 0;
-		background-color: rgba(255, 255, 255, 0.6);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 5;
-		transition: opacity 0.3s ease-in-out;
-	}
-
-</style>
-
-<section class="content inner-tbl pt-5 pb-3">
+<section class="content inner-tbl pt-5 pb-3 page-section">
 	<div class="container-fluid p-0">
 		<div class="row">
 			<div class="col-12 col-lg-5">
-				<div class="card">
+				<div class="card content-surface-card">
 					<EditForm Model="menu" OnValidSubmit="SaveMenu">
 						<FluentValidationValidator />
 						<div class="content-header">
@@ -41,8 +26,8 @@
 									</div>
 
 									<div class="col-12 col-md-5 col-lg-5 text-md-right">
-										<button type="button" class="btn btn-secondary" @onclick="@(() => Clear())">Clear</button>
-										<button type="submit" class="btn btn-primary ml-2" id="btnSaveMenu">Save</button>
+										<RadzenButton Text="Clear" Icon="restart_alt" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Secondary" Click="@Clear" />
+										<RadzenButton Text="Save" Icon="save" ButtonType="Radzen.ButtonType.Submit" id="btnSaveMenu" class="ms-2" />
 									</div>
 								</div>
 							</div>
@@ -107,7 +92,7 @@
 				</div>
 			</div>
 			<div class="col-12 col-lg-7">
-				<div class="card">
+				<div class="card content-surface-card">
 					<div class="content-header">
 						<div class="container-fluid">
 							<div class="row align-items-center">
@@ -122,9 +107,9 @@
 					<div class="card-body table-responsive">
 
 					    <!-- Header Row -->
-					    <div class="row mb-2">
+					    <div class="row mb-2 align-items-end g-3">
 					        <!-- Page Size -->
-					        <div class="col-md-6">
+					        <div class="col-12 col-md-6">
 					            <label class="fw-semibold me-2">Page Size:</label>
 					            <select class="form-select d-inline-block w-auto" @onchange="OnPageSizeChanged">
 					                @foreach (var size in PageSizes)
@@ -135,9 +120,8 @@
 					        </div>
 					
 					        <!-- Search -->
-							<div class="col-md-6">
-								<div class="float-right">
-									<div class="input-group">
+							<div class="col-12 col-md-6">
+									<div class="input-group search-shell">
 										<span class="input-group-text bg-light">
 											<i class="fa-solid fa-search"></i>
 										</span>
@@ -149,7 +133,6 @@
 											</button>
 										}
 									</div>
-								</div>
 							</div>
 					    </div>
 					
@@ -163,7 +146,7 @@
 					
 					    <!-- Grid -->
 					    <Grid TItem="Mst_Menu_New"
-					          Class="table table-head-fixed text-nowrap m-0 w-100 responsive-tbl"
+					          Class="table table-head-fixed text-nowrap m-0 w-100 responsive-tbl app-data-grid"
 					          AllowFiltering="false"
 					          AllowPaging="true"
 					          AllowSorting="true"
@@ -183,10 +166,10 @@
 					                @context.MenuUrl
 					            </GridColumn>
 					            <GridColumn TItem="Mst_Menu_New" HeaderText="Action" Filterable="false">
-					                <button class="btn btn-sm btn-primary me-1" @onclick="@(() => GetMenuDetail(context.MID))">
+					                <button class="btn btn-sm btn-primary me-1 grid-action-button" @onclick="@(() => GetMenuDetail(context.MID))">
 					                    <i class="fa-solid fa-pen"></i>
 					                </button>
-					                <button class="btn btn-sm btn-danger" @onclick="@(() => AskDelete(context.MID))">
+					                <button class="btn btn-sm btn-danger grid-action-button" @onclick="@(() => AskDelete(context.MID))">
 					                    <i class="fa-solid fa-trash"></i>
 					                </button>
 					            </GridColumn>

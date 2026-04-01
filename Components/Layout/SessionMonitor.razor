@@ -1,0 +1,15 @@
+﻿@inject NavigationManager Navigation
+@inject AppToastService Toast
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        Toast.Show("Your session has expired. Please login again.", ToastType.Danger, "Warning");
+
+        await Task.Delay(2000);
+
+        Navigation.NavigateTo("/", true);
+    }
+
+}

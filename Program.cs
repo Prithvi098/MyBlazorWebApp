@@ -1,18 +1,16 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using MyBlazorApp.Common;
 using MyBlazorApp.Components;
 using MyBlazorApp.Data;
 using MyBlazorApp.Models;
+using Radzen;
 using System.Net;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,13 +22,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
-/*builder.Services.AddDbContext<EMSContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("EMSContext")));*/
-
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
-
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
@@ -54,14 +47,13 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingAuthStateProvider>();
 builder.Services.AddHttpContextAccessor();
 
 // -------------------- Authentication --------------------
-// Keep cookie as the default scheme for Blazor Server circuits, and add JwtBearer for APIs.
+// Keep cookies as the default scheme for Blazor Server circuits and controller endpoints.
 builder.Services.AddAuthentication(options =>
 {
-    // The default scheme for app (Blazor Server circuits) remains Cookies.
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -71,8 +63,10 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.Name = "auth_token";
     options.LoginPath = "/";      // 👈 login page
     options.LogoutPath = "/api/auth/logout";
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(2);
     options.Cookie.SameSite = SameSiteMode.None; // 👈 allow cross-site if required
+    options.SlidingExpiration = false;
+    options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // 👈 required with SameSite=None
     options.Events.OnRedirectToLogin = ctx =>
     {
@@ -83,59 +77,17 @@ builder.Services.AddAuthentication(options =>
         }
         else
         {
-            // For normal Razor/Blazor routes → redirect
-            ctx.Response.Redirect(ctx.RedirectUri);
+            // Prevent automatic redirect
+            ctx.Response.StatusCode = 401;
         }
         return Task.CompletedTask;
-    };
-})
-// JWT bearer for API authentication — protected endpoints should use JwtBearer scheme
-.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-{
-    // Read from configuration
-    var key = builder.Configuration["JwtSettings:Key"];
-    var issuer = builder.Configuration["JwtSettings:Issuer"];
-    var audience = builder.Configuration["JwtSettings:Audience"];
-
-    options.RequireHttpsMetadata = true;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = issuer,
-        ValidateAudience = true,
-        ValidAudience = audience,
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromMinutes(2)
-    };
-
-    // If you ever use SignalR and pass token via querystring, you can extract it here
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = ctx =>
-        {
-            // Typical: look in Authorization header first. Optionally read from cookie or query string for SignalR.
-            var authHeader = ctx.Request.Headers["Authorization"].FirstOrDefault();
-            if (string.IsNullOrEmpty(authHeader) && ctx.Request.Cookies.ContainsKey("jwt_token"))
-            {
-                // optional: allow reading token from a cookie named "jwt_token" (HttpOnly cookie is not readable from JS,
-                // but JwtBearer cannot read HttpOnly cookie by default; you'd need custom middleware to copy cookie -> header.)
-                ctx.Token = ctx.Request.Cookies["jwt_token"];
-            }
-            return Task.CompletedTask;
-        }
     };
 });
 
 builder.Services.AddAuthorization();
 
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
 builder.Services.AddBlazorBootstrap();
-
-/*builder.Services.AddScoped<ModalServices>();*/
+builder.Services.AddRadzenComponents();
 
 builder.Services.AddScoped<AppToastService>();
 builder.Services.AddScoped<MenuService>();
@@ -145,6 +97,7 @@ builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<UserPermissionService>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<ProtectedLocalStorage>();
+builder.Services.AddScoped<EmployeeNavigationState>();
 
 builder.Services.AddScoped<Helper>();
 
@@ -174,10 +127,10 @@ app.UseRouting();
 app.UseCors("AllowFrontend");
 
 
-app.UseAuthentication();   // 👈 must come before UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseAntiforgery();      // 👈 AFTER auth, before endpoints   
+app.UseAntiforgery();
 
 app.MapControllers();
 

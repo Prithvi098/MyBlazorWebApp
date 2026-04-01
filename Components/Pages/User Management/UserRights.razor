@@ -10,13 +10,13 @@
 <PageTitle>User Rights</PageTitle>
 
 
-<section class="content inner-tbl pt-5 pb-3">
+<section class="content inner-tbl pt-5 pb-3 page-section">
     <div class="container-fluid">
         <EditForm EditContext="@editContext" OnValidSubmit="SaveUserRights">
             <div class="row">
                 <FluentValidationValidator />
                 <div class="col-12 col-lg-5">
-                    <div class="card">
+                    <div class="card content-surface-card">
                         <div class="content-header">
                             <div class="container-fluid">
                                 <div class="row align-items-center">
@@ -52,7 +52,7 @@
                     <CopyUserRightsForm EmployeeList="EmployeeList" />
                 </div>
                 <div class="col-12 col-lg-7">
-                    <div class="card">
+                    <div class="card content-surface-card">
                         <div class="content-header">
                             <div class="container-fluid">
                                 <div class="row align-items-center">
@@ -62,9 +62,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-6 text-lg-right">
+                                    <div class="col-12 col-md-6 col-lg-6 text-lg-right d-flex justify-content-lg-end gap-2 flex-wrap">
                                         <button class="btn btn-secondary" id="btnClear" type="button">Clear</button>
-                                        <button class="btn btn-primary ml-2" id="btnSaveUserRight" type="submit">Save</button>
+                                        <RadzenButton Text="Save" Icon="save" id="btnSaveUserRight" ButtonType="Radzen.ButtonType.Submit" />
                                     </div>
                                 </div>
                             </div>

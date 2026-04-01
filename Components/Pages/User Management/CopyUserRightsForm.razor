@@ -2,7 +2,7 @@
 
 <EditForm Model="CopyUserRights" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
-    <div class="card mt-3">
+    <div class="card mt-3 content-surface-card">
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row align-items-center">
@@ -56,9 +56,9 @@
                 </div>
             </div>
 
-            <div class="col-12 text-lg-right mt-3">
-                <button class="btn btn-secondary" type="button" @onclick="Clear">Clear</button>
-                <button class="btn btn-primary ml-2" type="submit">Save Copied Rights</button>
+            <div class="col-12 text-lg-right mt-3 d-flex justify-content-lg-end gap-2 flex-wrap">
+                <RadzenButton Text="Clear" Icon="restart_alt" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Secondary" Click="@Clear" />
+                <RadzenButton Text="Save Copied Rights" Icon="content_copy" ButtonType="Radzen.ButtonType.Submit" />
             </div>
         </div>
     </div>

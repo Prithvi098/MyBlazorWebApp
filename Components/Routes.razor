@@ -3,15 +3,7 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    @* Redirect unauthorized users to login *@
-                    @if (!context.User.Identity.IsAuthenticated)
-                    {
-                        <RedirectToLogin />
-                    }
-                    else
-                    {
-                        <p>You are not authorized to view this page.</p>
-                    }
+                    <SessionMonitor />
                 </NotAuthorized>
                 <Authorizing>
                     <p>Checking authorization...</p>
@@ -26,6 +18,3 @@
     </Router>
 </CascadingAuthenticationState>
 
-@code {
-    [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
-}

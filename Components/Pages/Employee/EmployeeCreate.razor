@@ -7,37 +7,37 @@
 @inject NavigationManager Navigation
 @inject Helper _helper
 @inject ProtectedSessionStorage ProtectedBrowserStorage
+@inject EmployeeNavigationState EmployeeNavState
 @rendermode InteractiveServer
 
 <AuthorizeMenu MenuUrl="@(EmpId == null ? "/employeecreate" : "/employeeedit")">
-    <section class="content">
+    <section class="content page-section">
         <div class="content-header">
             <div class="container-fluid p-0">
-                <div class="row">
-                    <div class="col-5 col-lg-6">
+                <div class="row align-items-center g-3">
+                    <div class="col-12 col-lg-6">
                         <div class="main-title">
                             <h2>@(employee.Emp_id == 0 ? "Add Employee" : "Edit Employee")</h2>
                         </div>
                     </div>
-                    <div class="col-6 col-lg-6">
-                        <div class="float-right">
-                            <div class="col-md-6" style="text-align:right">
-                                <a href="/employeelist" class="btn btn-success mb-3"> Back</a>
-                            </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="page-actions">
+                            <a href="/employeelist" class="btn btn-outline-primary mb-0">
+                                <i class="fa-solid fa-arrow-left-long"></i> Back
+                            </a>
                         </div>
-
                     </div>
                 </div>
             </div>
             <div class="container-fluid p-0">
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card content-surface-card">
                             <div class="card-body">
                                 <EditForm Model="@employee" OnValidSubmit="AskDelete">
                                     <FluentValidationValidator />
 
-                                    <div class="row">
+                                    <div class="row g-3">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>First Name</label>
@@ -60,7 +60,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row g-3">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Email</label>
@@ -83,7 +83,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row g-3">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Department</label>
@@ -105,9 +105,11 @@
                                         </div>
 
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-1">
-                                            <button type="submit" class="btn-primary">@(employee.Emp_id == 0 ? "Save" : "Update")</button>
+                                    <div class="row mt-2">
+                                        <div class="col-12">
+                                            <RadzenButton Text="@(employee.Emp_id == 0 ? "Save Employee" : "Update Employee")"
+                                                          Icon="save"
+                                                          ButtonType="Radzen.ButtonType.Submit" />
                                         </div>
                                     </div>
 
@@ -135,44 +137,52 @@
     private bool ShowConfirmDialog { get; set; }
     private bool loadedFromStorage = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        using var db = DbFactory.CreateDbContext();
-        departments = db.Mst_Department
-            .Where(d => d.DeletedBy == null && d.Isactive == true)
-            .ToList();
+        using var db = await DbFactory.CreateDbContextAsync();
+        if (EmployeeNavState.IsEditMode)
+        {
+            EmpId = EmployeeNavState.EditEmpId;
+            employee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefaultAsync();
+            plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
+        }
+        else
+        {
+            employee = new Mst_employees();
+        }
+        departments = await db.Mst_Department.Where(d => d.DeletedBy == null && d.Isactive == true).ToListAsync();        
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        try
-        {
-            if (firstRender && !loadedFromStorage)
-            {
-                loadedFromStorage = true;
-                using var db = DbFactory.CreateDbContext();
-                var result = await ProtectedBrowserStorage.GetAsync<int>("EditEmployeeId");
-                if (result.Success)
-                {
-                    EmpId = result.Value;
-                    await ProtectedBrowserStorage.DeleteAsync("EditEmployeeId");
-                }
-                if (EmpId != null)
-                {
-                    employee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefaultAsync();
-                    plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
-                    StateHasChanged();
-                }
-            }
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     try
+    //     {
+    //         if (firstRender && !loadedFromStorage)
+    //         {
+    //             loadedFromStorage = true;
+    //             using var db = DbFactory.CreateDbContext();
+    //             var result = await ProtectedBrowserStorage.GetAsync<int>("EditEmployeeId");
+    //             if (result.Success)
+    //             {
+    //                 EmpId = result.Value;
+    //                 await ProtectedBrowserStorage.DeleteAsync("EditEmployeeId");
+    //             }
+    //             if (EmpId != null)
+    //             {
+    //                 employee = await db.Mst_Employees.Where(e => e.DeletedBy == null && e.Emp_id == EmpId).FirstOrDefaultAsync();
+    //                 plainPassword = employee.Password == null || employee.Password == "" ? string.Empty : _helper.Decrypt(employee.Password);
+    //                 StateHasChanged();
+    //             }
+    //         }
             
-        }
-        catch (Exception ex)
-        {
-            _helper.SaveException(ex, "EmployeeCreate/OnInitialized");
-            ToastService.Show($"Error loading data: {ex.Message}", ToastType.Warning, "Warning");
-        }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _helper.SaveException(ex, "EmployeeCreate/OnInitialized");
+    //         ToastService.Show($"Error loading data: {ex.Message}", ToastType.Warning, "Warning");
+    //     }
 
-    }
+    // }
 
     private void AskDelete()
     {

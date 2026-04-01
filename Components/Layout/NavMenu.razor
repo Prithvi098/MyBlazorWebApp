@@ -41,21 +41,24 @@
     </div>
 </nav> *@
 
-<nav class="main-header navbar navbar-expand-md navbar-light border-0">
+<nav class="main-header navbar navbar-expand-lg navbar-light border-0 app-navbar">
     <div class="container-fluid">
-        @* <a href="/home" class="navbar-brand">
-            <span style="font-size:medium;font-weight:900">EMS</span>
-        </a> *@
-        <a href="/home" class="navbar-brand">
-            <img src="/Logo.png" alt="Main Logo" class="img-fluid" />
+        <a href="/home" class="navbar-brand app-brand">
+            <span class="brand-mark">
+                <img src="/Logo.png" alt="Main Logo" class="img-fluid" />
+            </span>
+            <span class="brand-copy">
+                <strong>EMS</strong>
+                <small>Operations workspace</small>
+            </span>
         </a>
 
-        <button class="navbar-toggler order-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+        <button class="navbar-toggler order-1 app-navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse order-3" id="navbarCollapse">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav app-navbar-links">
                 @foreach (var main in Menus)
                 {
                     if (!main.IsHidden)
@@ -67,14 +70,14 @@
 
                             @if (main.SubMenus?.Any() == true)
                             {
-                                <ul class="dropdown-menu border-0 shadow">
+                                <ul class="dropdown-menu border-0 shadow app-dropdown-menu">
                                     @foreach (var sub in main.SubMenus)
                                     {
                                         if (sub.SubMenus?.Any() == true)
                                         {
                                             <li class="dropdown-submenu dropdown-hover">
                                                 <a href="@sub.MenuUrl" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown">@sub.MenuName</a>
-                                                <ul class="dropdown-menu border-0 shadow">
+                                                <ul class="dropdown-menu border-0 shadow app-dropdown-menu">
                                                     @foreach (var child in sub.SubMenus)
                                                     {
                                                         if (!child.IsHidden)
@@ -100,12 +103,19 @@
                 }
             </ul>
 
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item app-user-summary">
+                    <span class="app-user-avatar">@UserInitials</span>
+                    <div class="app-user-meta">
+                        <span class="app-user-label">Signed in as</span>
+                        <strong>@UserFullName</strong>
+                    </div>
+                </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        @UserFullName
+                    <a class="nav-link dropdown-toggle app-user-menu-trigger" href="#" data-bs-toggle="dropdown">
+                        Account
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end app-dropdown-menu">
                         <li><a class="dropdown-item" href="/api/login/userlogout">Sign out</a></li>
                     </ul>
                 </li>
@@ -117,6 +127,10 @@
 @code {
     private List<MenuModel> Menus = new();
     private string UserFullName = "User";
+    private string UserInitials => string.Join("", UserFullName
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(part => char.ToUpperInvariant(part[0])));
 
     protected override async Task OnInitializedAsync()
     {

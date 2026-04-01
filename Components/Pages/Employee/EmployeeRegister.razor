@@ -5,52 +5,33 @@
 @inject AppToastService ToastService
 @rendermode InteractiveServer
 
-<style>
-    .layout-navbar-fixed .wrapper .content-wrapper {
-        margin-top: 0px;
-    }
-</style>
-
-<section class="content inner-tbl pt-5 pb-3">
+<section class="content inner-tbl pt-5 pb-3 page-section">
     <div class="content-header">
         <div class="container-fluid p-0">
-            <div style="text-align:center">
-                <img class="mb-2" style="align-items:center;" src="/Logo.png" />
+            <div class="register-intro">
+                <img class="register-logo mb-2" src="/Logo.png" alt="EMS logo" />
             </div>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card card-info card-outline" style="background-color: #f4f6f9;">
-                <div class="card-header">
-                    <h1 class="card-title"><strong> &nbsp;</strong></h1>
-                    <div style="text-align:right">
-                        <a href="/" class="btn btn-info mb-3"> Back</a>
-                    </div>
+            <div class="card card-info card-outline content-surface-card">
+                <div class="card-header d-flex justify-content-end">
+                    <a href="/" class="btn btn-outline-primary">Back</a>
                 </div>
                 <div class="card-body">
-                    <div class="card-group mt-3">
-                    </div>
-                    <div class="card-group" style="margin-bottom:15px">
-                        <div class="panel card card-info">
+                    <div class="card-group mb-3">
+                        <div class="panel card card-info content-surface-card">
                             <div class="card-body">
-                                <div class="row mb-3">
-                                    <h1 class="card-title" style="font-size: x-large;">
-                                        <strong>Employee Registration Form</strong>
-                                    </h1>
+                                <div class="section-intro mb-3">
+                                    <h1 class="card-title">Employee Registration Form</h1>
                                 </div>
-                                <div class="row">
-                                    <p>Fields marked with  <span class="required"></span>  are mandatory.</p>
-                                </div>
-                                <div class="row">
-                                    <p>Use Your Email Address to start filling the form.</p>
-                                </div>
-                                <div class="row">
-                                    <p>If your email is used before, Data already saved will be loaded.</p>
-                                </div>
-                                <div class="row">
-                                    <p>If you are not able to fill form using the email, contact admin for further details.</p>
+                                <div class="app-copy-block mb-3">
+                                    <p>Fields marked with <span class="required"></span> are mandatory.</p>
+                                    <p>Use your email address to start filling the form.</p>
+                                    <p>If your email is used before, previously saved data will be loaded.</p>
+                                    <p>If you are not able to fill the form using the email, contact admin for further details.</p>
                                 </div>
                                 @if (!HideEmail)
                                 {
@@ -67,8 +48,8 @@
                                         </div>
                                         @* <div class="cf-turnstile" data-sitekey="0x4AAAAAABfyCw48RIANHyo_">
                                         </div> *@
-                                        <div class="col-2">
-                                            <input type="submit" value="Submit" class="btn btn-sm btn-info float-left" />
+                                        <div class="page-actions justify-content-start">
+                                            <input type="submit" value="Submit" class="btn btn-primary" />
                                         </div>
                                     </EditForm>
                                     
@@ -80,7 +61,7 @@
                     {
                         <div class="row">
                             <div class="col-12">
-                                <div class="card">
+                                <div class="card content-surface-card">
                                     <EditForm Model="employee">
                                         <FluentValidationValidator />
                                         <div class="content-header">

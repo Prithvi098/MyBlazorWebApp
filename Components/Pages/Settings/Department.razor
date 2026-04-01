@@ -10,35 +10,20 @@
 
 <PageTitle>Department</PageTitle>
 
-<style>
-
-    .table-overlay {
-        position: absolute;
-        inset: 0;
-        background-color: rgba(255, 255, 255, 0.6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 5;
-        transition: opacity 0.3s ease-in-out;
-    }
-
-</style>
-
-<section class="content">
+<section class="content page-section">
     <div class="content-header">
         <div class="container-fluid p-0">
-            <div class="row">
-                <div class="col-5 col-lg-6">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-lg-6">
                     <div class="main-title">
                         <h3>Department</h3>
                     </div>
                 </div>
-                <div class="col-6 col-lg-6">
-                    <div class="float-right">
-                        <button href="#" class="btn btn-success" @onclick="OpenAddModal">
-                            <i class="fa-solid fa-plus"></i> Add Department
-                        </button>
+                <div class="col-12 col-lg-6">
+                    <div class="page-actions">
+                        <RadzenButton Text="Add Department"
+                                      Icon="add_business"
+                                      Click="@OpenAddModal" />
                     </div>
                 </div>
             </div>
@@ -46,12 +31,12 @@
     </div>
     <div class="container-fluid p-0">
         <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body table-responsive">
-                        <div class="row mb-2">
+                <div class="col-12">
+                    <div class="card content-surface-card">
+                        <div class="card-body table-responsive">
+                        <div class="row mb-2 align-items-end g-3">
                             <!-- Page Size -->
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <label class="fw-semibold me-2">Page Size:</label>
                                 <select class="form-select d-inline-block w-auto" @onchange="OnPageSizeChanged">
                                     @foreach (var size in PageSizes)
@@ -62,9 +47,8 @@
                             </div>
 
                             <!-- Search -->
-                            <div class="col-md-6">
-                                <div class="float-right">
-                                    <div class="input-group">
+                            <div class="col-12 col-md-6">
+                                <div class="input-group search-shell">
                                         <span class="input-group-text bg-light">
                                             <i class="fa-solid fa-search"></i>
                                         </span>
@@ -76,7 +60,6 @@
                                             </button>
                                         }
                                     </div>
-                                </div>
                             </div>
                         </div>
 
@@ -90,7 +73,7 @@
 
                         <!-- Grid -->
                         <Grid TItem="Departmentdata"
-                              Class="table table-head-fixed text-nowrap m-0 w-100 responsive-tbl"
+                              Class="table table-head-fixed text-nowrap m-0 w-100 responsive-tbl app-data-grid"
                               AllowFiltering="false"
                               AllowPaging="true"
                               AllowSorting="true"
@@ -113,10 +96,10 @@
                                     @context.ParentDepartmentName
                                 </GridColumn>
                                 <GridColumn TItem="Departmentdata" HeaderText="Action" Filterable="false">
-                                    <button class="btn btn-sm btn-primary me-1" @onclick="@(() => EditDepartment(context.Id))">
+                                    <button class="btn btn-sm btn-primary me-1 grid-action-button" @onclick="@(() => EditDepartment(context.Id))">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger" @onclick="@(() => AskDelete(context.Id))">
+                                    <button class="btn btn-sm btn-danger grid-action-button" @onclick="@(() => AskDelete(context.Id))">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </GridColumn>

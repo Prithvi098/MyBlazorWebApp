@@ -3,94 +3,112 @@
 @layout LoginLayout
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
-@inject HttpClient Http
 @rendermode InteractiveServer
 
-@* <h3 class="login-title">Welcome Back</h3> *@
-<div class="col-12 d-flex align-items-center p-sm-5 p-4 right-area">
-    <div class="login-box mx-auto">
-        <div class="brand-logo">
-            <a href="#!">
+<div class="row g-4 justify-content-center auth-login-grid">
+    @* <div class="col-12 col-lg-5">
+        <div class="auth-story-panel">
+            <div class="brand-logo">
                 <img src="/Logo.png" alt="logo" class="img-fluid" />
-            </a>
+            </div>
+            <span class="auth-kicker">Employee Management System</span>
+            <h1>Run attendance, people records, and admin workflows from one polished workspace.</h1>
+            <p>Sign in to continue to your dashboard, manage teams, and keep day-to-day operations moving.</p>
+
+            <div class="auth-feature-list">
+                <div class="auth-feature-item">
+                    <RadzenIcon Icon="grid_view" />
+                    <span>Streamlined dashboards for daily actions</span>
+                </div>
+                <div class="auth-feature-item">
+                    <RadzenIcon Icon="group" />
+                    <span>Cleaner employee and permissions management</span>
+                </div>
+                <div class="auth-feature-item">
+                    <RadzenIcon Icon="schedule" />
+                    <span>Quick punch tracking with a calmer layout</span>
+                </div>
+            </div>
         </div>
-        <h3 class="mb-1 align-items-center">Employee Management System</h3>
-        @* <p class="mb-4 short-text">Please sign-in to your account and start the adventure</p> *@
-        <p class="mb-4 short-text">Sign in to start your session</p>
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="text-danger">@errorMessage</div>
-        }
-        <EditForm Model="@loginModel" OnValidSubmit="SubmitForm">
-            <DataAnnotationsValidator />
+    </div> *@
 
-            <div class="input-group mb-3">
-                <label class="form-label required">Username</label>
-                <InputText @bind-Value="loginModel.Username" class="form-control" />
-                <div class="input-group-text">
-                    <span class="fas fa-envelope"></span>
-                </div>
+    <div class="col-12 col-md-10 col-lg-6 col-xl-5 d-flex align-items-center justify-content-center">
+        <RadzenCard class="auth-card login-box">
+            <div class="auth-card-header">
+                <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1">Welcome back</RadzenText>
+                <p>Use your account credentials to start your session.</p>
             </div>
-            <ValidationMessage For="@(() => loginModel.Username)" />
 
-            <div class="input-group mb-3">
-                <label class="form-label required">Password</label>
-                <PasswordInput @bind-Value="loginModel.Password" Type="password" />
-            </div>
-            <ValidationMessage For="@(() => loginModel.Password)" />
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="app-inline-alert app-inline-alert--danger">@errorMessage</div>
+            }
 
-            <div class="submit-btn">
-                <div class="row">
-                    <div class="col-md-6">
-                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+            <EditForm Model="@loginModel" OnValidSubmit="SubmitForm" class="auth-form">
+                <DataAnnotationsValidator />
+
+                <div class="form-group mb-3">
+                    <label class="form-label required">Username</label>
+                    <div class="input-group app-input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <InputText @bind-Value="loginModel.Username" class="form-control" />
                     </div>
-                    <div class="col-md-6">
-                        <button type="button" class="btn btn-primary btn-block" @onclick="() => NavigateToRegister()">Register</button>
-                    </div>
+                    <ValidationMessage For="@(() => loginModel.Username)" />
                 </div>
-            </div>
-        </EditForm>
+
+                <div class="form-group mb-3">
+                    <label class="form-label required">Password</label>
+                    <div class="app-password-wrap">
+                        <PasswordInput @bind-Value="loginModel.Password" Type="password" />
+                    </div>
+                    <ValidationMessage For="@(() => loginModel.Password)" />
+                </div>
+
+                <div class="auth-actions">
+                    <RadzenButton Text="Login"
+                                  
+                                  ButtonType="Radzen.ButtonType.Submit"
+                                  class="auth-action-button" />
+                    <RadzenButton Text="Register"
+                                  Icon=""
+                                  Variant="Variant.Outlined"
+                                  ButtonStyle="ButtonStyle.Secondary"
+                                  Click="@NavigateToRegister"
+                                  class="auth-action-button auth-action-button--secondary" />
+                </div>
+            </EditForm>
+        </RadzenCard>
     </div>
 </div>
 
-
 @code {
-    private string errorMessage = string.Empty;
-    private LoginModel.LoginRequest loginModel = new();
 
-    public static Login LoginPageInstance;
+    private LoginModel.LoginRequest loginModel = new();
+    private string errorMessage = "";
+
+    private DotNetObjectReference<Login>? dotnetRef;
 
     protected override void OnInitialized()
     {
-        LoginPageInstance = this;
+        dotnetRef = DotNetObjectReference.Create(this);
     }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            JS.InvokeVoidAsync("eval", @"
-            window.addEventListener('loginError', function(e) {
-                DotNet.invokeMethodAsync('MyBlazorApp', 'SetLoginError', e.detail);
-            });
-        ");
-        }
-    }
-
-    [JSInvokable]
-    public static void SetLoginError(string message)
-    {
-        LoginPageInstance.errorMessage = message;
-        LoginPageInstance.StateHasChanged();
-    }
-
 
     private async Task SubmitForm()
     {
-        // Pass the login model directly to JS
-        await JS.InvokeVoidAsync("submitLoginForm", loginModel);
-        //await Task.Delay(2000); // Small delay to ensure JS processing
-        //Navigation.NavigateTo("/register");
+        errorMessage = "";
+
+        await JS.InvokeVoidAsync(
+            "submitLoginForm",
+            loginModel,
+            dotnetRef
+        );
+    }
+
+    [JSInvokable]
+    public void SetLoginError(string message)
+    {
+        errorMessage = message;
+        StateHasChanged();
     }
 
     private void NavigateToRegister()
@@ -98,15 +116,8 @@
         Navigation.NavigateTo("/register");
     }
 
-    // protected override void OnInitialized()
-    // {
-    //     var uri = new Uri(NavigationManager.Uri);
-    //     var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-    //     if (query.TryGetValue("error", out var err))
-    //     {
-    //         errorMessage = err!;
-    //     }
-    // }
-
+    public void Dispose()
+    {
+        dotnetRef?.Dispose();
+    }
 }

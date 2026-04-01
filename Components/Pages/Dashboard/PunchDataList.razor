@@ -2,32 +2,37 @@
 
 @if (PunchList is null || PunchList.Count == 0)
 {
-    <p>No punch data available.</p>
+    <div class="empty-state mt-3">
+        <RadzenIcon Icon="event_busy" />
+        <span>No punch data available for today.</span>
+    </div>
 }
 else
 {
-    foreach (var item in PunchList)
-    {
-        <div class="mb-2">
-            @if (item.PunchIn.HasValue)
-            {
-                <span style="font-size:large;">
-                    <label style="color:blue">IN TIME :</label>
-                    @* @(item.PunchIn.Value.ToString("HH") + ":" + item.PunchIn.Value.ToString("mm") + ":" + item.PunchIn.Value.ToString("ss")) *@
-                    @item.PunchIn.Value.ToString("HH:mm:ss")
-                </span>
-            }
+    <div class="punch-timeline">
+        @foreach (var item in PunchList)
+        {
+            <div class="punch-timeline-item">
+                @if (item.PunchIn.HasValue)
+                {
+                    <div class="punch-time-chip">
+                        <RadzenIcon />
+                        <span>IN TIME</span>
+                        <strong>@item.PunchIn.Value.ToString("HH:mm:ss")</strong>
+                    </div>
+                }
 
-            @if (item.PunchOut.HasValue)
-            {
-                <span style="font-size:large; margin-left:20px;">
-                    <label style="color:blue">OUT TIME :</label>
-                    @* @(item.PunchOut.Value.ToString("HH") + ":" + item.PunchOut.Value.ToString("mm") + ":" + item.PunchOut.Value.ToString("ss")) *@
-                    @item.PunchOut.Value.ToString("HH:mm:ss")
-                </span>
-            }
-        </div>
-    }
+                @if (item.PunchOut.HasValue)
+                {
+                    <div class="punch-time-chip">
+                        <RadzenIcon />
+                        <span>OUT TIME</span>
+                        <strong>@item.PunchOut.Value.ToString("HH:mm:ss")</strong>
+                    </div>
+                }
+            </div>
+        }
+    </div>
 }
 
 @code {

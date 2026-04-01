@@ -8,11 +8,11 @@
 
 <PageTitle>Role Permission</PageTitle>
 
-<section class="content inner-tbl pt-5 pb-3">
+<section class="content inner-tbl pt-5 pb-3 page-section">
    <div class="container-fluid p-0">
         <div class="row">
             <div class=" col-12 col-lg-6">
-                <div class="card">
+                <div class="card content-surface-card">
                     <EditForm Model="rolePermission" OnValidSubmit="SaveRolePermissions">
                         <FluentValidationValidator />
 
@@ -25,9 +25,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6 col-lg-6 text-lg-right">
-                                        <button type="button" class="btn btn-secondary" @onclick="() => Clear()">Clear</button>
-                                        <button type="submit" class="btn btn-primary">Save</button>
+                                    <div class="col-12 col-md-6 col-lg-6 text-lg-right d-flex justify-content-lg-end gap-2 flex-wrap">
+                                        <RadzenButton Text="Clear" Icon="restart_alt" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Secondary" Click="@Clear" />
+                                        <RadzenButton Text="Save" Icon="save" ButtonType="Radzen.ButtonType.Submit" />
                                     </div>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                             </div>
 
                             <ValidationMessage For="@(() => rolePermission.MenuId)" />
-                            <div class="row custom-multi-chkbox" id="menuTree" style="margin-left:10px">
+                            <div class="row custom-multi-chkbox" id="menuTree">
                                 @if (menuModels.Count == 0)
                                 {
                                    <Loader />
@@ -88,7 +88,7 @@
                 </div>
             </div>
             <div class="col-12 col-lg-6">
-                <div class="card">
+                <div class="card content-surface-card">
                     <div class="content-header">
                         <div class="container-fluid">
                             <div class="row align-items-center">
@@ -107,7 +107,7 @@
                         }
                         else
                         {
-                            <table class="table table-bordered border-3 border-black">
+                            <table class="table table-bordered border-3 border-black app-data-grid">
                                 <thead>
                                     <tr>
                                         <th>No.</th>
@@ -123,8 +123,8 @@
                                             <td>@(i + 1)</td>
                                             <td>@role.RoleName</td>
                                             <td>
-                                                <a class="btn btn-sm btn-primary" @onclick="() => GetRolePermissionDetails(role.PerId)"><i class="fa-solid fa-pen"></i></a>
-                                                <a class="btn btn-sm btn-danger" @onclick="() => AskDelete(role.PerId)"><i class="fa-solid fa-trash"></i></a>
+                                                <a class="btn btn-sm btn-primary grid-action-button" @onclick="() => GetRolePermissionDetails(role.PerId)"><i class="fa-solid fa-pen"></i></a>
+                                                <a class="btn btn-sm btn-danger grid-action-button" @onclick="() => AskDelete(role.PerId)"><i class="fa-solid fa-trash"></i></a>
                                             </td>
                                         </tr>
                                     }

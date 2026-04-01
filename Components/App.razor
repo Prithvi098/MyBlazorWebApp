@@ -11,6 +11,7 @@
     <base href="/" />
     @* <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" /> *@
     <link rel="stylesheet" href="@Assets["Style.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Loader.css"]" />
     <link rel="stylesheet" href="@Assets["MyBlazorApp.styles.css"]" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -18,17 +19,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="_content/Blazor.Bootstrap/blazor.bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material3-base.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-<body class="@BodyClass" style="height: auto;">
-    <Routes />
-    <script src="lib/Login.js"></script>
-    <script src="lib/ModalHelper.js"></script>
-    <script src="lib/Toast.js"></script>
-    <script src="lib/fadeGrid.js"></script>
+<body class="@BodyClass">
+    <Routes @rendermode="InteractiveServer" />
+    <RadzenComponents @rendermode="InteractiveServer" />
+    <script src=@Assets["lib/Login.js"]></script>
+    <script src=@Assets["lib/ModalHelper.js"]></script>
+    <script src=@Assets["lib/Toast.js"]></script>
+    <script src=@Assets["lib/fadeGrid.js"]></script>
     @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> *@
     
     <script src="_framework/blazor.web.js"></script>
@@ -47,8 +51,8 @@
 
 @code {
     private string BodyClass => ShouldUseDashboardLayout()
-        ? "layout-top-nav layout-navbar-fixed dashboard-wrap"
-        : ""; // no classes for RegisterLayout or LoginLayout
+        ? "layout-top-nav layout-navbar-fixed dashboard-wrap app-root"
+        : "app-root auth-shell";
 
     private bool ShouldUseDashboardLayout()
     {
