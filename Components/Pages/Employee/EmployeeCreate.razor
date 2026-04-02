@@ -10,6 +10,8 @@
 @inject EmployeeNavigationState EmployeeNavState
 @rendermode InteractiveServer
 
+<PageTitle>@(EmpId == null ? "Create Employee" : "Edit Employee")</PageTitle>
+
 <AuthorizeMenu MenuUrl="@(EmpId == null ? "/employeecreate" : "/employeeedit")">
     <section class="content page-section">
         <div class="content-header">

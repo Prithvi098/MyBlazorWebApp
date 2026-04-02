@@ -16,7 +16,7 @@ else
                 @if (item.PunchIn.HasValue)
                 {
                     <div class="punch-time-chip">
-                        <RadzenIcon />
+                        <RadzenIcon Icon="login" />
                         <span>IN TIME</span>
                         <strong>@item.PunchIn.Value.ToString("HH:mm:ss")</strong>
                     </div>
@@ -25,7 +25,7 @@ else
                 @if (item.PunchOut.HasValue)
                 {
                     <div class="punch-time-chip">
-                        <RadzenIcon />
+                        <RadzenIcon Icon="logout" />
                         <span>OUT TIME</span>
                         <strong>@item.PunchOut.Value.ToString("HH:mm:ss")</strong>
                     </div>

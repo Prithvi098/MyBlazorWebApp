@@ -49,7 +49,7 @@ namespace MyBlazorApp.Controller
             }
 
             var fullname = emp.Emp_firstname + " " + emp.Emp_surname;
-            var expiresAt = DateTimeOffset.UtcNow.AddMinutes(2);
+            var expiresAt = DateTimeOffset.UtcNow.AddMinutes(10);
 
             var claims = new List<Claim>
             {

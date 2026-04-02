@@ -69,59 +69,51 @@
                                     </div>
                                 </div>
                             </div>
-                            @if (IsGridLoading)
+                            @* @if (IsGridLoading)
                             {
                                 <div class="table-overlay">
-                                    @* <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div> *@
                                     <Spinner Color="SpinnerColor.Primary" Type="SpinnerType.Border" Size="SpinnerSize.Large" />
                                 </div>
-                            }
-                            <Grid @ref="employeeGrid"
-                                  TItem="EmployeeListModel"
-                                  Class="table table-hover table-bordered table-striped app-data-grid"
-                                  DataProvider="LoadEmployeesDataProvider"
-                                  AllowFiltering="false"
-                                  AllowPaging="true"
-                                  AllowSorting="true"
-                                  AllowSelection="false"
-                                  PageSize=@PageSize
-                                  Responsive="true">
-
-                                <GridColumns>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Emp ID" PropertyName="Empid" SortKeySelector="e => e.Empid" IsDefaultSortColumn="true" SortString="Empid">
-                                        @context.Empid
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="First Name" PropertyName="EmpFirstName" SortKeySelector="e => e.EmpFirstName" SortString="EmpFirstName">
-                                        @context.EmpFirstName
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Last Name" PropertyName="EmpLastName" SortKeySelector="e => e.EmpLastName" SortString="EmpLastName">
-                                        @context.EmpLastName
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Username" PropertyName="Username" SortKeySelector="e => e.Username" SortString="Username">
-                                        @context.Username
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Email" PropertyName="Email" SortKeySelector="e => e.Email" SortString="Email">
-                                        @context.Email
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Department" PropertyName="DepartmentName" SortKeySelector="e => e.DepartmentName" SortString="DepartmentName">
-                                        @context.DepartmentName
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Active" PropertyName="IsActive" Filterable="false">
-                                        <input type="checkbox" checked="@context.IsActive" disabled />
-                                    </GridColumn>
-                                    <GridColumn TItem="EmployeeListModel" HeaderText="Action" Filterable="false">
-                                        <button class="btn btn-sm btn-primary me-1 grid-action-button" @onclick="@(() => EditEmployee(context.Empid))">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger grid-action-button" @onclick="@(() => AskDelete(context.Empid))">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </GridColumn>
-                                </GridColumns>
-
-                            </Grid>
+                            } *@
+                            <RadzenDataGrid @ref="employeeGrid"
+                                            TItem="EmployeeListModel"
+                                            Data="@employeelist"
+                                            Count="@TotalCount"
+                                            LoadData="@LoadEmployees"
+                                            AllowPaging="true"
+                                            AllowSorting="true"
+                                            AllowFiltering="false"
+                                            PageSize="@PageSize"
+                                            IsLoading="@IsGridLoading"
+                                            Responsive="true"
+                                            ShowPagingSummary="true"
+                                            PagerHorizontalAlign="HorizontalAlign.Right"
+                                            EmptyText="No employees found."
+                                            Class="app-data-grid radzen-employee-grid">
+                                <Columns>
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Property="@nameof(EmployeeListModel.Empid)" Title="Emp ID" />
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Property="@nameof(EmployeeListModel.EmpFirstName)" Title="First Name" />
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Property="@nameof(EmployeeListModel.EmpLastName)" Title="Last Name" />
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Property="@nameof(EmployeeListModel.Username)" Title="Username" />
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Property="@nameof(EmployeeListModel.Email)" Title="Email" />
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Property="@nameof(EmployeeListModel.DepartmentName)" Title="Department" />
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Title="Active" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
+                                        <Template Context="employee">
+                                            <input type="checkbox" checked="@employee.IsActive" disabled />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="EmployeeListModel" Title="Action" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
+                                        <Template Context="employee">
+                                            <button class="btn btn-sm btn-primary me-1 grid-action-button" @onclick="@(() => EditEmployee(employee.Empid))">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger grid-action-button" @onclick="@(() => AskDelete(employee.Empid))">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                </Columns>
+                            </RadzenDataGrid>
 
                         </div>
                     </div>
@@ -143,7 +135,8 @@
 </AuthorizeMenu>
 
 @code {
-    private List<EmployeeListModel> employeelist = new List<EmployeeListModel>();
+    private List<EmployeeListModel> employeelist = new();
+    private int TotalCount { get; set; }
     private bool IsActive { get; set; } = true;
     private bool ShowConfirmDialog { get; set; }
     private int DeleteEmpId { get; set; }
@@ -165,16 +158,18 @@
     }
     private int PageSize { get; set; } = 10;
     private List<int> PageSizes = new() { 5, 10, 25, 50, 100 };
-    private BlazorBootstrap.Grid<EmployeeListModel>? employeeGrid;
+    private RadzenDataGrid<EmployeeListModel>? employeeGrid;
     private System.Timers.Timer? _debounceTimer;
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500);
-        //await LoadEmployees();
+        await Task.Delay(200);
+        await ReloadGridAsync();
     }
 
-    private async Task<GridDataProviderResult<EmployeeListModel>> LoadEmployeesDataProvider(GridDataProviderRequest<EmployeeListModel> request)
+    
+
+    private async Task LoadEmployees(LoadDataArgs args)
     {
         using var db = await DbFactory.CreateDbContextAsync();
         try
@@ -182,125 +177,67 @@
             IsGridLoading = true;
             await InvokeAsync(StateHasChanged);
 
-            //await Task.Delay(400);
             var baseQuery =
                 from e in db.Mst_Employees
                 join d in db.Mst_Department.Where(x => x.DeletedBy == null)
                     on e.Department_type equals d.Id into deptJoin
                 from d in deptJoin.DefaultIfEmpty()
                 where e.DeletedBy == null && e.IsActive == IsActive
-                select new
+                select new EmployeeGridRow
                 {
-                    e.Emp_id,
-                    e.Emp_firstname,
-                    e.Emp_surname,
-                    e.Username,
-                    e.Email_address,
+                    Empid = e.Emp_id,
+                    EmpFirstName = e.Emp_firstname,
+                    EmpLastName = e.Emp_surname,
+                    Username = e.Username,
+                    Email = e.Email_address,
                     DepartmentName = d != null ? d.DepartmentName : string.Empty,
-                    e.IsActive
+                    IsActive = e.IsActive ?? false
                 };
 
-            // global search
             if (!string.IsNullOrWhiteSpace(GlobalSearch))
             {
                 var lower = GlobalSearch.ToLower();
                 baseQuery = baseQuery.Where(x =>
-                    x.Emp_firstname.ToLower().Contains(lower) ||
-                    x.Emp_surname.ToLower().Contains(lower) ||
+                    x.EmpFirstName.ToLower().Contains(lower) ||
+                    x.EmpLastName.ToLower().Contains(lower) ||
                     x.Username.ToLower().Contains(lower) ||
-                    x.Email_address.ToLower().Contains(lower) ||
+                    x.Email.ToLower().Contains(lower) ||
                     x.DepartmentName.ToLower().Contains(lower));
             }
 
-            // sorting (simple first-sort, follow your previous switch if you need more)
-            if (request.Sorting != null && request.Sorting.Any())
-            {
-                var sort = request.Sorting.First();
-                switch (sort.SortString)
-                {
-                    case nameof(EmployeeListModel.Empid):
-                        baseQuery = sort.SortDirection == SortDirection.Descending
-                            ? baseQuery.OrderByDescending(x => x.Emp_id)
-                            : baseQuery.OrderBy(x => x.Emp_id);
-                        break;
-                    case nameof(EmployeeListModel.EmpFirstName):
-                        baseQuery = sort.SortDirection == SortDirection.Descending
-                            ? baseQuery.OrderByDescending(x => x.Emp_firstname)
-                            : baseQuery.OrderBy(x => x.Emp_firstname);
-                        break;
-                    case nameof(EmployeeListModel.EmpLastName):
-                        baseQuery = sort.SortDirection == SortDirection.Descending
-                            ? baseQuery.OrderByDescending(x => x.Emp_surname)
-                            : baseQuery.OrderBy(x => x.Emp_surname);
-                        break;
-                    case nameof(EmployeeListModel.Username):
-                        baseQuery = sort.SortDirection == SortDirection.Descending
-                            ? baseQuery.OrderByDescending(x => x.Username)
-                            : baseQuery.OrderBy(x => x.Username);
-                        break;
-                    case nameof(EmployeeListModel.Email):
-                        baseQuery = sort.SortDirection == SortDirection.Descending
-                            ? baseQuery.OrderByDescending(x => x.Email_address)
-                            : baseQuery.OrderBy(x => x.Email_address);
-                        break;
-                    case nameof(EmployeeListModel.DepartmentName):
-                        baseQuery = sort.SortDirection == SortDirection.Descending
-                            ? baseQuery.OrderByDescending(x => x.DepartmentName)
-                            : baseQuery.OrderBy(x => x.DepartmentName);
-                        break;
-                    default:
-                        baseQuery = baseQuery.OrderBy(x => x.Emp_id);
-                        break;
-                }
-            }
-            else
-            {
-                baseQuery = baseQuery.OrderBy(x => x.Emp_id);
-            }
+            baseQuery = ApplySorting(baseQuery, args.OrderBy);
 
-            // paging: use request.PageNumber and request.PageSize
-            var total = await baseQuery.CountAsync();
-            var pageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber; // defensive
-            var pageSize = request.PageSize <= 0 ? PageSize : request.PageSize;
+            TotalCount = await baseQuery.CountAsync();
+            var skip = args.Skip ?? 0;
+            var take = args.Top ?? PageSize;
 
-            var rows = await baseQuery
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+            employeelist = await baseQuery
+                .Skip(skip)
+                .Take(take)
                 .Select(x => new EmployeeListModel
                 {
-                    Empid = x.Emp_id,
-                    EmpFirstName = x.Emp_firstname,
-                    EmpLastName = x.Emp_surname,
+                    Empid = x.Empid,
+                    EmpFirstName = x.EmpFirstName,
+                    EmpLastName = x.EmpLastName,
                     Username = x.Username,
-                    Email = x.Email_address,
+                    Email = x.Email,
                     DepartmentName = x.DepartmentName,
-                    IsActive = x.IsActive ?? false
+                    IsActive = x.IsActive
                 })
                 .ToListAsync();
 
-            // 🟢 Trigger fade-in after grid refresh
             await Task.Delay(400); // slight delay for DOM to update
             await JS.InvokeVoidAsync("fadeGridRows");
-
-            return new GridDataProviderResult<EmployeeListModel>
-            {
-                Data = rows,
-                TotalCount = total
-            };
         }
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeList/LoadEmployeesDataProvider");
             ToastService.Show("Error loading employee data", ToastType.Danger, "Error");
-            return new GridDataProviderResult<EmployeeListModel>
-            {
-                Data = new List<EmployeeListModel>(),
-                TotalCount = 0
-            };
+            employeelist = new();
+            TotalCount = 0;
         }
         finally
         {
-            // hide overlay
             IsGridLoading = false;
             await InvokeAsync(StateHasChanged);
         }
@@ -312,7 +249,7 @@
         if (int.TryParse(e.Value?.ToString(), out int newSize))
         {
             PageSize = newSize;
-            // Force re-render of grid (Blazor.Bootstrap refreshes automatically on parameter change)
+            await ReloadGridAsync();
         }
     }
 
@@ -323,11 +260,7 @@
         _debounceTimer.Elapsed += async (_, _) =>
         {
             _debounceTimer?.Stop();
-            await InvokeAsync(async () =>
-            {
-                if (employeeGrid is not null)
-                    await employeeGrid.RefreshDataAsync();
-            });
+            await InvokeAsync(ReloadGridAsync);
         };
         _debounceTimer.Start();
     }
@@ -335,14 +268,16 @@
     private async Task ClearSearch()
     {
         GlobalSearch = string.Empty;
-        if (employeeGrid is not null)
-            await employeeGrid.RefreshDataAsync();
+        await ReloadGridAsync();
     }
 
-    private async Task RefreshGridAsync()
+    private async Task ReloadGridAsync()
     {
         if (employeeGrid is not null)
-            await employeeGrid.RefreshDataAsync();
+        {
+            await employeeGrid.Reload();
+        }
+        IsGridLoading = false;
     }
 
     private void AskDelete(int id)
@@ -363,17 +298,8 @@
     private async Task GetInActiveEmployeeList()
     {
         IsActive = !IsActive;
-        if (employeeGrid is not null)
-        {
-            // The grid provides a reload method in Blazor.Bootstrap.
-            // Depending on your exact package minor, method name can be ReloadDataAsync or ReloadAsync.
-            // Try ReloadDataAsync() first; if compiler complains, try RefreshDataAsync().
-            await employeeGrid.RefreshDataAsync();
-        }
-        else
-        {
-            StateHasChanged();
-        }
+        IsGridLoading = true;
+        await ReloadGridAsync();
     }
 
     private async Task EditEmployee(int EmpId)
@@ -402,15 +328,50 @@
             emp.DeletedOn = DateTime.Now;
             await db.SaveChangesAsync();
             ToastService.Show("Employee Deleted Successfully.", ToastType.Success, "Success");
-
-            //await LoadEmployees();
-            StateHasChanged();
+            await ReloadGridAsync();
         }
         catch (Exception ex)
         {
             _helper.SaveException(ex, "EmployeeList/DeleteEmployee");
             ToastService.Show("Error while Deleting Employee", ToastType.Danger, "Error");
         }
+    }
+
+    private static IQueryable<EmployeeGridRow> ApplySorting(IQueryable<EmployeeGridRow> query, string? orderBy)
+    {
+        if (string.IsNullOrWhiteSpace(orderBy))
+        {
+            return query.OrderBy(x => x.Empid);
+        }
+
+        var isDescending = orderBy.Contains(" desc", StringComparison.OrdinalIgnoreCase);
+
+        if (orderBy.Contains(nameof(EmployeeListModel.EmpFirstName), StringComparison.OrdinalIgnoreCase))
+        {
+            return isDescending ? query.OrderByDescending(x => x.EmpFirstName) : query.OrderBy(x => x.EmpFirstName);
+        }
+
+        if (orderBy.Contains(nameof(EmployeeListModel.EmpLastName), StringComparison.OrdinalIgnoreCase))
+        {
+            return isDescending ? query.OrderByDescending(x => x.EmpLastName) : query.OrderBy(x => x.EmpLastName);
+        }
+
+        if (orderBy.Contains(nameof(EmployeeListModel.Username), StringComparison.OrdinalIgnoreCase))
+        {
+            return isDescending ? query.OrderByDescending(x => x.Username) : query.OrderBy(x => x.Username);
+        }
+
+        if (orderBy.Contains(nameof(EmployeeListModel.Email), StringComparison.OrdinalIgnoreCase))
+        {
+            return isDescending ? query.OrderByDescending(x => x.Email) : query.OrderBy(x => x.Email);
+        }
+
+        if (orderBy.Contains(nameof(EmployeeListModel.DepartmentName), StringComparison.OrdinalIgnoreCase))
+        {
+            return isDescending ? query.OrderByDescending(x => x.DepartmentName) : query.OrderBy(x => x.DepartmentName);
+        }
+
+        return isDescending ? query.OrderByDescending(x => x.Empid) : query.OrderBy(x => x.Empid);
     }
 
     private class EmployeeListModel
@@ -421,6 +382,17 @@
         public string? Username { get; set; }
         public string? Email { get; set; }
         public string? DepartmentName { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    private class EmployeeGridRow
+    {
+        public int Empid { get; set; }
+        public string EmpFirstName { get; set; } = string.Empty;
+        public string EmpLastName { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string DepartmentName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
     }
 }

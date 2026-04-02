@@ -14,8 +14,15 @@
     </RadzenBody>
     <RadzenFooter class="app-shell-footer">
         <div class="footer-inner">
-            <span class="footer-brand">Employee Management System</span>
-            <span class="footer-copy">Copyright © @DateTime.Now.Year. All rights reserved.</span>
+            <div class="footer-block">
+                <span class="footer-brand">Employee Management System</span>
+                @* <span class="footer-meta">Operations workspace</span> *@
+            </div>
+            <span class="footer-divider" aria-hidden="true"></span>
+            <div class="footer-block footer-block--end">
+                @* <span class="footer-meta">Internal dashboard experience</span> *@
+                <span class="footer-copy">Copyright © @DateTime.Now.Year. All rights reserved.</span>
+            </div>
         </div>
     </RadzenFooter>
 </RadzenLayout>
