@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="SecondaryProject\" />
     <Folder Include="wwwroot\lib\plugins\" />
   </ItemGroup>
 
