@@ -48,19 +48,31 @@
                 <DataAnnotationsValidator />
 
                 <div class="form-group mb-3">
-                    <label class="form-label required">Username</label>
-                    <div class="input-group app-input-group">
+                    @* <label class="form-label required">Username</label> *@
+                    <RadzenFormField Text="Username" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="loginModel.Username" />
+                    </RadzenFormField>
+                    @* <div class="input-group app-input-group">
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                         <InputText @bind-Value="loginModel.Username" class="form-control" />
-                    </div>
+                    </div> *@
                     <ValidationMessage For="@(() => loginModel.Username)" />
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label required">Password</label>
-                    <div class="app-password-wrap">
+                    @* <label class="form-label required">Password</label> *@
+                    <RadzenFormField Text="Password" Variant="@Radzen.Variant.Outlined" Style="width: 100%;">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="loginModel.Password" Visible="@(!password)" />
+                            <RadzenPassword @bind-Value="loginModel.Password" Visible="@password" />
+                        </ChildContent>
+                        <End>
+                            <RadzenButton Icon="@(password ? "visibility" : "visibility_off")" Click="TogglePassword" Variant="@Radzen.Variant.Text" Size="@Radzen.ButtonSize.Small" />
+                        </End>
+                    </RadzenFormField>
+                    @* <div class="app-password-wrap">
                         <PasswordInput @bind-Value="loginModel.Password" Type="password" />
-                    </div>
+                    </div> *@
                     <ValidationMessage For="@(() => loginModel.Password)" />
                 </div>
 
@@ -71,7 +83,7 @@
                     <RadzenButton Text="Register"
                                   Icon=""
                                   Variant="Variant.Outlined"
-                                  ButtonStyle="ButtonStyle.Secondary"
+                                  ButtonStyle="@Radzen.ButtonStyle.Secondary"
                                   Click="@NavigateToRegister"
                                   class="auth-action-button auth-action-button--secondary" />
                 </div>
@@ -84,6 +96,7 @@
 
     private LoginModel.LoginRequest loginModel = new();
     private string errorMessage = "";
+    bool password = true;
 
     private DotNetObjectReference<Login>? dotnetRef;
 
@@ -101,6 +114,11 @@
             loginModel,
             dotnetRef
         );
+    }
+
+    void TogglePassword()
+    {
+        password = !password;
     }
 
     [JSInvokable]
